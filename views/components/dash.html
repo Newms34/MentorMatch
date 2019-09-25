@@ -1,0 +1,68 @@
+<div ng-controller='dash-cont' postrender-action="getAll()">
+    <div class="message">
+        <div class="message-header">
+            My Profile
+        </div>
+        <div class="message-body blocky is-fullwidth">
+            <div class="columns">
+
+                <div class="column is-one-fifth message">
+                    <div class="message-header">
+                        Profile/Avatar
+                    </div>
+                    <div class="message-body has-background-grey-lighter">
+                        <img src="{{$parent.user.avatar}}" alt="" class="is-fullwidth">
+                        <div class="is-fullwidth has-text-centered">
+                            <button class="button is-info">Change Avatar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-four-fifths message">
+                    <div class="message-header">
+                        Interests
+                    </div>
+                    <div class="message-body has-background-grey-lighter">
+                        <table class="table is-fullwidth">
+                            <thead>
+                                <tr>
+                                    <th>Skill Name</th>
+                                    <th>Level (1-10)</th>
+                                    <th>Can Teach?</th>
+                                    <th>Remove Skill</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat='sk in $parent.user.interests'>
+                                    <td>{{sk.title}}</td>
+                                    <!-- ng-keyup='updateTopics($event)' ng-click -->
+                                    <td><input type="number" ng-model='sk.lvl' class="number" change-re-focus change-fn='updateTopics()' min='0' max='10'></td>
+                                    <td>
+                                        <!-- ng-click='sk.canTeach=!sk.cantTeach;' -->
+                                        <input type='checkbox' ng-model='sk.canTeach' class="button is-small" change-re-focus change-fn='updateTopics()' >
+                                            <i class="fa fa-{{sk.canTeach?'check-':''}}square-o"></i>
+                                        </input>
+                                    </td>
+                                    <td>
+                                        <button class="button is-info" ng-click='removeSkill(sk)'><i class="fa fa-trash"></i>&nbsp;Remove</button>
+                                    </td>
+                                </tr>
+                                <tr ng-if='!user.interests.length'>
+                                    <td colspan='4' class='has-text-centered is-italic'>
+                                        You have not yet added any skills!
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+                <!-- STUFF TO ADD:
+                    <ul>
+                <li>Avatar change/upload</li>
+                <li>Display Name add/change</li>
+                <li>Interest search, add, change</li>
+                <li>Notifications of new unread msgs?</li>
+            </ul> -->
+        </div>
+    </div>
+</div>

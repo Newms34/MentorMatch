@@ -1,0 +1,59 @@
+@import "./components/bulma";
+@import "./components/chat";
+@import "./components/fonts.scss";
+html,
+body {
+  width: 100%;
+  margin: 0;
+  height: 100%; // padding-top: 40px;
+  background: #ddd;
+  // background-repeat: no-repeat;
+  // background-size: cover;
+  // background-attachment: fixed;
+}
+
+#main-box {
+  padding: 10px;
+  padding-top: 60px;
+  height: 140vh;
+  // color: #fff;
+}
+.is-fullwidth {
+  width: 100% !important;
+}
+.is-wide-btn {
+  width: 33%;
+}
+.blocky {
+  display: block !important;
+}
+.btn-pad-right {
+  margin-right: 5px;
+}
+.has-bottom-border {
+  border-bottom: 1px solid #222;
+}
+.no-underline a {
+  text-decoration: none !important;
+}
+.mail-view {
+  padding: 4px;
+  min-height: 210px;
+}
+.modal-wide {
+  width: 70%;
+}
+.is-one-tenth {
+  flex: none;
+  width: 10%;
+}
+$tenNames: two, three, four, five, six, seven, eight, nine;
+@for $i from 1 through length($tenNames) {
+  .is-#{nth($tenNames,$i)}-tenths {
+    width: ($i + 1) * 10%;
+    flex: none;
+  }
+}
+.check-list {
+  list-style-type: none !important;
+}

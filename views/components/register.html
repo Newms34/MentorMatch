@@ -1,0 +1,55 @@
+<div ng-controller='log-cont' class='columns'>
+    <div class="column is-one-third"></div>
+    <div class='column is-one-third panel'>
+        <div class='panel-heading is-primary'>
+            <h3 class='card-header-title is-primary'>Register</h3>
+        </div>
+        <div class='panel-block has-background-white'>
+            <form name='regForm' novalidate>
+                <div class='card card-content' ng-if='!noWarn'>
+                    Warning:
+                    <button class="button is-small is-danger is-pulled-right" ng-click='noWarn=true;'>x</button>
+                    <div class='is-size-7'>
+                        
+                     Do <i>not</i> use your Guild Wars 2 account information! I (Dave) hold <i>no</i> responsibility for your accounts!<br>
+                    Please note that you will <i>not</i> be able to view the site until you're approved by a moderator.</div>
+                    </div>
+                <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>Account Information</h4>
+                <div class="field">
+                    <p class="control has-icons-left">
+                        <input class="input" type="text" placeholder="Username" ng-model='user' ng-change='checkUser();'>
+                        <span class="icon is-small is-left">
+                            <i class="fa fa-user"></i>
+                        </span>
+                    </p>
+                        <div class='notification is-danger' ng-if='!nameOkay'>This username is already in use!</div>
+                </div>
+                <div class="field">
+                    <p class="control has-icons-left">
+                        <input class="input" type="text" placeholder="Email" ng-model='email' ng-blur='checkEmail();' title='Your email will not be show to others, and is only used for security purposes!'>
+                        <span class="icon is-small is-left">
+                            <i class="fa fa-envelope-o"></i>
+                        </span>
+                    </p>
+                    <div class='notification is-danger' ng-if='emailBad'>This email doesn't appear to be valid!</div>
+                </div>
+                <div class="field">
+                    <p class="control has-icons-left">
+                        <input class="input" type="password" placeholder="Password" ng-model='pwd'>
+                        <span class="icon is-small is-left">
+                            <i class="fa fa-lock"></i>
+                        </span>
+                    </p>
+                    <p class="control has-icons-left">
+                        <input class="input" type="password" placeholder="Password (again)" ng-model='pwdDup'>
+                        <span class="icon is-small is-left">
+                            <i class="fa fa-lock"></i>
+                        </span>
+                    </p>
+                </div>
+                <button class='button is-success' type='submit' ng-click='register()'>Register</button>
+                <button class='button is-warning' ng-click='goLog()'>I have an account</button>
+            </form>
+        </div>
+    </div>
+</div>

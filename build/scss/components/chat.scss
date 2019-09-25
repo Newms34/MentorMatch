@@ -1,0 +1,77 @@
+/*styles for chat*/
+
+.chat-bg {
+    height: 100vh;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    background: rgba(0, 0, 0, .8);
+    z-index:99;
+    .chat-pan {
+        position: fixed;
+        width: 80%;
+        left: 10%;
+        top: 60px;
+        min-height: 65vh;
+        & .panel-body {
+            padding: 0;
+            height: 65vh;
+            & .chat-men {
+                height: 100%;
+                background: #955;
+                color: #fff;
+                padding: 0;
+                & .chat-men-btn {
+                    width: 100%;
+                    line-height: 30pt;
+                    text-align: right;
+                    font-size: 12pt;
+                    padding-right: 8px;
+                    border-bottom: 3px groove #996A6A;
+                    background: #996A6A;
+                    cursor: pointer;
+                    transition-duration: .2s;
+                    &:hover {
+                        background: #D79595;
+                    }
+                    &.active-grp {
+                        background: #d79595;
+                    }
+                }
+            }
+            & .chat-main {
+                height: 100%;
+                padding: 0;
+                & input {
+                    position: absolute;
+                    bottom: 0px;
+                    width: 90%;
+                    left: 0px;
+                }
+                & .no-grps-warn {
+                    position: absolute;
+                    top: 0;
+                    left: 5%;
+                    background: #b99;
+                    color:#fff;
+                }
+                & .send-chat {
+                    position: absolute;
+                    bottom: 0px;
+                    width: 10%;
+                    right: 0px;
+                }
+                & .messages {
+                    height: 93%;
+                    width: 100%;
+                    overflow-y: scroll;
+                    & .message {
+                        width: 100%;
+                        line-height: 20pt;
+                    }
+                }
+            }
+        }
+    }
+}
