@@ -139,7 +139,7 @@ gulp.task('checkDB', function () {
                 // console.log('result of run request',e,f)
                 if (!f.length) {
                     //database not already running, so start it up!
-                    kid.exec('c: && cd C:\Program Files\MongoDB\Server\4.2\bin && start mongod -dbpath "e:\mongodata" && pause', function (err, stdout, stderr) {
+                    kid.exec('c: && cd C:\\Program Files\\MongoDB\\Server\\4.2\\bin && start mongod -dbpath "e:\\mongodata" && pause', function (err, stdout, stderr) {
                         if (err) console.log('Uh oh! An error of "', err, '" prevented the DB from starting!');
                     })
                     resolve();

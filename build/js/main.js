@@ -173,15 +173,15 @@ app
                     const reader = new FileReader(),
                         theFile = changeEvent.target.files[0],
                         tempName = theFile.name;
-                    $log.debug('UPLOADING FILE', theFile);
+                    // $log.debug('UPLOADING FILE', theFile);
                     reader.onload = function (loadEvent) {
                         let theURI = loadEvent.target.result;
-                        $log.debug('URI before optional resize', theURI, theURI.length);
+                        // $log.debug('URI before optional resize', theURI, theURI.length);
                         if (scope.$parent.needsResize) {
                             //needs to resize img (usually for avatar)
                             resizeDataUrl(scope, theURI, scope.$parent.needsResize, scope.$parent.needsResize, tempName);
                         } else {
-                            $log.debug('APPLYING file to $parent');
+                            // $log.debug('APPLYING file to $parent');
                             scope.$apply(function () {
                                 if (scope.$parent && scope.$parent.$parent && scope.$parent.$parent.avas) {
 

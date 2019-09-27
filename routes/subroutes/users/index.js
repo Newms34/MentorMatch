@@ -199,6 +199,7 @@ const routeExp = function (io, pp) {
         });
     });
     //user profile stuff, like interests, etc.    
+    //inchrests
     router.put('/interests', this.authbit, (req, res, next) => {
         //upsert one or more interests
         //incoming format: array of interests like [{title:'JS',lvl:6,canTeach:bool}]
@@ -245,30 +246,85 @@ const routeExp = function (io, pp) {
         })
     })
 
-    router.get('/changeTz', this.authbit, (req, res, next) => {
-        mongoose.model('User').findOne({
-            _id: req.session.passport.user
-        }, function (err, usr) {
-            usr.tz = req.query.tz;
-            console.log('USER TIME ZONE NOW', usr);
-            usr.save((errsv, usrsv) => {
-                res.send(usrsv);
-            });
+    //projs
+    router.put('/projs', this.authbit, (req, res, next) => {
+        //upsert one or more interests
+        if (!req.body || !req.body.length) {
+            return res.status(400).send('err');
+        }
+        req.body.forEach(proj => {
+            if (!proj.name) {
+                //cannot do anything without a name
+                return false;
+            }
+            let alreadyHaz = req.user.projects.find(q => q.name == proj.name);
+            console.log('ALREADY HAZ?',alreadyHaz,'ORIGINAL',proj)
+            if (!alreadyHaz) {
+                //project does not already exists, so create it
+                //level CAN be zero, if the user is for example projected but has not actually learned about it.
+                alreadyHaz = {
+                    name: proj.name,
+                    description:proj.description||null,
+                    position:proj.position||null
+                }
+                req.user.projects.push(alreadyHaz);
+            } else {
+                //does already exists. update 
+                alreadyHaz.description = proj.description;
+                alreadyHaz.position = proj.position;
+            }
         });
+        req.user.save((eu, esv) => {
+            res.send('done')
+        })
     });
-    router.post('/changeOther', this.authbit, (req, res, next) => {
+    router.get('/projs', this.authbit, (req, res, next) => {
+        //get all interests
+        res.send(req.user.projects);
+    })
+    router.delete('/projs', this.authbit, (req, res, next) => {
+        //remove interest(s)
+        req.user.projects = req.user.projects.filter(q => {
+            q.name == req.body.name;
+        });
+        req.user.save((eu, esv) => {
+            res.send('refresh')
+        })
+    })
 
-        req.user.otherInfo = req.body.other;
-        usr.save((errsv, usrsv) => {
-            res.send(usrsv);
+    // router.get('/changeTz', this.authbit, (req, res, next) => {
+    //     mongoose.model('User').findOne({
+    //         _id: req.session.passport.user
+    //     }, function (err, usr) {
+    //         usr.tz = req.query.tz;
+    //         console.log('USER TIME ZONE NOW', usr);
+    //         usr.save((errsv, usrsv) => {
+    //             res.send(usrsv);
+    //         });
+    //     });
+    // });
+    router.post('/changeOther', this.authbit, (req, res, next) => {
+        //NEED TO IMPLEMENT
+        // req.user.otherInfo = req.body.other;
+        // console.log('INCOMING USER',req.body)
+        ['company','projects','otherInfo','displayName'].forEach(n=>{
+            if(n=='projects' && !req.body[n].length){
+                return false;
+            }
+            console.log('Old',n,'was',req.user[n],'new',req.body[n],'replace?',!!req.body[n])
+            req.user[n]=req.body[n]||req.user[n]||null;
+        });
+
+        req.user.save((errsv, usrsv) => {
+            res.send('refresh');
         });
 
     });
     router.post('/changeAva', this.authbit, (req, res, next) => {
         req.user.avatar = req.body.img;
-        console.log('USER NOW', req.body, usr);
-        usr.save((errsv, usrsv) => {
-            res.send(usrsv);
+        // console.log('USER NOW', req.body, usr);
+        req.user.save((errsv, usrsv) => {
+            res.send('refresh');
         });
     });
     router.get('/setEmail', authbit, (req, res, next) => {
@@ -783,24 +839,24 @@ const routeExp = function (io, pp) {
 
     //TEMPORARY!
 
-    router.get('/tempAddTeachTop', this.authbit, (req, res, next) => {
-        req.user.teachTopics.push({ title: req.query.t, lvl: Math.ceil(Math.random() * 10) })
-        req.user.save();
-        res.send('done');
-    })
-    router.get('/temp',(req,res,next)=>{
-        res.send('Random number: '+Math.floor(Math.random()*100));
-    })
-    router.get('/wipeMail', (req, res, next) => {
-        mongoose.model('User').find({}, (err, usrs) => {
-            usrs.forEach(u => {
-                u.inMsgs = [];
-                u.outMsgs = [];
-                u.save();
-            })
-            res.send('DONE');
-        })
-    })
+    // router.get('/tempAddTeachTop', this.authbit, (req, res, next) => {
+    //     req.user.teachTopics.push({ title: req.query.t, lvl: Math.ceil(Math.random() * 10) })
+    //     req.user.save();
+    //     res.send('done');
+    // })
+    // router.get('/temp',(req,res,next)=>{
+    //     res.send('Random number: '+Math.floor(Math.random()*100));
+    // })
+    // router.get('/wipeMail', (req, res, next) => {
+    //     mongoose.model('User').find({}, (err, usrs) => {
+    //         usrs.forEach(u => {
+    //             u.inMsgs = [];
+    //             u.outMsgs = [];
+    //             u.save();
+    //         })
+    //         res.send('DONE');
+    //     })
+    // })
     return router;
 };
 

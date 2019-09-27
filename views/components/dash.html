@@ -6,18 +6,113 @@
         <div class="message-body blocky is-fullwidth">
             <div class="columns">
 
-                <div class="column is-one-fifth message">
+                <div class="column is-two-fifths message">
                     <div class="message-header">
                         Profile/Avatar
                     </div>
                     <div class="message-body has-background-grey-lighter">
-                        <img src="{{$parent.user.avatar}}" alt="" class="is-fullwidth">
-                        <div class="is-fullwidth has-text-centered">
-                            <button class="button is-info">Change Avatar</button>
+                        <div class="columns is-fullwidth is-multiline">
+                            <div class="column is-one-fifth notification notif-spaced">
+                                <div class="is-size-4">Profile Picture</div>
+                            </div>
+                            <div class="column is-four-fifths">
+                                <div class="is-fullwidth is-italic">How about a nice, clear picture of you?</div>
+                                <img src="{{$parent.user.avatar}}" alt="" class="prof-pic">
+                                <div class="field">
+                                    <div class="file">
+                                        <label class="file-label">
+                                            <input class='file-input' type="file" fileread="user.avatar"
+                                                onchange="angular.element(this).scope().loadFile()" />
+                                            <span class="file-cta button is-info">
+                                                <span class="file-icon">
+                                                    <i class="fa fa-upload"></i>
+                                                </span>
+                                                <span class="file-label">
+                                                    {{fileName?fileName:'Change Profile Pic (optional)…'}}
+                                                </span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column is-full">
+                                <hr>
+                            </div>
+                            <div class="column is-one-fifth notification notif-spaced">
+                                <div class="is-size-4">Display Name</div>
+                            </div>
+                            <div class="column is-four-fifths">
+                                <div class="is-fullwidth is-italic">Want us to call you something other than your
+                                    username?</div>
+                                <div class="field">
+                                    <input type="text" ng-model='user.displayName' class='input'
+                                        placeholder='None (just call me {{user.user}})' ng-keyup='saveDebounce()'>
+                                </div>
+                            </div>
+                            <div class="column is-full">
+                                <hr>
+                            </div>
+                            <div class="column is-one-fifth notification notif-spaced">
+                                <div class="is-size-4">Company</div>
+                            </div>
+                            <div class="column is-four-fifths">
+                                <div class="is-fullwidth is-italic">Who do you currently work for?</div>
+                                <div class="field">
+                                    <input type="text" ng-model='user.company' class='input'
+                                        placeholder="No one/Don't wish to say" ng-keyup='saveDebounce()'>
+                                </div>
+                            </div>
+                            <div class="column is-full">
+                                <hr>
+                            </div>
+                            <div class="column is-one-fifth notification notif-spaced">
+                                <div class="is-size-4">Projects</div>
+                            </div>
+                            <div class="column is-four-fifths">
+                                <div class="is-fullwidth is-italic">Any cool projects you've worked on?</div>
+                                <div class="is-fullwidth">
+                                    <!-- NEEDS: TABLE O PROJECTS, ADD {name,desc,position} -->
+                                    <table class="table is-fullwidth">
+                                        <thead>
+                                            <tr>
+                                                <th>Project Name</th>
+                                                <th>Project Description</th>
+                                                <th>Your Position</th>
+                                                <th>Remove Project</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat = 'prj in $parent.user.projects'>
+                                                <td><input type="text" class="input" ng-model='prj.name'></td>
+                                                <td><input type="text" class="input" ng-model='prj.description' placeholder='(None given)'></td>
+                                                <td><input type="text" class="input" ng-model='prj.position'></td>
+                                                <td><button class="button is-small is-danger" ng-click='deleteProj(prj.name)'><i class="fa fa-trash"></i></button></td>
+                                            </tr>
+                                            <tr ng-if='!$parent.user.projects || !$parent.user.projects.length'>
+                                                <td colspan='3' class='is-italic'>You have not added any projects yet!</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <button class="button is-info is-large" ng-click='modProjDial()'><i class="fa fa-plus"></i>&nbsp; Add New Project</button>
+                                </div>
+                            </div>
+                            <div class="column is-full">
+                                <hr>
+                            </div>
+                            <div class="column is-one-fifth notification notif-spaced">
+                                <div class="is-size-4">Other</div>
+                            </div>
+                            <div class="column is-four-fifths">
+                                <div class="is-fullwidth is-italic">Any other cool info you wanna let us know?</div>
+                                <div class="field">
+                                    <input type="text" ng-model='user.otherInfo' class='input'
+                                        placeholder="Sorry, but I'm boring" ng-keyup='saveDebounce()'>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="column is-four-fifths message">
+                <div class="column is-three-fifths message">
                     <div class="message-header">
                         Interests
                     </div>
@@ -35,15 +130,16 @@
                                 <tr ng-repeat='sk in $parent.user.interests'>
                                     <td>{{sk.title}}</td>
                                     <!-- ng-keyup='updateTopics($event)' ng-click -->
-                                    <td><input type="number" ng-model='sk.lvl' class="number" change-re-focus change-fn='updateTopics()' min='0' max='10'></td>
+                                    <td><input type="number" ng-model='sk.lvl' class="number" change-re-focus
+                                            change-fn='updateTopics()' min='0' max='10'></td>
                                     <td>
                                         <!-- ng-click='sk.canTeach=!sk.cantTeach;' -->
-                                        <input type='checkbox' ng-model='sk.canTeach' class="button is-small" change-re-focus change-fn='updateTopics()' >
-                                            <i class="fa fa-{{sk.canTeach?'check-':''}}square-o"></i>
-                                        </input>
+                                        <input type='checkbox' ng-model='sk.canTeach' change-re-focus change-fn='updateTopics()' id='skCanTeach-{{$index}}'>
+                                        <label for="skCanTeach-{{$index}}">{{sk.canTeach?'Yes':'No'}}</label>
                                     </td>
                                     <td>
-                                        <button class="button is-info" ng-click='removeSkill(sk)'><i class="fa fa-trash"></i>&nbsp;Remove</button>
+                                        <button class="button is-info" ng-click='removeSkill(sk)'><i
+                                                class="fa fa-trash"></i>&nbsp;Remove</button>
                                     </td>
                                 </tr>
                                 <tr ng-if='!user.interests.length'>
@@ -51,18 +147,137 @@
                                         You have not yet added any skills!
                                     </td>
                                 </tr>
+                                <tr>
+                                    <td colspan='4' class='has-text-centered '>
+                                        <button class="button is-large is-info" ng-click='addIntDial()'><i class="fa fa-plus"></i>&nbsp; Add New
+                                            Skill</button>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-                <!-- STUFF TO ADD:
+            <!-- STUFF TO ADD:
                     <ul>
                 <li>Avatar change/upload</li>
                 <li>Display Name add/change</li>
                 <li>Interest search, add, change</li>
                 <li>Notifications of new unread msgs?</li>
             </ul> -->
+        </div>
+    </div>
+    <div class="modal" ng-class='{"is-active":addInt.show==true}'>
+        <div class="modal-background" ng-click='addInt.show=false'></div>
+        <div class="modal-content modal-wide">
+            <div class="panel">
+                <div class="panel-heading is-link">
+                    Add Skill
+                    <button class="button is-danger is-small is-pulled-right" ng-click='addInt.show=false'>x</button>
+                </div>
+                <div class="panel-block has-background-white blocky content">
+                    <div class="columns is-fullwidth is-multiline">
+                        <div class="column is-one-fifth notification notif-spaced">
+                            Skill Name:
+                        </div>
+                        <div class="column is-four-fifths">
+                                <md-content class='md-padding'>
+                                        <form>
+                                            <div id="addTopicLabel" class='is-fullwidth has-text-left'>Add a skill</div>
+                                            <md-autocomplete md-selected-item="selectedTopic" md-search-text="topicToAdd"
+                                                md-items="topic in filterMe(topicToAdd)" md-no-cache='true'
+                                                md-item-text="topic.display" md-min-length="0" placeholder="Ex. JavaScript"
+                                                input-aria-labelledby="addTopicLabel" md-mode='standard'>
+                                                <md-item-template>
+                                                    <span md-highlight-text="topicToAdd"
+                                                        md-highlight-flags="^i">{{topic.display}}</span>
+                                                </md-item-template>
+                                                <!-- <md-not-found>
+                                                    No skills matching "{{topicToAdd}}" were found.
+                                                    <a ng-click='addIntDial(topicToAdd)'>Create a new skill!</a>
+                                                </md-not-found> -->
+                                        </form>
+                                        </md-autocomplete>
+                                    </md-content>
+                        </div>
+                        <div class="column is-full">
+                            <hr>
+                        </div>
+                        <div class="column is-one-fifth notification notif-spaced">
+                            Skill Level:
+                        </div>
+                        <div class="column is-four-fifths">
+                            <div class="is-fullwidth is-italic">Rate yourself on a scale of 1-10 for this skill.</div>
+                            <input type="text" class="number" ng-model='addInt.lvl' min='0' max='10'>
+                        </div>
+                        <div class="column is-full">
+                            <hr>
+                        </div>
+                        <div class="column is-one-fifth notification notif-spaced">
+                            Can Teach:
+                        </div>
+                        <div class="column is-four-fifths">
+                            <div class="is-fullwidth is-italic">Can you teach this skill?</div>
+                            <input type='checkbox' ng-model='addInt.canTeach' id='addIntCanTeach'></input> <label for="addIntCanTeach">{{addInt.canTeach?'Yes':'No'}}</label>
+                        </div>
+                        <div class="column is-full">
+                            <hr>
+                        </div>
+                        <div class="column is-full has-text-centered">
+                            <button class="button is-info is-large" ng-click='saveSkills()'><i class="fa fa-plus"></i>&nbsp; Add Skill</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" ng-class='{"is-active":modProj.show==true}'>
+        <div class="modal-background" ng-click='modProj.show=false'></div>
+        <div class="modal-content modal-wide">
+            <div class="panel">
+                <div class="panel-heading is-link">
+                    {{modProj.editMode?'Edit':'Add'}} Project
+                    <button class="button is-danger is-small is-pulled-right" ng-click='modProj.show=false'>x</button>
+                </div>
+                <div class="panel-block has-background-white blocky content">
+                    <div class="columns is-fullwidth is-multiline">
+                        <div class="column is-one-fifth notification notif-spaced">
+                            Name:
+                        </div>
+                        <div class="column is-four-fifths">
+                            <div class="is-fullwidth is-italic">Your project's name</div>
+                            <input type="text" class="input" ng-model='modProj.proj.name' placeholder='e.g., Widget App'>
+                        </div>
+                        <div class="column is-full">
+                            <div class="is-fullwidth notification is-danger" ng-if='countDups($parent.user.projects,"name")'><i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;That project name is already taken! Please pick another one.</div>
+                            <hr>
+                        </div>
+                        <div class="column is-one-fifth notification notif-spaced">
+                            Description (optional):
+                        </div>
+                        <div class="column is-four-fifths">
+                            <div class="is-fullwidth is-italic">A brief description of what your project does</div>
+                            <textarea ng-model='modProj.proj.description' class='textarea is-fullwidth' placeholder='e.g., App to make widgets for local companies'></textarea>
+                        </div>
+                        <div class="column is-full">
+                            <hr>
+                        </div>
+                        <div class="column is-one-fifth notification notif-spaced">
+                            Position:
+                        </div>
+                        <div class="column is-four-fifths">
+                            <div class="is-fullwidth is-italic">Your position (job) on the project</div>
+                            <input type="text" class="input" ng-model='modProj.proj.position' placeholder = 'e.g., Front-end engineer/designer'>
+                        </div>
+                        <div class="column is-full">
+                            <hr>
+                        </div>
+                        <div class="column is-full has-text-centered">
+                                <button class="button is-info is-large" ng-disabled ='countDups($parent.user.projects,"name")' ng-click='saveProjs()'><i class="fa fa-pencil"></i>&nbsp;{{modProj.editMode?'Edit':'Add'}} Project</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
