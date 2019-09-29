@@ -229,7 +229,8 @@ const routeExp = function (io, pp) {
             }
         });
         req.user.save((eu, esv) => {
-            res.send('done')
+            io.emit('topicUpdate',{})
+            res.send('done');
         })
     });
     router.get('/interests', this.authbit, (req, res, next) => {

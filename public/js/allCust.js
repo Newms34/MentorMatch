@@ -955,12 +955,15 @@ app.controller('match-cont', function ($scope, $http, $q) {
     // }
     // $scope.topicToAdd = '';
     // $scope.selectedItem = null;
-    $http.get('/topic/topic').then(r => {
-        $scope.topicObjsAll = r.data.map(q => {
-            return { value: q.title.toLowerCase(), display: q.title, desc: q.desc }
+    $scope.regetTopics = ()=>{
+        $http.get('/topic/topic').then(r => {
+            $scope.topicObjsAll = r.data.map(q => {
+                return { value: q.title.toLowerCase(), display: q.title, desc: q.desc }
+            })
+            $scope.topicObjs = angular.copy($scope.topicObjsAll)
         })
-        $scope.topicObjs = angular.copy($scope.topicObjsAll)
-    })
+    }
+    $scope.regetTopics();
     $scope.filterMe = (query) => {
         const lowercaseQuery = query.toLowerCase();
         // console.log('picked topics map', $scope.pickedTopics.map(q => q.value))
@@ -989,12 +992,24 @@ app.controller('match-cont', function ($scope, $http, $q) {
 
         }
         $scope.newTopic.show = !$scope.newTopic.show;
+        if(!$scope.newTopic.show && waitingForTopic){
+            waitingForTopic=false;
+            $scope.regetTopics();
+        }
     }
+    let waitingForTopic = false;
+    socket.on('topicUpdate',u=>{
+        if (!!$scope.newTopic.show){
+            //if the topic adding window is currently showing, don't refresh; wait for user to submit new topic;
+            waitingForTopic=true;
+        }else{
+            $scope.regetTopics();
+        }
+    })
     $scope.addNewTopic = () => {
         $http.post('/topic/topic', $scope.newTopic)
             .then(r => {
                 //do nothing. We refresh in the socket response, just so EVERYONE can no we added a topic.
-                socket.emit()
                 $scope.toggleNewTopicDia();
             })
             .catch(e => {
