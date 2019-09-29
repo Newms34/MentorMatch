@@ -1,5 +1,5 @@
 app.controller('dash-cont', ($scope, $http, $q, userFact) => {
-    console.log("Dashboard ctrl registered")
+    // console.log("Dashboard ctrl registered")
     $scope.refUsr = $scope.$parent.refUsr;
     $scope.refUsr();
     $scope.updateTopics = () => {
@@ -139,16 +139,16 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
         $scope.modProj.show = true;
     }
     $scope.saveProjs = (t) => {
-        console.log('Saving projects. List is', $scope.$parent.user.projects)
         const projArr = angular.copy($scope.$parent.user.projects);
+        console.log('Saving projects. List is', projArr,'modProj',$scope.modProj)
         if (!$scope.modProj.editMode) {
-            projArr.push($scope.modProj.proj);
+            projArr.push(angular.copy($scope.modProj.proj));
         }
         const dupName = countDups(projArr, 'name');
         if (!!dupName) {
             return bulmabox.alert('Duplicate Project Name', `The name ${dupName} is already being used! Please pick another one for this project.`)
         }
-        $http.put('/user/projs', $scope.$parent.user.projects)
+        $http.put('/user/projs', projArr)
             .then(r => {
                 //do nothing
                 $scope.modProj = {
@@ -159,10 +159,14 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
             })
     }
     $scope.deleteProj = (t) => {
-        $http.delete('/user/projs', { name: t })
-            .then(r => {
+        bulmabox.confirm('Remove Project', `Are you sure you wish to remove the project ${t}?`, r => {
+            if (!!r) {
+                $http.delete('/user/projs', { name: t })
+                    .then(r => {
 
-            })
+                    })
+            }
+        })
     }
     $scope.countDups = countDups
 })

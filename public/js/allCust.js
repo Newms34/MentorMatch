@@ -287,7 +287,7 @@ function postrenderAction($timeout) {
     }
 }
 app.controller('dash-cont', ($scope, $http, $q, userFact) => {
-    console.log("Dashboard ctrl registered")
+    // console.log("Dashboard ctrl registered")
     $scope.refUsr = $scope.$parent.refUsr;
     $scope.refUsr();
     $scope.updateTopics = () => {
@@ -427,16 +427,16 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
         $scope.modProj.show = true;
     }
     $scope.saveProjs = (t) => {
-        console.log('Saving projects. List is', $scope.$parent.user.projects)
         const projArr = angular.copy($scope.$parent.user.projects);
+        console.log('Saving projects. List is', projArr,'modProj',$scope.modProj)
         if (!$scope.modProj.editMode) {
-            projArr.push($scope.modProj.proj);
+            projArr.push(angular.copy($scope.modProj.proj));
         }
         const dupName = countDups(projArr, 'name');
         if (!!dupName) {
             return bulmabox.alert('Duplicate Project Name', `The name ${dupName} is already being used! Please pick another one for this project.`)
         }
-        $http.put('/user/projs', $scope.$parent.user.projects)
+        $http.put('/user/projs', projArr)
             .then(r => {
                 //do nothing
                 $scope.modProj = {
@@ -447,10 +447,14 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
             })
     }
     $scope.deleteProj = (t) => {
-        $http.delete('/user/projs', { name: t })
-            .then(r => {
+        bulmabox.confirm('Remove Project', `Are you sure you wish to remove the project ${t}?`, r => {
+            if (!!r) {
+                $http.delete('/user/projs', { name: t })
+                    .then(r => {
 
-            })
+                    })
+            }
+        })
     }
     $scope.countDups = countDups
 })
@@ -1006,11 +1010,11 @@ app.controller('match-cont', function ($scope, $http, $q) {
             simpTO = $scope.topicObjs ? $scope.topicObjs.map(b => b.value).sort().join('') : '';
         // console.log("simple data",simpPT,simpTO)
         if ($scope.topicToAdd && simpPT != simpTO) {
-            return 'Click to add your selected topic!'
+            return 'Click to add your selected skill!'
         } else if (simpPT != simpTO) {
-            return `You need to select a topic before you can add it!`
+            return `You need to select a skill before you can add it!`
         } else {
-            return `You've added all possible topics. Create a new one if you want!`
+            return `You've added all possible skills. Create a new one if you want!`
 
         }
     }
@@ -1070,12 +1074,13 @@ app.controller('match-cont', function ($scope, $http, $q) {
     $scope.doConnect = u => {
         //set up the dialog box for connecting w/ mentor
         $scope.mentCon.user = u.user;
+        $scope.mentCon.displayName = u.displayName|| null;
         $scope.mentCon.topics = $scope.pickedTopics.map(s => s.value);
         $scope.mentCon.plusMdMsg = null;
         $scope.mentCon.plusHtmlMsg = null;
         $scope.mentCon.tz = { from: null, to: null };
         $scope.mentCon.show = true;
-        $scope.$digest();
+        // $scope.$apply();
     }
     $scope.sendConnectMsg = t => {
         console.log('would send', $scope.mentCon)

@@ -75,11 +75,11 @@ app.controller('match-cont', function ($scope, $http, $q) {
             simpTO = $scope.topicObjs ? $scope.topicObjs.map(b => b.value).sort().join('') : '';
         // console.log("simple data",simpPT,simpTO)
         if ($scope.topicToAdd && simpPT != simpTO) {
-            return 'Click to add your selected topic!'
+            return 'Click to add your selected skill!'
         } else if (simpPT != simpTO) {
-            return `You need to select a topic before you can add it!`
+            return `You need to select a skill before you can add it!`
         } else {
-            return `You've added all possible topics. Create a new one if you want!`
+            return `You've added all possible skills. Create a new one if you want!`
 
         }
     }
@@ -139,12 +139,13 @@ app.controller('match-cont', function ($scope, $http, $q) {
     $scope.doConnect = u => {
         //set up the dialog box for connecting w/ mentor
         $scope.mentCon.user = u.user;
+        $scope.mentCon.displayName = u.displayName|| null;
         $scope.mentCon.topics = $scope.pickedTopics.map(s => s.value);
         $scope.mentCon.plusMdMsg = null;
         $scope.mentCon.plusHtmlMsg = null;
         $scope.mentCon.tz = { from: null, to: null };
         $scope.mentCon.show = true;
-        $scope.$digest();
+        // $scope.$apply();
     }
     $scope.sendConnectMsg = t => {
         console.log('would send', $scope.mentCon)

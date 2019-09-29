@@ -33,8 +33,7 @@
                             <button class="button is-wide-btn is-link"
                                 ng-disabled='addTopicBtn()!="Click to add your selected skill!"'
                                 title='{{addTopicBtn()}}' ng-click='addSearchTopic(selectedTopic)'><i
-                                    class="fa fa-plus"></i>&nbsp; Add
-                                Skill</button>
+                                    class="fa fa-plus"></i>&nbsp; Add Skill</button>
                         </div>
                     </div>
                 </div>
@@ -45,19 +44,21 @@
                             <div class="is-fullwidth is-italic" ng-show='!pickedTopics.length'>No skills selected! Pick
                                 some skills above or create your own!</div>
                             <div class="is-fullwidth columns is-multiline" ng-show='pickedTopics.length'>
- 
-                                <div class="column is-one-tenth notification is-dark btn-pad-right" ng-repeat='t in pickedTopics'
-                                    title='{{t.desc}}'>
+
+                                <div class="column is-one-tenth notification is-dark btn-pad-right"
+                                    ng-repeat='t in pickedTopics' title='{{t.desc}}'>
                                     <div class="is-fullwidth">
                                         <strong>Skill</strong>:&nbsp;{{t.display}}
                                     </div>
                                     <div class="is-fullwidth">&nbsp;</div>
                                     <div class="is-fullwidth">
-                                        Min Level: <select ng-model='t.min' ng-options='m.num as m.lbl for m in lvls' ng-change='changeTopList()'></select>
+                                        Min Level: <select ng-model='t.min' ng-options='m.num as m.lbl for m in lvls'
+                                            ng-change='changeTopList()'></select>
                                     </div>
                                     <div class="is-fullwidth">&nbsp;</div>
                                     <div class="is-fullwidth has-text-centered">
-                                        <button ng-click='removeTopic(t)' class="button is-light"><i class="fa fa-times-circle"></i> Remove</button>
+                                        <button ng-click='removeTopic(t)' class="button is-light"><i
+                                                class="fa fa-times-circle"></i> Remove</button>
                                     </div>
                                 </div>
 
@@ -80,6 +81,7 @@
                             <div class="columns is-fullwidth is-multiline">
 
                                 <div class="column is-one-third message" ng-repeat='mt in availTeachs'>
+                                    <!-- single mentor 'card' -->
                                     <div class="message-body has-background-info blocky is-fullwidth">
                                         <div class="columns is-fullwidth is-multiline">
                                             <div
@@ -91,18 +93,25 @@
                                             </div>
                                             <div class="column is-three-fifths is-size-7 has-background-white">
                                                 <div class="columns is-multiline">
-                                                    <div
-                                                        class="column is-two-fifth has-text-weight-bold has-bottom-border">
+                                                    <div class="column is-two-fifth has-text-weight-bold">
                                                         <i class="fa fa-briefcase"></i>&nbsp;Company:
                                                     </div>
-                                                    <div class="column is-three-fifths has-bottom-border">
+                                                    <div class="column is-three-fifths">
                                                         {{mt.company||'(None)'}}
                                                     </div>
-                                                    <div class="column is-full has-text-weight-bold has-text-centered">
+                                                    <div class="column is-full has-bottom-border"></div>
+                                                    <hr>
+                                                    <!-- skills && toggle -->
+                                                    <div class="column is-full has-text-weight-bold"
+                                                        ng-class='{"has-bottom-border":mt.showProj}'>
                                                         <i class="fa fa-cogs"></i>&nbsp;Skills:
+                                                        <button class="button is-small is-info is-pulled-right"
+                                                            ng-click='mt.showProj = !mt.showProj'>
+                                                            <i class="fa fa-{{!mt.showProj?'eye-slash':'eye'}}"></i>
+                                                        </button>
                                                     </div>
                                                     <div class="column is-full has-bottom-border"
-                                                        ng-if='mt.interests.length'>
+                                                        ng-show='!mt.showProj && mt.interests.length'>
                                                         <table class="table">
                                                             <thead>
                                                                 <tr>
@@ -126,8 +135,41 @@
                                                         </table>
                                                     </div>
                                                     <div class="column is-full has-bottom-border"
-                                                        ng-if='!mt.interests.length'>
+                                                        ng-show='!mt.showProj && !mt.interests.length'>
                                                         {{mt.displayName||mt.user}} has not included any skills!
+                                                    </div>
+                                                    <!-- projects && toggle -->
+                                                    <div class="column is-full has-text-weight-bold"
+                                                        ng-class='{"has-bottom-border":!mt.showProj}'>
+                                                        <i class="fa fa-cogs"></i>&nbsp;Projects:
+                                                        <button class="button is-small is-info is-pulled-right"
+                                                            ng-click='mt.showProj=!mt.showProj'>
+                                                            <i class="fa fa-{{mt.showProj?'eye-slash':'eye'}}"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="column is-full has-bottom-border"
+                                                        ng-show='mt.showProj && mt.projects.length'>
+                                                        <table class="table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Name</th>
+                                                                    <th>Description</th>
+                                                                    <th>Position</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat='prj in mt.projects'>
+                                                                    <td>{{prj.name}}</td>
+                                                                    <td>{{prj.description}}</td>
+                                                                    <td>{{prj.position}}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+
+                                                    <div class="column is-full has-bottom-border"
+                                                        ng-show='mt.showProj && !mt.projects.length'>
+                                                        {{mt.displayName||mt.user}} has not included any projects!
                                                     </div>
                                                     <div class="column is-full has-text-centered">
                                                         <button class="button is-link" ng-click='doConnect(mt)'><i
@@ -146,120 +188,121 @@
             </div>
         </div>
     </div>
-</div>
-<div class="modal" ng-class='{"is-active":newTopic.show}'>
-    <div class="modal-background"></div>
-    <div class="modal-content">
-        <div class="panel">
-            <div class="panel-heading is-link">
-                Create New Skill
-                <button class="button is-danger is-small is-pulled-right" ng-click='toggleNewTopicDia()'>x</button>
-            </div>
-            <div class="panel-block has-background-white blocky content">
-                <div class="is-italic">Your desired skill not included? Why not add it here?</div>
-                <div class="notification">
-                    First, give us a name for your skill. Examples:
-                    <br>
-                    <ul>
-                        <li>ReactJS</li>
-                        <li>Front-End Design</li>
-                        <li>Social Networking</li>
-                    </ul>
-                    <br>
-                    <input type="text" class="input" ng-model='newTopic.title' placeholder='Your Topic'>
+
+    <div class="modal" ng-class='{"is-active":newTopic.show}'>
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="panel">
+                <div class="panel-heading is-link">
+                    Create New Skill
+                    <button class="button is-danger is-small is-pulled-right" ng-click='toggleNewTopicDia()'>x</button>
                 </div>
-                <br>
-                <div class="notification">
-                    You can also give us a description for your topic if you want (it's optional!).
-                    <textarea ng-model='newTopic.desc' class='textarea'></textarea>
-                </div>
-                <div class="is-fullwidth has-text-centered">
-                    <button class="button is-link" ng-click='addNewTopic()'>Add it!</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal" ng-class='{"is-active":mentCon.show==true}'>
-    <div class="modal-background" ng-click='mentCon.show=false'></div>
-    <div class="modal-content modal-wide">
-        <div class="panel">
-            <div class="panel-heading is-link">
-                Connect With Mentor
-                <button class="button is-danger is-small is-pulled-right" ng-click='mentCon.show=false'>x</button>
-            </div>
-            <div class="panel-block has-background-white blocky content">
-                <div class="is-italic">Ready to connect? Just fill out the information below</div>
-                <div class="is-fullwidth">
-                    <!-- name -->
+                <div class="panel-block has-background-white blocky content">
+                    <div class="is-italic">Your desired skill not included? Why not add it here?</div>
+                    <div class="notification notif-spaced">
+                        First, give us a name for your skill. Examples:
+                        <br>
+                        <ul>
+                            <li>ReactJS</li>
+                            <li>Front-End Design</li>
+                            <li>Social Networking</li>
+                        </ul>
+                        <br>
+                        <input type="text" class="input" ng-model='newTopic.title' placeholder='Your Topic'>
+                    </div>
                     <br>
-                    <div class="is-fullwidth columns has-background-grey-dark">
-                        <div class="column is-one-fifth notification">Name:</div>
-                        <div class="column is-four-fifths has-text-white">
-                            <div class="is-italic is-fullwidth">Here's who you're connecting with: </div>
-                            <div class="notification has-background-white has-text-grey-darker is-fullwidth">
-                                {{mentCon.user}}
-                            </div>
-                        </div>
+                    <div class="notification notif-spaced">
+                        You can also give us a description for your topic if you want (it's optional!).
+                        <textarea ng-model='newTopic.desc' class='textarea'></textarea>
                     </div>
-                    <div class="is-fullwidth">&nbsp;</div>
-                    <!-- topics -->
-                    <div class="is-fullwidth columns has-background-grey-dark">
-                        <div class="column is-one-fifth notification">Skills:</div>
-                        <div class="column is-four-fifths has-text-white">
-                            <div class="is-italic is-fullwidth">Here's a list of the skills you wanna learn from
-                                this mentor:</div>
-                            <div class="notification has-background-white has-text-grey-darker is-fullwidth">
-                                <ul class='check-list'>
-                                    <li ng-repeat='t in mentCon.topics'><i class="fa fa-check"></i> &nbsp;{{t}}</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="is-fullwidth">&nbsp;</div>
-                    <!-- Time Zone -->
-                    <div class="is-fullwidth columns has-background-grey-dark">
-                        <div class="column is-one-fifth notification">Best Times:</div>
-                        <div class="column is-four-fifths has-text-white">
-                            <div class="is-fullwidth is-italic">What times work best for you?</div>
-                            <div class="notification has-background-white has-text-grey-darker is-fullwidth">
-                                <div class="is-fullwidth">
-                                    <div class="has-text-weight-bold">From:</div>
-                                    <div class="select">
-                                        <select ng-model='mentCon.tz.from'
-                                            ng-options='t.num as t.label for t in times'></select>
-                                    </div>
-                                </div>
-                                <div class="is-fullwidth">
-                                    <div class="has-text-weight-bold">To:</div>
-                                    <div class="select">
-                                        <select ng-model='mentCon.tz.to'
-                                            ng-options='t.num as t.label for t in times'></select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="is-fullwidth">&nbsp;</div>
-                    <!-- Custom Messij -->
-                    <div class="is-fullwidth columns has-background-grey-dark">
-                        <div class="column is-one-fifth notification">Additional Message:</div>
-                        <div class="column is-four-fifths has-text-white">
-                            <div class="is-fullwidth is-italic">
-                                Anything else you wanna say? We'd recommend "Hi" for starters!
-                            </div>
-                            <!-- <div class="notification has-background-white has-text-greis-fullwidth"></div> -->
-                            <textarea ng-model='mentCon.plusMdMsg' placeholder='Say something friendly!'
-                                class="textarea is-fullwidth"></textarea>
-                        </div>
-                    </div>
-                    <div class="is-fullwidth">&nbsp;</div>
-                    <div class="column is-full has-text-centered">
-                        <button class="button is-link" ng-click='sendConnectMsg()'>Connect!</button>
+                    <div class="is-fullwidth has-text-centered">
+                        <button class="button is-link" ng-click='addNewTopic()'>Add it!</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+    <div class="modal" ng-class='{"is-active":mentCon.show==true}'>
+        <div class="modal-background" ng-click='mentCon.show=false'></div>
+        <div class="modal-content modal-wide">
+            <div class="panel">
+                <div class="panel-heading is-link">
+                    Connect With Mentor
+                    <button class="button is-danger is-small is-pulled-right" ng-click='mentCon.show=false'>x</button>
+                </div>
+                <div class="panel-block has-background-white blocky content">
+                    <div class="is-italic">Ready to connect? Just fill out the information below</div>
+                    <div class="is-fullwidth">
+                        <!-- name -->
+                        <br>
+                        <div class="is-fullwidth columns has-background-grey-dark">
+                            <div class="column is-one-fifth notification notif-spaced">Name:</div>
+                            <div class="column is-four-fifths has-text-white">
+                                <div class="is-italic is-fullwidth">Here's who you're connecting with: </div>
+                                <div class="notification has-background-white has-text-grey-darker is-fullwidth">
+                                    {{mentCon.displayName||mentCon.user}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="is-fullwidth">&nbsp;</div>
+                        <!-- topics -->
+                        <div class="is-fullwidth columns has-background-grey-dark">
+                            <div class="column is-one-fifth notification notif-spaced">Skills:</div>
+                            <div class="column is-four-fifths has-text-white">
+                                <div class="is-italic is-fullwidth">Here's a list of the skills you wanna learn from
+                                    this mentor:</div>
+                                <div class="notification has-background-white has-text-grey-darker is-fullwidth">
+                                    <ul class='check-list'>
+                                        <li ng-repeat='t in mentCon.topics'><i class="fa fa-check"></i> &nbsp;{{t}}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="is-fullwidth">&nbsp;</div>
+                        <!-- Time Zone -->
+                        <div class="is-fullwidth columns has-background-grey-dark">
+                            <div class="column is-one-fifth notification notif-spaced">Best Times:</div>
+                            <div class="column is-four-fifths has-text-white">
+                                <div class="is-fullwidth is-italic">What times work best for you?</div>
+                                <div class="notification has-background-white has-text-grey-darker is-fullwidth">
+                                    <div class="is-fullwidth">
+                                        <div class="has-text-weight-bold">From:</div>
+                                        <div class="select">
+                                            <select ng-model='mentCon.tz.from'
+                                                ng-options='t.num as t.label for t in times'></select>
+                                        </div>
+                                    </div>
+                                    <div class="is-fullwidth">
+                                        <div class="has-text-weight-bold">To:</div>
+                                        <div class="select">
+                                            <select ng-model='mentCon.tz.to'
+                                                ng-options='t.num as t.label for t in times'></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="is-fullwidth">&nbsp;</div>
+                        <!-- Custom Messij -->
+                        <div class="is-fullwidth columns has-background-grey-dark">
+                            <div class="column is-one-fifth notification notif-spaced">Additional Message:</div>
+                            <div class="column is-four-fifths has-text-white">
+                                <div class="is-fullwidth is-italic">
+                                    Anything else you wanna say? We'd recommend "Hi" for starters!
+                                </div>
+                                <!-- <div class="notification has-background-white has-text-greis-fullwidth"></div> -->
+                                <textarea ng-model='mentCon.plusMdMsg' placeholder='Say something friendly!'
+                                    class="textarea is-fullwidth"></textarea>
+                            </div>
+                        </div>
+                        <div class="is-fullwidth">&nbsp;</div>
+                        <div class="column is-full has-text-centered">
+                            <button class="button is-link is-large" ng-click='sendConnectMsg()'><i class="fa fa-check"></i>&nbsp;Connect!</button>
+                            <button class="button is-info is-large" ng-click='mentCon.show=false'><i class="fa fa-times"></i>&nbsp;Nevermind...</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

@@ -84,13 +84,11 @@ const routeExp = function (io, pp) {
         })(req, res, next);
     });
     router.post('/login', function (req, res, next) {
-        console.log('req.body', req.body);
         if (!req.body || !req.body.pass || !req.body.user) {
             return res.send(false);
         }
         passport.authenticate('local-login', function (err, uObj, info) {
             let usr = uObj.u;
-            console.log('err', err, 'usr IS', usr, 'inf', info, 'pass candidate', req.body.pass, 'correct?');
             if (!info) {
                 //wrong un/pwd combo
                 mongoose.model('User').findOne({
@@ -107,7 +105,6 @@ const routeExp = function (io, pp) {
                     });
                 });
             } else {
-                // const correctSchool = (usr.school === null || usr.school == config.MATHAPP_SCHOOL);
                 if (usr && !usr.isBanned && !usr.locked) {
                     req.session.passport = {
                         user: usr._id
@@ -118,14 +115,17 @@ const routeExp = function (io, pp) {
                     let mtime = new Date(fs.lstatSync('./news.txt').mtime).getTime();
                     // const prevLog = usr.lastLogin || 0;
                     // const prevLog = 0
-                    console.log('TIME DIF: latest news time', mtime, 'last login was', uObj.oll, 'dif is', mtime - uObj.oll, 'Now is', Date.now());
-                    if ((mtime - uObj.oll) > 1000) {
+                    console.log('TIME DIF: latest news time', mtime, 'last login was', usr.oldLastLogin, 'dif is', mtime - usr.oldLastLogin, 'Now is', Date.now());
+                    if ((mtime - usr.oldLastLogin) > 1000) {
                         news = lastNews.map(d => d.replace(/\r/, ''));
                     }
                     usr.pass = null;
                     usr.salt = null;
+                    const clUsr = JSON.parse(JSON.stringify(usr));
+                    delete clUsr.pass;
+                    delete clUsr.salt;
                     res.send({
-                        usr: usr,
+                        usr: clUsr,
                         news: news,
                     });
                 }
@@ -275,7 +275,7 @@ const routeExp = function (io, pp) {
             }
         });
         req.user.save((eu, esv) => {
-            res.send('done')
+            res.send('refresh')
         })
     });
     router.get('/projs', this.authbit, (req, res, next) => {
@@ -788,7 +788,8 @@ const routeExp = function (io, pp) {
                     user: q.user,
                     interests: q.interests,
                     projects: q.projects,
-                    avatar: q.avatar
+                    avatar: q.avatar,
+                    displayName:q.displayName||null
                 }
             })
             res.send(gudUsrs)

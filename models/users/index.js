@@ -9,6 +9,8 @@ const usrSchema = new mongoose.Schema({
     email: String,
     googleId: String,
     lastAction: { type: Number, default: Date.now() },
+    lastLogin: { type: Number, default: 0 },
+    oldLastLogin: { type: Number, default: 0 },
     otherInfo: String,
     company: { type: String, default: null },
     projects: [{ name: String, description: String, position: String }],
