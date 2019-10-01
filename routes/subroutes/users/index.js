@@ -870,26 +870,26 @@ const routeExp = function (io, pp) {
                 //now we have all lessons and all users requesting those lessons
                 const lsnsWithNumbers = lsns.map(lsn => {
                     const theUsr = rlUsrs.find(a => a.user == lsn.user);
-                    console.log('USER FOR THIS TOPIC IS',theUsr.user)
+                    console.log('USER FOR THIS TOPIC IS', theUsr.user)
                     const topsWithNumbers = lsn.topics.map(ll => {
-                        const theTopicOnUsr = theUsr.interests.find(q=>q.title.toLowerCase()==ll.toLowerCase());//find the user instance of this topic, if it exists 
+                        const theTopicOnUsr = theUsr.interests.find(q => q.title.toLowerCase() == ll.toLowerCase());//find the user instance of this topic, if it exists 
                         // return Math.random()
-                        console.log('This topic on user model is',theTopicOnUsr,'Level is',(!!theTopicOnUsr && theTopicOnUsr.lvl)||0)
-                        console.log('OBJ',{
+                        console.log('This topic on user model is', theTopicOnUsr, 'Level is', (!!theTopicOnUsr && theTopicOnUsr.lvl) || 0)
+                        console.log('OBJ', {
                             title: ll,
-                            lvl: (!!theTopicOnUsr && theTopicOnUsr.lvl)||0
+                            lvl: (!!theTopicOnUsr && theTopicOnUsr.lvl) || 0
                         })
                         return {
                             title: ll,
-                            lvl: (!!theTopicOnUsr && theTopicOnUsr.lvl)||0
+                            lvl: (!!theTopicOnUsr && theTopicOnUsr.lvl) || 0
                         }
                     });
-                    console.log('lsn topics now',topsWithNumbers)
+                    console.log('lsn topics now', topsWithNumbers)
                     return {
-                        user:lsn.user,
-                        displayName:lsn.displayName,
-                        answerers:lsn.answerers,
-                        topics:topsWithNumbers,
+                        user: lsn.user,
+                        displayName: lsn.displayName,
+                        answerers: lsn.answerers,
+                        topics: topsWithNumbers,
                         _id: lsn._id
                     };
                 })
@@ -899,33 +899,73 @@ const routeExp = function (io, pp) {
 
         })
     })
-    router.delete('/lessonReq',this.authbit,(req,res,next)=>{
+    router.delete('/lessonReq', this.authbit, (req, res, next) => {
         mongoose.model('LessonRequest').findOneAndRemove({
-            user:req.user.user,
-            _id:req.query.id
-        },(err,data)=>{
-            console.log('REMOVED! Lesson was',data)
+            user: req.user.user,
+            _id: req.query.id
+        }, (err, data) => {
+            console.log('REMOVED! Lesson was', data)
             res.send('done')
         })
     })
-    router.delete('/acceptLesson',this.authbit,(req,res,next)=>{
-        mongoose.model('LessonRequest').findOneRemove({
-            user:req.user.user,
-            _id:req.query.id
-        },(err,model)=>{
-            res.send('done')
-        })
-    })
-    router.post('/teachLessonReq',this.authbit,(req,res,next)=>{
+    router.post('/acceptLesson', this.authbit, (req, res, next) => {
+        console.log('TRYING TO ACCEPT', req.body)
         mongoose.model('LessonRequest').findOne({
-            _id:req.body.id,
-        },(err,lsn)=>{
-            if(!lsn.answerers.includes(req.user.user)){
+            user: req.user.user,
+            _id: req.body.id
+        }, (erra, alsn) => {
+            console.log('ERR', erra, 'ALSN', alsn)
+            const htmlMsg = `Hi ${req.body.teacher}! Student ${req.user.user} has accepted your offer to teach them the following skills: <ul>${alsn.topics.map(q => "<li>" + q + "</li>").join('')}</ul><br/>Go ahead and reply back to this message to start learning!`,
+                mdMsg = `Hi ${req.body.teacher}! Student ${req.user.user} has accepted your offer to teach them the following skills: ${alsn.topics.join(', ')}. Go ahead and reply back to this message to start learning!`,
+                rawMsg = `Hi ${req.body.teacher}! Student ${req.user.user} has accepted your offer to teach them the following skills: ${alsn.topics.map(q => " - " + q + "\n").join('')}\n Go ahead and reply back to this message to start learning!`;
+
+            mongoose.model('User').findOne({ user: req.body.teacher }, (errt, toUsr) => {
+                if (!toUsr) {
+                    return res.status(400).send('err')
+                }
+                const nunc = Date.now();
+                toUsr.inMsgs.push({
+                    from: req.user.user,
+                    mdMsg: mdMsg,
+                    date: nunc,
+                    htmlMsg: htmlMsg,
+                    rawMsg: rawMsg
+                });
+                toUsr.save((errt, utsv) => {
+                })
+                req.user.outMsgs.push({
+                    to: req.body.tchr,
+                    mdMsg: mdMsg,
+                    date: nunc,
+                    htmlMsg: htmlMsg,
+                    rawMsg: rawMsg
+                })
+                req.user.save((errf, svf) => {
+                    if (errt) {
+                        console.log('ERROR TO', errt)
+                    }
+                    mongoose.model('LessonRequest').findOneAndRemove({
+                        user: req.user.user,
+                        _id: req.body.id
+                    }, (errr, rlsn) => {
+                        io.emit('refresh', { user: toUsr.user });
+                        res.send('refresh')
+                    })
+                })
+            })
+
+        })
+    })
+    router.post('/teachLessonReq', this.authbit, (req, res, next) => {
+        mongoose.model('LessonRequest').findOne({
+            _id: req.body.id,
+        }, (err, lsn) => {
+            if (!lsn.answerers.includes(req.user.user)) {
                 lsn.answerers.push(req.user.user);
-            }else{
-                lsn.answerers = lsn.answerers.filter(q=>q!=req.user.user)
+            } else {
+                lsn.answerers = lsn.answerers.filter(q => q != req.user.user)
             }
-            lsn.save((errs,rs)=>{
+            lsn.save((errs, rs) => {
                 res.send('done')
             })
         })
@@ -943,16 +983,16 @@ const routeExp = function (io, pp) {
     // router.get('/temp',(req,res,next)=>{
     //     res.send('Random number: '+Math.floor(Math.random()*100));
     // })
-    // router.get('/wipeMail', (req, res, next) => {
-    //     mongoose.model('User').find({}, (err, usrs) => {
-    //         usrs.forEach(u => {
-    //             u.inMsgs = [];
-    //             u.outMsgs = [];
-    //             u.save();
-    //         })
-    //         res.send('DONE');
-    //     })
-    // })
+    router.get('/wipeMail', (req, res, next) => {
+        mongoose.model('User').find({}, (err, usrs) => {
+            usrs.forEach(u => {
+                u.inMsgs = [];
+                u.outMsgs = [];
+                u.save();
+            })
+            res.send('DONE');
+        })
+    })
     return router;
 };
 

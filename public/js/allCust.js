@@ -1177,7 +1177,7 @@ app.controller('match-cont', function ($scope, $http, $q) {
             } else {
                 return `<li>${q.title}</li>`;
             }
-        });
+        }).join('');
         bulmabox.confirm('Teach Lesson', `Are you sure you wish to teach a lesson on the following topics?
         <ul class="contents">
         ${topicList}
