@@ -82,18 +82,23 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr ng-repeat = 'prj in $parent.user.projects'>
+                                            <tr ng-repeat='prj in $parent.user.projects'>
                                                 <td><input type="text" class="input" ng-model='prj.name'></td>
-                                                <td><input type="text" class="input" ng-model='prj.description' placeholder='(None given)'></td>
+                                                <td><input type="text" class="input" ng-model='prj.description'
+                                                        placeholder='(None given)'></td>
                                                 <td><input type="text" class="input" ng-model='prj.position'></td>
-                                                <td><button class="button is-small is-danger" ng-click='deleteProj(prj.name)'><i class="fa fa-trash"></i></button></td>
+                                                <td><button class="button is-small is-danger"
+                                                        ng-click='deleteProj(prj.name)'><i
+                                                            class="fa fa-trash"></i></button></td>
                                             </tr>
                                             <tr ng-if='!$parent.user.projects || !$parent.user.projects.length'>
-                                                <td colspan='3' class='is-italic'>You have not added any projects yet!</td>
+                                                <td colspan='3' class='is-italic'>You have not added any projects yet!
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
-                                    <button class="button is-info is-large" ng-click='modProjDial()'><i class="fa fa-plus"></i>&nbsp; Add New Project</button>
+                                    <button class="button is-info is-large" ng-click='modProjDial()'><i
+                                            class="fa fa-plus"></i>&nbsp; Add New Project</button>
                                 </div>
                             </div>
                             <div class="column is-full">
@@ -134,11 +139,12 @@
                                             change-fn='updateTopics()' min='0' max='10'></td>
                                     <td>
                                         <!-- ng-click='sk.canTeach=!sk.cantTeach;' -->
-                                        <input type='checkbox' ng-model='sk.canTeach' change-re-focus change-fn='updateTopics()' id='skCanTeach-{{$index}}'>
+                                        <input type='checkbox' ng-model='sk.canTeach' change-re-focus
+                                            change-fn='updateTopics()' id='skCanTeach-{{$index}}'>
                                         <label for="skCanTeach-{{$index}}">{{sk.canTeach?'Yes':'No'}}</label>
                                     </td>
                                     <td>
-                                        <button class="button is-info" ng-click='removeSkill(sk)'><i
+                                        <button class="button is-info" ng-click='removeSkill(sk.title)'><i
                                                 class="fa fa-trash"></i>&nbsp;Remove</button>
                                     </td>
                                 </tr>
@@ -149,7 +155,8 @@
                                 </tr>
                                 <tr>
                                     <td colspan='4' class='has-text-centered '>
-                                        <button class="button is-large is-info" ng-click='addIntDial()'><i class="fa fa-plus"></i>&nbsp; Add New
+                                        <button class="button is-large is-info" ng-click='addIntDial()'><i
+                                                class="fa fa-plus"></i>&nbsp; Add New
                                             Skill</button>
                                     </td>
                                 </tr>
@@ -158,13 +165,6 @@
                     </div>
                 </div>
             </div>
-            <!-- STUFF TO ADD:
-                    <ul>
-                <li>Avatar change/upload</li>
-                <li>Display Name add/change</li>
-                <li>Interest search, add, change</li>
-                <li>Notifications of new unread msgs?</li>
-            </ul> -->
         </div>
     </div>
     <div class="modal" ng-class='{"is-active":addInt.show==true}'>
@@ -181,25 +181,45 @@
                             Skill Name:
                         </div>
                         <div class="column is-four-fifths">
-                                <md-content class='md-padding'>
-                                        <form>
-                                            <div id="addTopicLabel" class='is-fullwidth has-text-left'>Add a skill</div>
-                                            <md-autocomplete md-selected-item="selectedTopic" md-search-text="topicToAdd"
-                                                md-items="topic in filterMe(topicToAdd)" md-no-cache='true'
-                                                md-item-text="topic.display" md-min-length="0" placeholder="Ex. JavaScript"
-                                                input-aria-labelledby="addTopicLabel" md-mode='standard'>
-                                                <md-item-template>
-                                                    <span md-highlight-text="topicToAdd"
-                                                        md-highlight-flags="^i">{{topic.display}}</span>
-                                                </md-item-template>
-                                                <!-- <md-not-found>
+                            <md-content class='md-padding'>
+                                <form>
+                                    <div id="addTopicLabel" class='is-fullwidth has-text-left'>Add a skill</div>
+                                    <md-autocomplete md-selected-item="selectedTopic" md-search-text="topicToAdd"
+                                        md-items="topic in filterMe(topicToAdd)" md-no-cache='true'
+                                        md-item-text="topic.display" md-min-length="0" placeholder="Ex. JavaScript"
+                                        input-aria-labelledby="addTopicLabel" md-mode='standard'>
+                                        <md-item-template>
+                                            <span md-highlight-text="topicToAdd"
+                                                md-highlight-flags="^i">{{topic.display}}</span>
+                                        </md-item-template>
+                                        <!-- <md-not-found>
                                                     No skills matching "{{topicToAdd}}" were found.
                                                     <a ng-click='addIntDial(topicToAdd)'>Create a new skill!</a>
                                                 </md-not-found> -->
-                                        </form>
-                                        </md-autocomplete>
-                                    </md-content>
+                                </form>
+                                </md-autocomplete>
+                            </md-content>
                         </div>
+                        <div class="column is-full">
+                            <hr>
+                        </div>
+                        <div class="column is-one-fifth notification notif-spaced">
+                            Skill Description:
+                        </div>
+                        <div class="column is-four-fifths" ng-show='hazTopic(topicToAdd)'>
+                            <div class="is-full">
+                                Description: {{selectedTopic.desc}}
+                            </div>
+                        </div>
+                        <div class="column is-four-fifths" ng-show='!!topicToAdd && !hazTopic(topicToAdd)'>
+                            <div class="is-full notification is-warning is-italic"><i class="fa fa-exclamation-triangle is-size-4"></i>&nbsp;You're adding a skill we don't have in our system.<br> Please help us out and give it a cool (useful!) description!</div>
+                            <textarea ng-model='addInt.newDesc' class='textarea'></textarea>
+                        </div>
+                        <div class="column is-four-fifths" ng-show='!topicToAdd && !hazTopic(topicToAdd)'>
+                                <div class="is-full is-italic">
+                                    (Please enter a skill title first!)
+                                </div>
+                            </div>
                         <div class="column is-full">
                             <hr>
                         </div>
@@ -208,7 +228,7 @@
                         </div>
                         <div class="column is-four-fifths">
                             <div class="is-fullwidth is-italic">Rate yourself on a scale of 1-10 for this skill.</div>
-                            <input type="text" class="number" ng-model='addInt.lvl' min='0' max='10'>
+                            <input type="number" class="number" ng-model='addInt.lvl' min='0' max='10'>
                         </div>
                         <div class="column is-full">
                             <hr>
@@ -218,13 +238,15 @@
                         </div>
                         <div class="column is-four-fifths">
                             <div class="is-fullwidth is-italic">Can you teach this skill?</div>
-                            <input type='checkbox' ng-model='addInt.canTeach' id='addIntCanTeach'></input> <label for="addIntCanTeach">{{addInt.canTeach?'Yes':'No'}}</label>
+                            <input type='checkbox' ng-model='addInt.canTeach' id='addIntCanTeach'></input> <label
+                                for="addIntCanTeach">{{addInt.canTeach?'Yes':'No'}}</label>
                         </div>
                         <div class="column is-full">
                             <hr>
                         </div>
                         <div class="column is-full has-text-centered">
-                            <button class="button is-info is-large" ng-click='saveSkills()'><i class="fa fa-plus"></i>&nbsp; Add Skill</button>
+                            <button class="button is-info is-large" ng-click='saveSkills()'><i
+                                    class="fa fa-plus"></i>&nbsp; Add Skill</button>
                         </div>
                     </div>
                 </div>
@@ -246,10 +268,14 @@
                         </div>
                         <div class="column is-four-fifths">
                             <div class="is-fullwidth is-italic">Your project's name</div>
-                            <input type="text" class="input" ng-model='modProj.proj.name' placeholder='e.g., Widget App'>
+                            <input type="text" class="input" ng-model='modProj.proj.name'
+                                placeholder='e.g., Widget App'>
                         </div>
                         <div class="column is-full">
-                            <div class="is-fullwidth notification is-danger" ng-if='countDups($parent.user.projects,"name")'><i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;That project name is already taken! Please pick another one.</div>
+                            <div class="is-fullwidth notification is-danger"
+                                ng-if='countDups($parent.user.projects,"name")'><i
+                                    class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;That project name is already
+                                taken! Please pick another one.</div>
                             <hr>
                         </div>
                         <div class="column is-one-fifth notification notif-spaced">
@@ -257,7 +283,8 @@
                         </div>
                         <div class="column is-four-fifths">
                             <div class="is-fullwidth is-italic">A brief description of what your project does</div>
-                            <textarea ng-model='modProj.proj.description' class='textarea is-fullwidth' placeholder='e.g., App to make widgets for local companies'></textarea>
+                            <textarea ng-model='modProj.proj.description' class='textarea is-fullwidth'
+                                placeholder='e.g., App to make widgets for local companies'></textarea>
                         </div>
                         <div class="column is-full">
                             <hr>
@@ -267,13 +294,16 @@
                         </div>
                         <div class="column is-four-fifths">
                             <div class="is-fullwidth is-italic">Your position (job) on the project</div>
-                            <input type="text" class="input" ng-model='modProj.proj.position' placeholder = 'e.g., Front-end engineer/designer'>
+                            <input type="text" class="input" ng-model='modProj.proj.position'
+                                placeholder='e.g., Front-end engineer/designer'>
                         </div>
                         <div class="column is-full">
                             <hr>
                         </div>
                         <div class="column is-full has-text-centered">
-                                <button class="button is-info is-large" ng-disabled ='countDups($parent.user.projects,"name")' ng-click='saveProjs()'><i class="fa fa-pencil"></i>&nbsp;{{modProj.editMode?'Edit':'Add'}} Project</button>
+                            <button class="button is-info is-large"
+                                ng-disabled='countDups($parent.user.projects,"name")' ng-click='saveProjs()'><i
+                                    class="fa fa-pencil"></i>&nbsp;{{modProj.editMode?'Edit':'Add'}} Project</button>
                         </div>
                     </div>
                 </div>

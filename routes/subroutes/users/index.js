@@ -203,6 +203,7 @@ const routeExp = function (io, pp) {
     router.put('/interests', this.authbit, (req, res, next) => {
         //upsert one or more interests
         //incoming format: array of interests like [{title:'JS',lvl:6,canTeach:bool}]
+        console.log('INCOMING INTERESTS ARR',req.body)
         if (!req.body || !req.body.length) {
             return res.status(400).send('err');
         }
@@ -239,8 +240,10 @@ const routeExp = function (io, pp) {
     })
     router.delete('/interests', this.authbit, (req, res, next) => {
         //remove interest(s)
+        // console.log('WOULD ATTEMPT TO DELETE ',req.query.t)
+        // return res.send('NO');
         req.user.interests = req.user.interests.filter(q => {
-            q.title == req.body.title;
+            return q.title != req.query.t;
         });
         req.user.save((eu, esv) => {
             res.send('refresh')

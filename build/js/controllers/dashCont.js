@@ -6,8 +6,9 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
         // console.log('Would updoot topics here! Val we passed was',e)
         return $http.put('/user/interests', $scope.$parent.user.interests)
     }
-    $scope.removeSkill = sk => {
-        $http.delete('/user/interests', sk).then(r => {
+    $scope.removeSkill = skt => {
+        // console.log('USER WISHES TO REMOVE',skt)
+        $http.delete('/user/interests?t=' + skt).then(r => {
             //do nothing 
         })
     }
@@ -33,6 +34,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
     };
     $scope.loadingFile = false;
     $scope.fileName = null;
+    $scope.topicToAdd = '';
     $scope.needsResize = 200;//the max pic width
     $scope.saveDataURI = (d) => {
         // $http.post('/user/changeAva', {
@@ -48,23 +50,37 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
     $scope.filterMe = (query) => {
         const lowercaseQuery = query.toLowerCase();
         // console.log('picked topics map', $scope.pickedTopics.map(q => q.value))
+        if (!$scope.topicObjs) {
+            return []
+        }
         let tops = $scope.topicObjs.filter(topic => {
             return (topic.value.indexOf(lowercaseQuery) > -1);
         });
         // console.log('tops', tops)
         return tops;
     }
+    $scope.hazTopic = t => {
+        // does this topic already exist?
+        return $scope.topicObjsAll && $scope.topicObjsAll.length && t && $scope.topicObjsAll.find(q => q.display == t);
+    }
     $scope.newTopic = {
         title: null,
         desc: null,
         show: false
     }
-    $http.get('/topic/topic').then(r => {
-        $scope.topicObjsAll = r.data.map(q => {
-            return { value: q.title.toLowerCase(), display: q.title, desc: q.desc }
+    $scope.refTopObjs = (cb)=>{
+        $http.get('/topic/topic').then(r => {
+            $scope.topicObjsAll = r.data.map(q => {
+                return { value: q.title.toLowerCase(), display: q.title, desc: q.desc }
+            })
+            console.log('All Topic Objs now:',$scope.topicObjsAll)
+            $scope.topicObjs = angular.copy($scope.topicObjsAll);
+            if(cb){
+                cb();
+            }
         })
-        $scope.topicObjs = angular.copy($scope.topicObjsAll)
-    })
+    }
+    $scope.refTopObjs();
     $scope.toggleNewTopicDia = () => {
         if (!$scope.newTopic.show) {
             $scope.newTopic.title = $scope.topicToAdd;
@@ -98,6 +114,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
         title: null,
         show: false,
         lvl: 0,
+        newDesc: null,
         canTeach: false,
     }
     $scope.addIntDial = (t) => {
@@ -105,12 +122,37 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
             title: t || null,
             show: true,
             lvl: 0,
+            newDesc: null,
             canTeach: false,
         }
     }
-
+    let alreadyAdded=false;
     $scope.saveSkills = () => {
-        $http.put('/user/interests', $scope.$parent.user.interests)
+        if (!$scope.topicToAdd) {
+            return bulmabox.alert('No Skill Name', `Please enter a skill name!`)
+        }
+        const skList = $scope.$parent.user.interests;
+        // console.log($scope.selectedTopic,$scope.topicToAdd);
+        if (!!skList.find(q => q.title == $scope.topicToAdd)) {
+            $scope.topicToAdd = '';
+            return bulmabox.alert('Duplicate Skill', "You've already added that skill!");
+        } else if (!$scope.hazTopic($scope.topicToAdd)) {
+            // return console.log('USER TRYIN TO ADD NEW TOPIC LIKE A PLEB',$scope.topicToAdd,$scope.addInt.newDesc)
+            if(alreadyAdded){
+                return console.error('O SHIT')
+            }
+            alreadyAdded=true;
+            $http.post('/topic/topic', { title: $scope.topicToAdd, desc: $scope.addInt.newDesc }).then(r => {
+                $scope.refTopObjs($scope.saveSkills);
+            })
+        } else {
+            skList.push({
+                title: $scope.topicToAdd,
+                lvl: $scope.addInt.lvl,
+                canTeach: !!$scope.addInt.canTeach
+            });
+            $scope.topicToAdd = '';
+            $http.put('/user/interests', skList)
             .then(r => {
                 //do nothing
                 $scope.addInt = {
@@ -119,7 +161,8 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
                     lvl: 0,
                     canTeach: false,
                 }
-            })
+            });
+        }
     }
     //add/edit proj
     $scope.modProj = {
@@ -140,7 +183,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
     }
     $scope.saveProjs = (t) => {
         const projArr = angular.copy($scope.$parent.user.projects);
-        console.log('Saving projects. List is', projArr,'modProj',$scope.modProj)
+        console.log('Saving projects. List is', projArr, 'modProj', $scope.modProj)
         if (!$scope.modProj.editMode) {
             projArr.push(angular.copy($scope.modProj.proj));
         }
