@@ -68,13 +68,6 @@ const usrSchema = new mongoose.Schema({
         },
         canTeach: { type: Boolean, default: false }
     }],
-    // teachTopics:[{
-    //     title: String,
-    //     lvl: {
-    //         type: Number,
-    //         default: 0
-    //     }
-    // }],
     teaching: [{
         //list of people this user is TEACHING. one person per entry
         user: String,

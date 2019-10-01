@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 require('./users/');
+require('./lessonReq/');
 require('./topics/');
 console.log('Node Environment:', process.env.NODE_ENV);
 if (!process.env.NODE_ENV || process.env.NODE_ENV != 'prod') {

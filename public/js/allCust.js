@@ -976,6 +976,7 @@ app.controller('main-cont', function ($scope, $http, $state, userFact, $log) {
         return `${theDate.toLocaleDateString()} ${theDate.getHours() % 12}:${theDate.getMinutes().toString().length < 2 ? '0' + theDate.getMinutes() : theDate.getMinutes()} ${theDate.getHours() < 13 ? 'AM' : 'PM'}`;
     };
 });
+
 app.controller('match-cont', function ($scope, $http, $q) {
     console.log("matcher ctrl registered")
     // $scope.searchTerm = '';
@@ -998,7 +999,7 @@ app.controller('match-cont', function ($scope, $http, $q) {
     // }
     // $scope.topicToAdd = '';
     // $scope.selectedItem = null;
-    $scope.regetTopics = ()=>{
+    $scope.regetTopics = () => {
         $http.get('/topic/topic').then(r => {
             $scope.topicObjsAll = r.data.map(q => {
                 return { value: q.title.toLowerCase(), display: q.title, desc: q.desc }
@@ -1035,17 +1036,17 @@ app.controller('match-cont', function ($scope, $http, $q) {
 
         }
         $scope.newTopic.show = !$scope.newTopic.show;
-        if(!$scope.newTopic.show && waitingForTopic){
-            waitingForTopic=false;
+        if (!$scope.newTopic.show && waitingForTopic) {
+            waitingForTopic = false;
             $scope.regetTopics();
         }
     }
     let waitingForTopic = false;
-    socket.on('topicUpdate',u=>{
-        if (!!$scope.newTopic.show){
+    socket.on('topicUpdate', u => {
+        if (!!$scope.newTopic.show) {
             //if the topic adding window is currently showing, don't refresh; wait for user to submit new topic;
-            waitingForTopic=true;
-        }else{
+            waitingForTopic = true;
+        } else {
             $scope.regetTopics();
         }
     })
@@ -1087,14 +1088,14 @@ app.controller('match-cont', function ($scope, $http, $q) {
         })
     }
     $scope.addSearchTopic = (q) => {
-        console.log('topic',q)
+        console.log('topic', q)
         if ($scope.pickedTopics.map(a => a.value.toLowerCase()).includes(q.value)) {
             // console.log('Duplicate!',q)
             $scope.topicToAdd = '';
             return bulmabox.alert(`Already Added`, `You've already added this topic!`)
         }
         const topicPush = angular.copy(q);
-        topicPush.min=1;
+        topicPush.min = 1;
         $scope.pickedTopics.push(topicPush);
         $scope.changeTopList();
         // $scope.filterMe('')
@@ -1125,14 +1126,14 @@ app.controller('match-cont', function ($scope, $http, $q) {
             num: i
         }
     })
-    $scope.lvls = ['None',2,3,4,5,6,7,8,9,10];
-    $scope.lvls = new Array(10).fill(1).map((q,i)=>({lbl:i>1?i:'None',num:i}))
+    $scope.lvls = ['None', 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    $scope.lvls = new Array(10).fill(1).map((q, i) => ({ lbl: i > 1 ? i : 'None', num: i }))
     $scope.conv = new showdown.Converter();
     console.log('TIMES', $scope.times)
     $scope.doConnect = u => {
         //set up the dialog box for connecting w/ mentor
         $scope.mentCon.user = u.user;
-        $scope.mentCon.displayName = u.displayName|| null;
+        $scope.mentCon.displayName = u.displayName || null;
         $scope.mentCon.topics = $scope.pickedTopics.map(s => s.value);
         $scope.mentCon.plusMdMsg = null;
         $scope.mentCon.plusHtmlMsg = null;
@@ -1143,15 +1144,91 @@ app.controller('match-cont', function ($scope, $http, $q) {
     $scope.sendConnectMsg = t => {
         console.log('would send', $scope.mentCon)
         $scope.mentCon.plusHtmlMsg = $scope.conv.makeHtml($scope.mentCon.plusMdMsg);
-        return false;
+        // return false;
         $http.put('/user/connect', {
             user: t.user,
             displayName: t.displayName,
             topics: $scope.pickedTopics.map(s => s.value)
         }).then(r => {
-            bulmabox.alert('Connect Request Sent', `User ${t.user} has been notified that you'd like them as a mentor!`)
-        })
+            bulmabox.alert('Connect Request Sent', `User ${t.user} has been notified that you'd like them as a mentor!`);
+        });
     };
+    //lesson request stuff
+    $scope.reqLess = () => {
+        console.log('User', $scope.$parent.user, 'wants lesosn on topics', $scope.pickedTopics);
+        //now we need to prepare an object to send to our lessonReq model
+        const lro = $scope.pickedTopics.map(q => q.display);
+        console.log('Final LRO:', lro);
+        $http.post('/user/lessonReq', lro).then(r => {
+            bulmabox.alert('Lesson Request Sent', `Your lesson request has been sent! You can head on over to the "View Requested Lessons" tab if you wanna view or delete it.`);
+        }).catch(e => {
+            bulmabox.alert("Duplicate Lesson Request", `You've already requested a lesson for these skills!`);
+        });
+    };
+    $scope.answerRl = (rl) => {
+        const topicList = rl.topics.map(q => {
+            const topicOnTeacher = $scope.$parent.user.interests.find(a => a.title == q.title);
+            if (!topicOnTeacher) {
+                //teacher does not have this topic
+                return `<li>${q.title}  <div class='tag is-warning' title='This skill is not in your list of personally known skills!'><div class='fa fa-exclamation-triangle'></div></div></li>`;
+            } else if (topicOnTeacher.lvl <= q.lvl) {
+                //teacher's experience is equal to or less than student's
+                return `<li>${q.title}  <div class='tag is-danger' title='Your level in this skill is less than or equal to the student's level!'><div class='fa fa-exclamation-triangle'></div></div></li>`;
+            } else {
+                return `<li>${q.title}</li>`;
+            }
+        });
+        bulmabox.confirm('Teach Lesson', `Are you sure you wish to teach a lesson on the following topics?
+        <ul class="contents">
+        ${topicList}
+        </ul>`, r => {
+            if (!!r && r != null) {
+                $http.post('/user/teachLessonReq', {
+                    id: rl._id
+                }).then(r=>{
+                    $scope.regetReqLsns();
+                })
+            }
+        })
+    }
+    $scope.noAnswerRl = o =>{
+        bulmabox.confirm("Cancel Teaching Offer",`Are you sure you wish to rescind your offer to teach these skills to ${o.displayName||o.user}?`,r=>{
+            if(!!r && r!=null){
+                $http.post('/user/teachLessonReq',{
+                    id:o._id
+                }).then(r=>{
+                    $scope.regetReqLsns();
+                })
+            }
+        })
+    }
+    $scope.deleteRl = (o) => {
+        console.log('WANNA DELETE LESSON', o)
+        bulmabox.confirm('Delete Lesson Request', `Are you sure you wish to delete this lesson request?<br/>You'll need to make a new one if you wanna learn these skills!`, r => {
+            if (!!r && r!= null) {
+                $http.delete('/user/lessonReq?id='+o._id).then(r=>{
+                    $scope.regetReqLsns();
+                })
+            }
+        })
+    }
+    $scope.acceptMentor = (tchr,lsn)=>{
+        bulmabox.confirm('Accept Mentor', `Are you sure you wish to accept this mentor? This will remove the lesson from the list of Requested Lessons and send a message to both of you to connect.`, r => {
+            if (!!r && r!= null) {
+                $http.post('/user/acceptLesson',{id:lsn._id,teacher:tchr}).then(r=>{
+                    $scope.regetReqLsns();
+                })
+            }
+        })
+    }
+    $scope.regetReqLsns = () => {
+        $http.get('/user/lessonReq').then(r => {
+            $scope.requestedLessons = r.data;
+        })
+    }
+    socket.on('refReqLs', o => {
+        $scope.regetReqLsns();
+    });
 })
 app.controller('nav-cont',function($scope,$http,$state, $log){
 	$scope.logout = function() {

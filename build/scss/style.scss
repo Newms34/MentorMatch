@@ -63,3 +63,12 @@ $tenNames: two, three, four, five, six, seven, eight, nine;
 .notif-spaced{
   margin-top:0.75rem;
 }
+.dave-tabs{
+  border-bottom:none!important;
+  & li a{
+    text-decoration:none!important;
+    &:not(.is-active){
+      background: #ddd;
+    }
+  }
+}

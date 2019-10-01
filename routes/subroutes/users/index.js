@@ -203,7 +203,7 @@ const routeExp = function (io, pp) {
     router.put('/interests', this.authbit, (req, res, next) => {
         //upsert one or more interests
         //incoming format: array of interests like [{title:'JS',lvl:6,canTeach:bool}]
-        console.log('INCOMING INTERESTS ARR',req.body)
+        console.log('INCOMING INTERESTS ARR', req.body)
         if (!req.body || !req.body.length) {
             return res.status(400).send('err');
         }
@@ -213,7 +213,7 @@ const routeExp = function (io, pp) {
                 return false;
             }
             let alreadyHaz = req.user.interests.find(q => q.title == intr.title);
-            console.log('ALREADY HAZ?',alreadyHaz,'ORIGINAL',intr)
+            console.log('ALREADY HAZ?', alreadyHaz, 'ORIGINAL', intr)
             if (!alreadyHaz) {
                 //interest does not already exists, so create it
                 //level CAN be zero, if the user is for example interested but has not actually learned about it.
@@ -226,11 +226,11 @@ const routeExp = function (io, pp) {
             } else {
                 //does already exists. update 
                 alreadyHaz.lvl = intr.lvl || alreadyHaz.lvl;
-                alreadyHaz.canTeach = intr.canTeach||intr.canTeach===false?intr.canTeach:alreadyHaz.canTeach;
+                alreadyHaz.canTeach = intr.canTeach || intr.canTeach === false ? intr.canTeach : alreadyHaz.canTeach;
             }
         });
         req.user.save((eu, esv) => {
-            io.emit('topicUpdate',{})
+            io.emit('topicUpdate', {})
             res.send('done');
         })
     });
@@ -262,14 +262,14 @@ const routeExp = function (io, pp) {
                 return false;
             }
             let alreadyHaz = req.user.projects.find(q => q.name == proj.name);
-            console.log('ALREADY HAZ?',alreadyHaz,'ORIGINAL',proj)
+            console.log('ALREADY HAZ?', alreadyHaz, 'ORIGINAL', proj)
             if (!alreadyHaz) {
                 //project does not already exists, so create it
                 //level CAN be zero, if the user is for example projected but has not actually learned about it.
                 alreadyHaz = {
                     name: proj.name,
-                    description:proj.description||null,
-                    position:proj.position||null
+                    description: proj.description || null,
+                    position: proj.position || null
                 }
                 req.user.projects.push(alreadyHaz);
             } else {
@@ -311,12 +311,12 @@ const routeExp = function (io, pp) {
         //NEED TO IMPLEMENT
         // req.user.otherInfo = req.body.other;
         // console.log('INCOMING USER',req.body)
-        ['company','projects','otherInfo','displayName'].forEach(n=>{
-            if(n=='projects' && !req.body[n].length){
+        ['company', 'projects', 'otherInfo', 'displayName'].forEach(n => {
+            if (n == 'projects' && !req.body[n].length) {
                 return false;
             }
-            console.log('Old',n,'was',req.user[n],'new',req.body[n],'replace?',!!req.body[n])
-            req.user[n]=req.body[n]||req.user[n]||null;
+            console.log('Old', n, 'was', req.user[n], 'new', req.body[n], 'replace?', !!req.body[n])
+            req.user[n] = req.body[n] || req.user[n] || null;
         });
 
         req.user.save((errsv, usrsv) => {
@@ -793,7 +793,7 @@ const routeExp = function (io, pp) {
                     interests: q.interests,
                     projects: q.projects,
                     avatar: q.avatar,
-                    displayName:q.displayName||null
+                    displayName: q.displayName || null
                 }
             })
             res.send(gudUsrs)
@@ -838,12 +838,103 @@ const routeExp = function (io, pp) {
             })
         })
     })
-    router.get('/ref', this.authbit, (req, res, next) => {
-        res.send('refresh');
-    })
 
+    //lesson request stuffs
+    router.post('/lessonReq', this.authbit, (req, res, next) => {
+
+        const simpTopics = req.body.map(q => q.toLowerCase()).sort();
+        mongoose.model('LessonRequest').find({
+            user: req.body.user
+        }, (err, currLessons) => {
+            const dupLsns = currLessons.filter(q => {
+                const simpCurrLsnTopics = q.topics.map(a => a.toLowerCase()).sort();
+                return simpCurrLsnTopics.join('') == simpTopics.join('');
+            });
+            if (dupLsns && dupLsns.length) {
+                return res.status(400).send('duplicate');
+            }
+            mongoose.model('LessonRequest').create({
+                topics: req.body,
+                user: req.user.user,
+                displayName: req.user.displayName || null
+            }, function (err, nrl) {
+                io.emit('refReqLs', {})
+                res.send('refresh')
+            })
+        });
+    })
+    router.get('/lessonReq', this.authbit, (req, res, next) => {
+        mongoose.model('LessonRequest').find({}).exec((err, lsns) => {
+            const unqUsrs = _.uniqBy(lsns, 'user').map(q => q.user);
+            mongoose.model('User').find({ user: { $in: unqUsrs } }, (erru, rlUsrs) => {
+                //now we have all lessons and all users requesting those lessons
+                const lsnsWithNumbers = lsns.map(lsn => {
+                    const theUsr = rlUsrs.find(a => a.user == lsn.user);
+                    console.log('USER FOR THIS TOPIC IS',theUsr.user)
+                    const topsWithNumbers = lsn.topics.map(ll => {
+                        const theTopicOnUsr = theUsr.interests.find(q=>q.title.toLowerCase()==ll.toLowerCase());//find the user instance of this topic, if it exists 
+                        // return Math.random()
+                        console.log('This topic on user model is',theTopicOnUsr,'Level is',(!!theTopicOnUsr && theTopicOnUsr.lvl)||0)
+                        console.log('OBJ',{
+                            title: ll,
+                            lvl: (!!theTopicOnUsr && theTopicOnUsr.lvl)||0
+                        })
+                        return {
+                            title: ll,
+                            lvl: (!!theTopicOnUsr && theTopicOnUsr.lvl)||0
+                        }
+                    });
+                    console.log('lsn topics now',topsWithNumbers)
+                    return {
+                        user:lsn.user,
+                        displayName:lsn.displayName,
+                        answerers:lsn.answerers,
+                        topics:topsWithNumbers,
+                        _id: lsn._id
+                    };
+                })
+                res.send(lsnsWithNumbers)
+            })
+            // console.log('UNIQ USERS',unqUsrs,'ALL LSNS',lsns)
+
+        })
+    })
+    router.delete('/lessonReq',this.authbit,(req,res,next)=>{
+        mongoose.model('LessonRequest').findOneAndRemove({
+            user:req.user.user,
+            _id:req.query.id
+        },(err,data)=>{
+            console.log('REMOVED! Lesson was',data)
+            res.send('done')
+        })
+    })
+    router.delete('/acceptLesson',this.authbit,(req,res,next)=>{
+        mongoose.model('LessonRequest').findOneRemove({
+            user:req.user.user,
+            _id:req.query.id
+        },(err,model)=>{
+            res.send('done')
+        })
+    })
+    router.post('/teachLessonReq',this.authbit,(req,res,next)=>{
+        mongoose.model('LessonRequest').findOne({
+            _id:req.body.id,
+        },(err,lsn)=>{
+            if(!lsn.answerers.includes(req.user.user)){
+                lsn.answerers.push(req.user.user);
+            }else{
+                lsn.answerers = lsn.answerers.filter(q=>q!=req.user.user)
+            }
+            lsn.save((errs,rs)=>{
+                res.send('done')
+            })
+        })
+    })
     //TEMPORARY!
 
+    // router.get('/ref', this.authbit, (req, res, next) => {
+    //     res.send('refresh');
+    // })
     // router.get('/tempAddTeachTop', this.authbit, (req, res, next) => {
     //     req.user.teachTopics.push({ title: req.query.t, lvl: Math.ceil(Math.random() * 10) })
     //     req.user.save();
