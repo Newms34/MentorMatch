@@ -77,35 +77,43 @@ const routeExp = function (io, pp) {
             });
         }
     };
-    this.findUserNames = (param)=>{
-        return function(req,res,next){
-            if(!req.body || !req.body[param]){
-               return next();//cannot find param, so just run Next
+    this.findUserNames = (param) => {
+        return function (req, res, next) {
+            if (!req.body || !req.body[param]) {
+                return next();//cannot find param, so just run Next
             }
-            if(req.body[param] instanceof Array){
+            console.log('incoming data to findUserNames', req.body, param)
+            if (req.body[param] instanceof Array) {
                 //multiple "to" users
-                mongoose.model('User').find({user:{$in: req.body[param]}},(err,usrs)=>{
-                    if(!usr || !usr.length){
+                console.log('finding MULTIPLE users', req.body[param])
+                mongoose.model('User').find({
+                    $or: [{ user: { $in: req.body[param] } }, { displayName: { $in: req.body[param] } }]
+                }, (err, usrs) => {
+                    console.log('ERR?', err)
+                    if (!usrs || !usrs.length) {
                         //cannot find users
                         return next();
                     }
-                    req.body.users = usrs.map(q=>({user:usr.user,displayName:usr.displayNames}))
+                    req.body.users = usrs.map(q => ({ user: q.user, displayName: q.displayNames }))
                     next();
                 })
-            }else{
-                mongoose.model('User').findOne({user:req.body[param]},(err,usr)=>{
-                    if(!usr){
+            } else {
+                console.log('finding ONE user', req.body[param])
+
+                mongoose.model('User').findOne({
+                    $or: [{ user: req.body[param] }, { displayName: req.body[param] }]
+                }, (err, usr) => {
+                    if (!usr) {
                         //cannot find user
                         return next();
                     }
-                    req.body.user = usr.user,
-                    req.body.displayName = usr.displayName;
+                    req.body.users = [{ user: usr.user, displayName: usr.displayName }];
                     next();
                 })
             }
         }
     }
-    router.post('/testRoute',this.findUserNames('tchr'),(req,res,next)=>{
+    router.post('/testRoute', this.findUserNames('tchr'), (req, res, next) => {
         console.log(req.body)
         res.send('done!')
     })
@@ -347,17 +355,40 @@ const routeExp = function (io, pp) {
         //NEED TO IMPLEMENT
         // req.user.otherInfo = req.body.other;
         // console.log('INCOMING USER',req.body)
-        ['company', 'projects', 'otherInfo', 'displayName', 'avatar', 'gitLink'].forEach(n => {
-            if (n == 'projects' && !req.body[n].length) {
-                return false;
-            }
-            console.log('Old', n, 'was', req.user[n], 'new', req.body[n], 'replace?', !!req.body[n])
-            req.user[n] = req.body[n] || req.user[n] || null;
-        });
+        if (req.body.displayName && req.body.displayName != req.user.displayName) {
+            //changed display name; we need to check if this name is okay
+            mongoose.model('User').findOne({ $or: [{ user: req.body.displayName }, { displayName: req.body.displayName }] }, (err, usr) => {
+                if (usr && usr.user != req.user.user) {
+                    return res.status(400).send('dupDisplay')
+                }
+                ['company', 'projects', 'otherInfo', 'displayName', 'avatar', 'gitLink'].forEach(n => {
+                    if (n == 'projects' && !req.body[n].length) {
+                        return false;
+                    }
 
-        req.user.save((errsv, usrsv) => {
-            res.send('refresh');
-        });
+                    console.log('Old', n, 'was', req.user[n], 'new', req.body[n], 'replace?', !!req.body[n])
+                    req.user[n] = req.body[n];
+                });
+
+                req.user.save((errsv, usrsv) => {
+                    res.send('refresh');
+                });
+            })
+        } else {
+
+            ['company', 'projects', 'otherInfo', 'displayName', 'avatar', 'gitLink'].forEach(n => {
+                if (n == 'projects' && !req.body[n].length) {
+                    return false;
+                }
+
+                console.log('Old', n, 'was', req.user[n], 'new', req.body[n], 'replace?', !!req.body[n])
+                req.user[n] = req.body[n];
+            });
+
+            req.user.save((errsv, usrsv) => {
+                res.send('refresh');
+            });
+        }
 
     });
     router.post('/changeAva', this.authbit, (req, res, next) => {
@@ -429,6 +460,7 @@ const routeExp = function (io, pp) {
         });
     });
     //msg stuff
+    //note that there is NO reply route; replies are generated on the front end, and are treated here as just regular messages
     router.get('/setOneRead', this.authbit, (req, res, next) => {
         if (!req.query.id) {
             res.send('err');
@@ -473,7 +505,8 @@ const routeExp = function (io, pp) {
             req.user.save((ef, fu) => {
                 res.send('refresh')
             });
-            const nao = Date.now()
+            const nao = Date.now();
+            let hadBadUsrs = false;
             req.body.users.forEach(tu => {
                 //note that we can send the above "done" response before actually submitting our mails
                 mongoose.model('User').findOne({
@@ -481,14 +514,17 @@ const routeExp = function (io, pp) {
                 }, function (err, tousr) {
                     if (!tousr || err) {
                         //Cannot find this user!
-                        return req.user.inMsgs.push({
-                            from: {user:'System',displayName:null},
+                        req.user.inMsgs.push({
+                            from: { user: 'System', displayName: null },
                             date: nao,
                             msg: '<h3 class="content">Undeliverable Message</h3> The following user cannot be found:<br>' + tu
                         })
+                        return req.user.save((ef, fu) => {
+                            io.emit('refresh', { user: req.user.user })
+                        });
                     }
                     tousr.inMsgs.push({
-                        from:{user:req.user.user,displayName:req.user.displayName},
+                        from: { user: req.user.user, displayName: req.user.displayName },
                         date: nao,
                         mdMsg: req.body.mdMsg,
                         htmlMsg: req.body.htmlMsg,
@@ -498,7 +534,7 @@ const routeExp = function (io, pp) {
                         io.emit('refresh', { user: tu })
                     })
                 });
-            })
+            });
         })
     });
     router.get('/delMsg', this.authbit, (req, res, next) => {
@@ -853,27 +889,26 @@ const routeExp = function (io, pp) {
 
                 mdMsg = `Hi ${req.body.displayName || req.body.user}! User ${req.user.displayName || req.user.user} wants to a mentor for the following topics!\n
             ${req.body.topics.map(q => {
-                    return ' - ' + q+'\n';
+                    return ' - ' + q + '\n';
                 })}.\n If you're ready to teach, go ahead and click the Teach button below!`,
                 rawMsg = `Hi ${req.body.displayName || req.body.user}! User ${req.user.displayName || req.user.user} wants to a mentor for the following topics! ${req.body.topics.join('')}. If you're ready to teach, go ahead and click the Teach button below!`;
             req.user.outMsgs.push({
-                to: {user:req.body.user,displayName:req.body.displayName},
-                displayTo:req.body.displayName,
+                to: [{ user: req.body.user, displayName: req.body.displayName }],
                 date: Date.now(),
                 htmlMsg: htmlMsg,
                 rawMsg: rawMsg,
                 mdMsg: mdMsg,
-                isConMsg:true,
-                topics:req.body.topics
+                isConMsg: true,
+                topics: req.body.topics
             });
             tu.inMsgs.push({
-                from: {user:req.user.user,displayName:req.user.displayName},
+                from: { user: req.user.user, displayName: req.user.displayName },
                 date: Date.now(),
                 htmlMsg: htmlMsg,
                 rawMsg: rawMsg,
                 mdMsg: mdMsg,
-                isConMsg:true,
-                topics:req.body.topics
+                isConMsg: true,
+                topics: req.body.topics
             })
             tu.save();
             req.user.save((ef, uf) => {
@@ -881,12 +916,16 @@ const routeExp = function (io, pp) {
             })
         })
     })
-    router.put('/teach',this.authbit,(req,res,next)=>{
+    router.put('/teach', this.authbit, this.findUserNames('other'), (req, res, next) => {
         req.user.teaching.push({
-            user:req.body.other,
-            topics:req.body.msg
+            user: {
+                user: req.body.user,
+                displayName: req.body.displayName
+            },
+            topics: req.body.topics
         })
-        console.log('Didnt save, but user teaching is',req.user.teaching)
+        console.log('Didnt save, but user teaching is', req.user.teaching, 'and body was', req.body)
+        res.send('done')
     })
 
     //lesson request stuffs
@@ -974,25 +1013,25 @@ const routeExp = function (io, pp) {
                 }
                 const nunc = Date.now();
                 toUsr.inMsgs.push({
-                    from: {user:req.user.user,displayName:req.user.displayName},
+                    from: { user: req.user.user, displayName: req.user.displayName },
                     mdMsg: mdMsg,
                     date: nunc,
                     htmlMsg: htmlMsg,
                     rawMsg: rawMsg,
-                    isConMsg:true,
-                    topics:alsn.topics
+                    isConMsg: true,
+                    topics: alsn.topics
                 });
                 toUsr.save((errt, utsv) => {
                 })
                 req.user.outMsgs.push({
-                    to: [{user:req.body.user,displayName:req.body.displayName}],
-                    displayTo:req.body.displayName,
+                    to: [{ user: req.body.user, displayName: req.body.displayName }],
+                    displayTo: req.body.displayName,
                     mdMsg: mdMsg,
                     date: nunc,
                     htmlMsg: htmlMsg,
                     rawMsg: rawMsg,
-                    isConMsg:true,
-                    topics:alsn.topics
+                    isConMsg: true,
+                    topics: alsn.topics
                 })
                 req.user.save((errf, svf) => {
                     if (errt) {
@@ -1037,14 +1076,14 @@ const routeExp = function (io, pp) {
                 return res.status(400).send(err);
             }
             mongoose.model('topic').find({}).exec((err, tps) => {
-                const numTops = Math.floor(Math.random()*0.75*tps.length);
+                const numTops = Math.floor(Math.random() * 0.75 * tps.length);
                 tps = tps.sort(q => Math.floor(Math.random() * 3) - 1).slice(0, numTops).map(q => q.title);
                 user.isDemoUser = true;
                 user.interests = tps.map(q => {
                     const canTeach = Math.random() > 0.6;
                     return {
                         title: q,
-                        lvl: canTeach?Math.ceil(Math.random()*5)+5:Math.floor(Math.random() * 11),
+                        lvl: canTeach ? Math.ceil(Math.random() * 5) + 5 : Math.floor(Math.random() * 11),
                         canTeach: canTeach
                     }
                 })
@@ -1067,7 +1106,7 @@ const routeExp = function (io, pp) {
     // router.get('/temp',(req,res,next)=>{
     //     res.send('Random number: '+Math.floor(Math.random()*100));
     // })
-    router.get('/wipeMail',this.authbit,isMod, (req, res, next) => {
+    router.get('/wipeMail', this.authbit, isMod, (req, res, next) => {
         mongoose.model('User').find({}, (err, usrs) => {
             usrs.forEach(u => {
                 u.inMsgs = [];

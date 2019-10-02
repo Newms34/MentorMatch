@@ -43,7 +43,7 @@
                     </thead>
                     <tbody>
                         <tr ng-repeat='om in $parent.user.outMsgs'>
-                            <td>{{om.to.join(',')}}</td>
+                            <td>{{getUserList(om.to)}}</td>
                             <td>{{om.date|numToDate}}</td>
                             <td>{{om.rawMsg}}</td>
                             <td><button class="button is-success" title='View this message' ng-click='viewMsg(om)'><i class="fa fa-eye"></i>&nbsp;View Message</button> &nbsp;<button class="button is-info" title='Delete this message' ng-click="delMsg(om)"><i class="fa fa-trash"></i>&nbsp;Delete</button></td>

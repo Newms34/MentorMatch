@@ -82,7 +82,10 @@ const usrSchema = new mongoose.Schema({
     }],
     teaching: [{
         //list of people this user is TEACHING. one person per entry
-        user: String,
+        user: {
+            user:{type:String,required:true},
+            displayName:String
+        },
         topics: [String],
         active: {
             //after a lesson is "done", the user can rate this lesson, which will also require this be set to false.

@@ -11,7 +11,7 @@ app.controller('mail-cont', ($scope, $http, $q) => {
         other:false
     }
     $scope.viewMsg = d => {
-        $scope.mailView.title = d.to ? `Message to ${d.to}` : `Message from ${d.from}`;
+        $scope.mailView.title = d.to ? `Message to ${$scope.getUserList(d.to)}` : `Message from ${d.from.displayName||d.from.user}`;
         $scope.mailView.htmlMsg = d.htmlMsg;
         $scope.mailView.isConMsg= !!d.isConMsg;
         $scope.mailView.date = d.date;
@@ -159,5 +159,8 @@ app.controller('mail-cont', ($scope, $http, $q) => {
                     })
             }
         })
+    }
+    $scope.getUserList = (o)=>{
+        return o.map(q=>q.displayName||q.user).join(', ')
     }
 })

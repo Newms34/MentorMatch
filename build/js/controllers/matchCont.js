@@ -161,6 +161,8 @@ app.controller('match-cont', function ($scope, $http, $q) {
         $scope.mentCon.plusHtmlMsg = null;
         $scope.mentCon.tz = { from: null, to: null };
         $scope.mentCon.show = true;
+        $scope.mentCon.topics = $scope.pickedTopics.map(q=>q.display);
+        // console.log('original incoming object to doConnect was',u)
         // $scope.$apply();
     }
     $scope.sendConnectMsg = t => {
@@ -168,7 +170,7 @@ app.controller('match-cont', function ($scope, $http, $q) {
         $scope.mentCon.plusHtmlMsg = $scope.conv.makeHtml($scope.mentCon.plusMdMsg);
         // return false;
         $http.put('/user/connect', $scope.mentCon).then(r => {
-            bulmabox.alert('Connect Request Sent', `User ${$scope.mentCon.user} has been notified that you'd like them as a mentor!`);
+            bulmabox.alert('Connect Request Sent', `User ${$scope.mentCon.displayName||$scope.mentCon.user} has been notified that you'd like them as a mentor!`);
         });
     };
     //lesson request stuff
