@@ -238,9 +238,13 @@
                                 <div class='is-fullwidth is-size-7 is-italic'>The following people wanna teach you:</div>
                                 <hr>
                                 <div class="is-fullwidth" ng-repeat = 'an in rl.answerers'>
-                                    {{an}} <button class="button is-small is-link is-pulled-right" title='Accept this mentor' ng-click='acceptMentor(an,rl)'><i class="fa fa-check"></i></button>
+                                    {{an}} <button class="button is-small is-link is-pulled-right" title='Accept this mentor' ng-click='acceptMentor(an,rl)'><i class="fa fa-check"></i>&nbsp;Accept</button>
                                 </div>
                             </div>
+                            <div class="is-fullwidth notification" ng-if='(!rl.answerers || !rl.answerers.length) && rl.user == $parent.user.user'>
+                                    <div class='is-fullwidth is-italic'>No one's answered you yet! :(</div>
+                                    
+                                </div>
                             <div class="is-fullwidth has-text-centered">
                                 <!-- control buttons -->
                                 <button class="button is-link" ng-if='rl.user!=$parent.user.user && !rl.answerers.includes($parent.user.user)' title='Offer to teach this lesson' ng-click='answerRl(rl)'><i class="fa fa-thumbs-up"></i>&nbsp;Teach It!</button>

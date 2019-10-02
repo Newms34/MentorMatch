@@ -145,7 +145,7 @@ app
     }])
     .directive("changeReFocus", [function () {
         return {
-            restrict:'EA',
+            restrict: 'EA',
             scope: {
                 changeFn: "&"
             },
@@ -154,7 +154,7 @@ app
                 // console.log('THE FUNCTION IS',scope.changeFn())
                 element.bind("change", function (changeEvent) {
                     // console.log('SCOPE',scope,'ELEMENT',element,'ATTRIBS',attributes,scope.changeFn)
-                    scope.changeFn().then(r=>{
+                    scope.changeFn().then(r => {
                         element[0].focus();
                     })
                     // scope.theFn('HELLOTHERE');
@@ -176,15 +176,15 @@ app
                     const reader = new FileReader(),
                         theFile = changeEvent.target.files[0],
                         tempName = theFile.name;
-                    // $log.debug('UPLOADING FILE', theFile);
+                    console.log('UPLOADING FILE', theFile);
                     reader.onload = function (loadEvent) {
                         let theURI = loadEvent.target.result;
-                        // $log.debug('URI before optional resize', theURI, theURI.length);
+                        console.log('URI before optional resize', theURI, theURI.length);
                         if (scope.$parent.needsResize) {
                             //needs to resize img (usually for avatar)
                             resizeDataUrl(scope, theURI, scope.$parent.needsResize, scope.$parent.needsResize, tempName);
                         } else {
-                            // $log.debug('APPLYING file to $parent');
+                            console.log('APPLYING file to $parent',scope.$parent);
                             scope.$apply(function () {
                                 if (scope.$parent && scope.$parent.$parent && scope.$parent.$parent.avas) {
 
@@ -316,7 +316,8 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
         })
     }
     //avy stuff
-    $scope.loadFile = () => {
+    $scope.loadFile = (o) => {
+        console.log('loadFile sez',o)
         $scope.loadingFile = true;
         const fr = new FileReader();
     };
@@ -325,12 +326,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
     $scope.topicToAdd = '';
     $scope.needsResize = 200;//the max pic width
     $scope.saveDataURI = (d) => {
-        // $http.post('/user/changeAva', {
-        //     img: d
-        // })
-        //     .then(r => {
-        //         $scope.doUser(r.data);
-        //     });
+        // console.log('trying to update datauri to',d)
         $scope.user.avatar = d;
         $scope.saveGeneral();
     };

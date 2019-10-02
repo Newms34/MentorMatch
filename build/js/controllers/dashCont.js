@@ -28,7 +28,8 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
         })
     }
     //avy stuff
-    $scope.loadFile = () => {
+    $scope.loadFile = (o) => {
+        console.log('loadFile sez',o)
         $scope.loadingFile = true;
         const fr = new FileReader();
     };
@@ -37,12 +38,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
     $scope.topicToAdd = '';
     $scope.needsResize = 200;//the max pic width
     $scope.saveDataURI = (d) => {
-        // $http.post('/user/changeAva', {
-        //     img: d
-        // })
-        //     .then(r => {
-        //         $scope.doUser(r.data);
-        //     });
+        // console.log('trying to update datauri to',d)
         $scope.user.avatar = d;
         $scope.saveGeneral();
     };

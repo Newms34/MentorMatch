@@ -5,7 +5,6 @@
         </div>
         <div class="message-body blocky is-fullwidth">
             <div class="columns">
-
                 <div class="column is-two-fifths message">
                     <div class="message-header">
                         Profile/Avatar
@@ -22,7 +21,7 @@
                                     <div class="file">
                                         <label class="file-label">
                                             <input class='file-input' type="file" fileread="user.avatar"
-                                                onchange="angular.element(this).scope().loadFile()" />
+                                                onchange="angular.element(this).scope().loadFile(this)" />
                                             <span class="file-cta button is-info">
                                                 <span class="file-icon">
                                                     <i class="fa fa-upload"></i>
@@ -212,14 +211,17 @@
                             </div>
                         </div>
                         <div class="column is-four-fifths" ng-show='!!topicToAdd && !hazTopic(topicToAdd)'>
-                            <div class="is-full notification is-warning is-italic"><i class="fa fa-exclamation-triangle is-size-4"></i>&nbsp;You're adding a skill we don't have in our system.<br> Please help us out and give it a cool (useful!) description!</div>
+                            <div class="is-full notification is-warning is-italic"><i
+                                    class="fa fa-exclamation-triangle is-size-4"></i>&nbsp;You're adding a skill we
+                                don't have in our system.<br> Please help us out and give it a cool (useful!)
+                                description!</div>
                             <textarea ng-model='addInt.newDesc' class='textarea'></textarea>
                         </div>
                         <div class="column is-four-fifths" ng-show='!topicToAdd && !hazTopic(topicToAdd)'>
-                                <div class="is-full is-italic">
-                                    (Please enter a skill title first!)
-                                </div>
+                            <div class="is-full is-italic">
+                                (Please enter a skill title first!)
                             </div>
+                        </div>
                         <div class="column is-full">
                             <hr>
                         </div>

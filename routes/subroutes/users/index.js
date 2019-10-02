@@ -311,7 +311,7 @@ const routeExp = function (io, pp) {
         //NEED TO IMPLEMENT
         // req.user.otherInfo = req.body.other;
         // console.log('INCOMING USER',req.body)
-        ['company', 'projects', 'otherInfo', 'displayName'].forEach(n => {
+        ['company', 'projects', 'otherInfo', 'displayName','avatar'].forEach(n => {
             if (n == 'projects' && !req.body[n].length) {
                 return false;
             }
