@@ -28,13 +28,9 @@
                                 <md-content class='md-padding'>
                                     <form>
                                         <div id="addTopicLabel" class='is-fullwidth has-text-left'>Add a skill</div>
-                                        <md-autocomplete md-selected-item="selectedTopic" md-search-text="topicToAdd"
-                                            md-items="topic in filterMe(topicToAdd)" md-no-cache='true'
-                                            md-item-text="topic.display" md-min-length="0" placeholder="Ex. JavaScript"
-                                            input-aria-labelledby="addTopicLabel" md-mode='standard'>
+                                        <md-autocomplete md-selected-item="selectedTopic" md-search-text="topicToAdd" md-items="topic in filterMe(topicToAdd)" md-no-cache='true' md-item-text="topic.display" md-min-length="0" placeholder="Ex. JavaScript" input-aria-labelledby="addTopicLabel" md-mode='standard'>
                                             <md-item-template>
-                                                <span md-highlight-text="topicToAdd"
-                                                    md-highlight-flags="^i">{{topic.display}}</span>
+                                                <span md-highlight-text="topicToAdd" md-highlight-flags="^i">{{topic.display}}</span>
                                             </md-item-template>
                                             <md-not-found>
                                                 No skills matching "{{topicToAdd}}" were found.
@@ -47,10 +43,7 @@
                                 <div class="is-fullwidth has-text-left" ng-if='selectedTopic.desc'>
                                     <strong>Description:</strong><br>{{selectedTopic.desc||''}}</div>
                                 <hr>
-                                <button class="button is-wide-btn is-link"
-                                    ng-disabled='addTopicBtn()!="Click to add your selected skill!"'
-                                    title='{{addTopicBtn()}}' ng-click='addSearchTopic(selectedTopic)'><i
-                                        class="fa fa-plus"></i>&nbsp; Add Skill</button>
+                                <button class="button is-wide-btn is-link" ng-disabled='addTopicBtn()!="Click to add your selected skill!"' title='{{addTopicBtn()}}' ng-click='addSearchTopic(selectedTopic)'><i class="fa fa-plus"></i>&nbsp; Add Skill</button>
                             </div>
                         </div>
                     </div>
@@ -63,21 +56,17 @@
                                     some skills above or create your own!</div>
                                 <div class="is-fullwidth columns is-multiline" ng-show='pickedTopics.length'>
 
-                                    <div class="column is-one-tenth notification is-dark btn-pad-right"
-                                        ng-repeat='t in pickedTopics' title='{{t.desc}}'>
+                                    <div class="column is-one-tenth notification is-dark btn-pad-right" ng-repeat='t in pickedTopics' title='{{t.desc}}'>
                                         <div class="is-fullwidth">
                                             <strong>Skill</strong>:&nbsp;{{t.display}}
                                         </div>
                                         <div class="is-fullwidth">&nbsp;</div>
                                         <div class="is-fullwidth">
-                                            Min Level: <select ng-model='t.min'
-                                                ng-options='m.num as m.lbl for m in lvls'
-                                                ng-change='changeTopList()'></select>
+                                            Min Level: <select ng-model='t.min' ng-options='m.num as m.lbl for m in lvls' ng-change='changeTopList()'></select>
                                         </div>
                                         <div class="is-fullwidth">&nbsp;</div>
                                         <div class="is-fullwidth has-text-centered">
-                                            <button ng-click='removeTopic(t)' class="button is-light"><i
-                                                    class="fa fa-times-circle"></i> Remove</button>
+                                            <button ng-click='removeTopic(t)' class="button is-light"><i class="fa fa-times-circle"></i> Remove</button>
                                         </div>
                                     </div>
 
@@ -101,7 +90,6 @@
                                 </div>
                             </div>
                             <div class="is-fullwidth" ng-show='availTeachs.length'>
-
                                 <div class="is-italic is-fullwidth has-tex">Click a mentor to connect with them!</div>
                                 <hr>
                                 <div class="columns is-fullwidth is-multiline">
@@ -110,8 +98,7 @@
                                         <!-- single mentor 'card' -->
                                         <div class="message-body has-background-info blocky is-fullwidth">
                                             <div class="columns is-fullwidth is-multiline">
-                                                <div
-                                                    class="column is-full has-text-centered has-text-weight-bold has-text-white is-size-4">
+                                                <div class="column is-full has-text-centered has-text-weight-bold has-text-white is-size-4">
                                                     {{mt.displayName||mt.user}}
                                                 </div>
                                                 <div class="column is-two-fifths">
@@ -126,18 +113,23 @@
                                                             {{mt.company||'(None)'}}
                                                         </div>
                                                         <div class="column is-full has-bottom-border"></div>
+                                                        <div class="column is-two-fifth has-text-weight-bold">
+                                                            <i class="fa fa-briefcase"></i>&nbsp;Git Link:
+                                                        </div>
+                                                        <div class="column is-three-fifths">
+                                                            <a href="{{mt.gitLink}}" ng-if='mt.gitLink'>{{mt.gitLink}}</a>
+                                                            (None)
+                                                        </div>
+                                                        <div class="column is-full has-bottom-border"></div>
                                                         <hr>
                                                         <!-- skills && toggle -->
-                                                        <div class="column is-full has-text-weight-bold"
-                                                            ng-class='{"has-bottom-border":mt.showProj}'>
+                                                        <div class="column is-full has-text-weight-bold" ng-class='{"has-bottom-border":mt.showProj}'>
                                                             <i class="fa fa-cogs"></i>&nbsp;Skills:
-                                                            <button class="button is-small is-info is-pulled-right"
-                                                                ng-click='mt.showProj = !mt.showProj'>
+                                                            <button class="button is-small is-info is-pulled-right" ng-click='mt.showProj = !mt.showProj'>
                                                                 <i class="fa fa-{{!mt.showProj?'eye-slash':'eye'}}"></i>
                                                             </button>
                                                         </div>
-                                                        <div class="column is-full has-bottom-border"
-                                                            ng-show='!mt.showProj && mt.interests.length'>
+                                                        <div class="column is-full has-bottom-border" ng-show='!mt.showProj && mt.interests.length'>
                                                             <table class="table">
                                                                 <thead>
                                                                     <tr>
@@ -150,31 +142,25 @@
                                                                     <tr ng-repeat='sk in mt.interests'>
                                                                         <td>{{sk.title}}</td>
                                                                         <td>{{sk.lvl}}</td>
-                                                                        <td ng-if='sk.canTeach'><i
-                                                                                class="fa fa-check has-text-success"></i>
+                                                                        <td ng-if='sk.canTeach'><i class="fa fa-check has-text-success"></i>
                                                                         </td>
-                                                                        <td ng-if='!sk.canTeach'><i
-                                                                                class="fa fa-times has-text-danger"></i>
+                                                                        <td ng-if='!sk.canTeach'><i class="fa fa-times has-text-danger"></i>
                                                                         </td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
                                                         </div>
-                                                        <div class="column is-full has-bottom-border"
-                                                            ng-show='!mt.showProj && !mt.interests.length'>
+                                                        <div class="column is-full has-bottom-border" ng-show='!mt.showProj && !mt.interests.length'>
                                                             {{mt.displayName||mt.user}} has not included any skills!
                                                         </div>
                                                         <!-- projects && toggle -->
-                                                        <div class="column is-full has-text-weight-bold"
-                                                            ng-class='{"has-bottom-border":!mt.showProj}'>
+                                                        <div class="column is-full has-text-weight-bold" ng-class='{"has-bottom-border":!mt.showProj}'>
                                                             <i class="fa fa-cogs"></i>&nbsp;Projects:
-                                                            <button class="button is-small is-info is-pulled-right"
-                                                                ng-click='mt.showProj=!mt.showProj'>
+                                                            <button class="button is-small is-info is-pulled-right" ng-click='mt.showProj=!mt.showProj'>
                                                                 <i class="fa fa-{{mt.showProj?'eye-slash':'eye'}}"></i>
                                                             </button>
                                                         </div>
-                                                        <div class="column is-full has-bottom-border"
-                                                            ng-show='mt.showProj && mt.projects.length'>
+                                                        <div class="column is-full has-bottom-border" ng-show='mt.showProj && mt.projects.length'>
                                                             <table class="table">
                                                                 <thead>
                                                                     <tr>
@@ -193,13 +179,11 @@
                                                             </table>
                                                         </div>
 
-                                                        <div class="column is-full has-bottom-border"
-                                                            ng-show='mt.showProj && !mt.projects.length'>
+                                                        <div class="column is-full has-bottom-border" ng-show='mt.showProj && !mt.projects.length'>
                                                             {{mt.displayName||mt.user}} has not included any projects!
                                                         </div>
                                                         <div class="column is-full has-text-centered">
-                                                            <button class="button is-link" ng-click='doConnect(mt)'><i
-                                                                    class="fa fa-handshake-o"></i>&nbsp;Connect!</button>
+                                                            <button class="button is-link" ng-click='doConnect(mt)'><i class="fa fa-handshake-o"></i>&nbsp;Connect!</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -216,7 +200,7 @@
             <div class="is-fullwidth" ng-show='viewReqLessons'>
                 <!-- {{requestedLessons}} -->
                 <div class="is-fullwidth columns">
-                    <div class="column is-one-fifth message is-info" ng-repeat = 'rl in requestedLessons'>
+                    <div class="column is-one-fifth message is-info" ng-repeat='rl in requestedLessons'>
                         <div class="message-header">Requested Lesson: {{rl.displayName||rl.user}}</div>
                         <div class="message-body has-background-grey-lighter">
                             <table class="table is-fullwidth">
@@ -237,14 +221,14 @@
                                 <div class='is-fullwidth has-text-weight-bold'>Answerers</div>
                                 <div class='is-fullwidth is-size-7 is-italic'>The following people wanna teach you:</div>
                                 <hr>
-                                <div class="is-fullwidth" ng-repeat = 'an in rl.answerers'>
+                                <div class="is-fullwidth" ng-repeat='an in rl.answerers'>
                                     {{an}} <button class="button is-small is-link is-pulled-right" title='Accept this mentor' ng-click='acceptMentor(an,rl)'><i class="fa fa-check"></i>&nbsp;Accept</button>
                                 </div>
                             </div>
                             <div class="is-fullwidth notification" ng-if='(!rl.answerers || !rl.answerers.length) && rl.user == $parent.user.user'>
-                                    <div class='is-fullwidth is-italic'>No one's answered you yet! :(</div>
-                                    
-                                </div>
+                                <div class='is-fullwidth is-italic'>No one's answered you yet! :(</div>
+
+                            </div>
                             <div class="is-fullwidth has-text-centered">
                                 <!-- control buttons -->
                                 <button class="button is-link" ng-if='rl.user!=$parent.user.user && !rl.answerers.includes($parent.user.user)' title='Offer to teach this lesson' ng-click='answerRl(rl)'><i class="fa fa-thumbs-up"></i>&nbsp;Teach It!</button>
@@ -337,15 +321,13 @@
                                     <div class="is-fullwidth">
                                         <div class="has-text-weight-bold">From:</div>
                                         <div class="select">
-                                            <select ng-model='mentCon.tz.from'
-                                                ng-options='t.num as t.label for t in times'></select>
+                                            <select ng-model='mentCon.tz.from' ng-options='t.num as t.label for t in times'></select>
                                         </div>
                                     </div>
                                     <div class="is-fullwidth">
                                         <div class="has-text-weight-bold">To:</div>
                                         <div class="select">
-                                            <select ng-model='mentCon.tz.to'
-                                                ng-options='t.num as t.label for t in times'></select>
+                                            <select ng-model='mentCon.tz.to' ng-options='t.num as t.label for t in times'></select>
                                         </div>
                                     </div>
                                 </div>
@@ -360,16 +342,13 @@
                                     Anything else you wanna say? We'd recommend "Hi" for starters!
                                 </div>
                                 <!-- <div class="notification has-background-white has-text-greis-fullwidth"></div> -->
-                                <textarea ng-model='mentCon.plusMdMsg' placeholder='Say something friendly!'
-                                    class="textarea is-fullwidth"></textarea>
+                                <textarea ng-model='mentCon.plusMdMsg' placeholder='Say something friendly!' class="textarea is-fullwidth"></textarea>
                             </div>
                         </div>
                         <div class="is-fullwidth">&nbsp;</div>
                         <div class="column is-full has-text-centered">
-                            <button class="button is-link is-large" ng-click='sendConnectMsg()'><i
-                                    class="fa fa-check"></i>&nbsp;Connect!</button>
-                            <button class="button is-info is-large" ng-click='mentCon.show=false'><i
-                                    class="fa fa-times"></i>&nbsp;Nevermind...</button>
+                            <button class="button is-link is-large" ng-click='sendConnectMsg()'><i class="fa fa-check"></i>&nbsp;Connect!</button>
+                            <button class="button is-info is-large" ng-click='mentCon.show=false'><i class="fa fa-times"></i>&nbsp;Nevermind...</button>
                         </div>
                     </div>
                 </div>

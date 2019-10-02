@@ -32,6 +32,7 @@ const usrSchema = new mongoose.Schema({
         mdMsg: String,
         isRep: { type: Boolean, default: false }
     }],
+    gitLink:{type:String,default:null},
     isBanned: {
         type: Boolean,
         default: false

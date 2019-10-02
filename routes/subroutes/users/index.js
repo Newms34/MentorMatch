@@ -311,7 +311,7 @@ const routeExp = function (io, pp) {
         //NEED TO IMPLEMENT
         // req.user.otherInfo = req.body.other;
         // console.log('INCOMING USER',req.body)
-        ['company', 'projects', 'otherInfo', 'displayName','avatar'].forEach(n => {
+        ['company', 'projects', 'otherInfo', 'displayName','avatar','gitLink'].forEach(n => {
             if (n == 'projects' && !req.body[n].length) {
                 return false;
             }
@@ -793,7 +793,8 @@ const routeExp = function (io, pp) {
                     interests: q.interests,
                     projects: q.projects,
                     avatar: q.avatar,
-                    displayName: q.displayName || null
+                    displayName: q.displayName || null,
+                    gitLink:q.gitLink||null,
                 }
             })
             res.send(gudUsrs)
