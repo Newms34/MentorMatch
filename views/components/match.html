@@ -100,6 +100,7 @@
                                             <div class="columns is-fullwidth is-multiline">
                                                 <div class="column is-full has-text-centered has-text-weight-bold has-text-white is-size-4">
                                                     {{mt.displayName||mt.user}}
+                                                    <div class='tag is-link' ng-if='mt.isDemoUser' title='This user does not actually exist, and is included for demonstration purposes only.'><i class="fa fa-exclamation-triangle"></i>&nbsp;Demo User</div>
                                                 </div>
                                                 <div class="column is-two-fifths">
                                                     <img src='{{mt.avatar}}' class="is-fullwidth">
@@ -117,8 +118,8 @@
                                                             <i class="fa fa-briefcase"></i>&nbsp;Git Link:
                                                         </div>
                                                         <div class="column is-three-fifths">
-                                                            <a href="{{mt.gitLink}}" ng-if='mt.gitLink'>{{mt.gitLink}}</a>
-                                                            (None)
+                                                            <a href="{{mt.gitLink}}" ng-if='mt.gitLink' target='_blank'>{{mt.gitLink}}</a>
+                                                            <span ng-if='!mt.gitLink'>(None)</span>
                                                         </div>
                                                         <div class="column is-full has-bottom-border"></div>
                                                         <hr>
@@ -183,7 +184,8 @@
                                                             {{mt.displayName||mt.user}} has not included any projects!
                                                         </div>
                                                         <div class="column is-full has-text-centered">
-                                                            <button class="button is-link" ng-click='doConnect(mt)'><i class="fa fa-handshake-o"></i>&nbsp;Connect!</button>
+                                                            <button class="button is-link" ng-click='doConnect(mt)' ng-if='!mt.isDemoUser'><i class="fa fa-handshake-o"></i>&nbsp;Connect!</button>
+                                                            <button class="button is-default" disabled ng-if='mt.isDemoUser' title='This is a demo user!'><i class="fa fa-times"></i>&nbsp;Connect!</button>
                                                         </div>
                                                     </div>
                                                 </div>

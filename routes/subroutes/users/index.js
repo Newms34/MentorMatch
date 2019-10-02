@@ -20,6 +20,10 @@ const router = express.Router(),
                 res.status(403).send('err');
             }
         });
+    },
+    demoNames = {
+        animals: ['dog', 'fish', 'cat', 'horse', 'bird', 'lizard', 'turtle', 'spider', 'mouse', 'hamster', 'frog'],
+        adjectives: ['lumpy', 'large', 'small', 'ferocious', 'tiny', 'friendly', 'dignified', 'superior', 'humble']
     };
 
 // const oldUsers = JSON.parse(fs.readFileSync('oldUsers.json', 'utf-8'))
@@ -311,7 +315,7 @@ const routeExp = function (io, pp) {
         //NEED TO IMPLEMENT
         // req.user.otherInfo = req.body.other;
         // console.log('INCOMING USER',req.body)
-        ['company', 'projects', 'otherInfo', 'displayName','avatar','gitLink'].forEach(n => {
+        ['company', 'projects', 'otherInfo', 'displayName', 'avatar', 'gitLink'].forEach(n => {
             if (n == 'projects' && !req.body[n].length) {
                 return false;
             }
@@ -794,7 +798,8 @@ const routeExp = function (io, pp) {
                     projects: q.projects,
                     avatar: q.avatar,
                     displayName: q.displayName || null,
-                    gitLink:q.gitLink||null,
+                    gitLink: q.gitLink || null,
+                    isDemoUser: !!q.isDemoUser
                 }
             })
             res.send(gudUsrs)
@@ -970,6 +975,36 @@ const routeExp = function (io, pp) {
                 res.send('done')
             })
         })
+    });
+
+    router.get('/genDemoUser', this.authbit, isMod, (req, res, next) => {
+        const user = `${demoNames.adjectives[Math.floor(Math.random() * demoNames.adjectives.length)]}-${demoNames.animals[Math.floor(Math.random() * demoNames.animals.length)]}-${Math.ceil(Math.random() * 99)}`
+        req.body = {
+            user: user,
+            pass: Math.floor(Math.random() * 9999999999).toString(32)
+        }
+        passport.authenticate('local-signup', function (err, user, info) {
+            // truncus('err', err, 'usr', user, 'inf', info)
+            if (err) {
+                return res.status(400).send(err);
+            }
+            mongoose.model('topic').find({}).exec((err, tps) => {
+                const numTops = Math.floor(Math.random()*0.75*tps.length);
+                tps = tps.sort(q => Math.floor(Math.random() * 3) - 1).slice(0, numTops).map(q => q.title);
+                user.isDemoUser = true;
+                user.interests = tps.map(q => {
+                    const canTeach = Math.random() > 0.6;
+                    return {
+                        title: q,
+                        lvl: canTeach?Math.ceil(Math.random()*5)+5:Math.floor(Math.random() * 11),
+                        canTeach: canTeach
+                    }
+                })
+                user.save((err, dsv) => {
+                    res.send(`Your demo user: ${req.body.user}, password: ${req.body.pass} . WRITE THIS DOWN!`);
+                })
+            })
+        })(req, res, next);
     })
     //TEMPORARY!
 
@@ -984,16 +1019,16 @@ const routeExp = function (io, pp) {
     // router.get('/temp',(req,res,next)=>{
     //     res.send('Random number: '+Math.floor(Math.random()*100));
     // })
-    router.get('/wipeMail', (req, res, next) => {
-        mongoose.model('User').find({}, (err, usrs) => {
-            usrs.forEach(u => {
-                u.inMsgs = [];
-                u.outMsgs = [];
-                u.save();
-            })
-            res.send('DONE');
-        })
-    })
+    // router.get('/wipeMail', (req, res, next) => {
+    //     mongoose.model('User').find({}, (err, usrs) => {
+    //         usrs.forEach(u => {
+    //             u.inMsgs = [];
+    //             u.outMsgs = [];
+    //             u.save();
+    //         })
+    //         res.send('DONE');
+    //     })
+    // })
     return router;
 };
 
