@@ -13,6 +13,7 @@ app.controller('mail-cont', ($scope, $http, $q) => {
     $scope.viewMsg = d => {
         $scope.mailView.title = d.to ? `Message to ${d.to}` : `Message from ${d.from}`;
         $scope.mailView.htmlMsg = d.htmlMsg;
+        $scope.mailView.isConMsg= !!d.isConMsg;
         $scope.mailView.date = d.date;
         $scope.mailView.toMode = !!d.to;
         $scope.mailView.other= d.to||d.from;
@@ -27,7 +28,7 @@ app.controller('mail-cont', ($scope, $http, $q) => {
         show: false,
     }
     $scope.reportMsg = m => {
-        bulmabox.confirm('Report Message', `Are you sure you wish to report this message from ${m.from} to the moderator team?`, a => {
+        bulmabox.confirm('Report Message', `Are you sure you wish to report this message from ${m.other} to the moderator team?`, a => {
             if (a && a != null) {
                 $http.post('/user/repMsg', m)
                     .then(r => {
@@ -35,6 +36,14 @@ app.controller('mail-cont', ($scope, $http, $q) => {
                     })
             }
         })
+    }
+    $scope.startTeach = () =>{
+        $http.put('/user/teach',$scope.mailView).then(r=>{
+            //do nuffin
+        })
+    }
+    $scope.explStartTeach =()=>{
+        bulmabox.alert('Start Teaching', `Clicking the "Teach" button will allow the student to leave reviews for you. While there's nothing explicitly preventing you from connecting on your own, we'd still recommend you click this button, as well-written reviews are always helpful!`);
     }
     $scope.replyMsg = m => {
         // alert('NEED MESSAGE WRITING UI!');
@@ -82,7 +91,7 @@ app.controller('mail-cont', ($scope, $http, $q) => {
         $scope.newMsg.isReply = false;
     }
     $scope.sendMsg = () => {
-        if (!$scope.newMsg.to.length || !$scope.newMsg.mdMsg.length) {
+        if (!$scope.newMsg.to.length || !$scope.newMsg.mdMsg || !$scope.newMsg.mdMsg.length) {
             return bulmabox.alert('Missing Information', 'Please provide at least one user and something to say!');
         }
         const conv = new showdown.Converter();
@@ -92,7 +101,7 @@ app.controller('mail-cont', ($scope, $http, $q) => {
             $scope.newMsg.htmlMsg = `${$scope.newMsg.isReply.htmlMsg}<hr>${$scope.newMsg.htmlMsg}`;
             $scope.newMsg.mdMsg = `${$scope.newMsg.isReply.mdMsg}\n---\n${$scope.newMsg.mdMsg}`
         }
-        // console.log('WOULD SEND:', $scope.newMsg)
+        // return console.log('WOULD SEND:', $scope.newMsg)
         $http.post('/user/sendMsg', {
             to: $scope.newMsg.to,
             htmlMsg: $scope.newMsg.htmlMsg,

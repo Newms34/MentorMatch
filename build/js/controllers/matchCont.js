@@ -167,12 +167,8 @@ app.controller('match-cont', function ($scope, $http, $q) {
         console.log('would send', $scope.mentCon)
         $scope.mentCon.plusHtmlMsg = $scope.conv.makeHtml($scope.mentCon.plusMdMsg);
         // return false;
-        $http.put('/user/connect', {
-            user: t.user,
-            displayName: t.displayName,
-            topics: $scope.pickedTopics.map(s => s.value)
-        }).then(r => {
-            bulmabox.alert('Connect Request Sent', `User ${t.user} has been notified that you'd like them as a mentor!`);
+        $http.put('/user/connect', $scope.mentCon).then(r => {
+            bulmabox.alert('Connect Request Sent', `User ${$scope.mentCon.user} has been notified that you'd like them as a mentor!`);
         });
     };
     //lesson request stuff

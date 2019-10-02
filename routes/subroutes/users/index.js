@@ -77,6 +77,38 @@ const routeExp = function (io, pp) {
             });
         }
     };
+    this.findUserNames = (param)=>{
+        return function(req,res,next){
+            if(!req.body || !req.body[param]){
+               return next();//cannot find param, so just run Next
+            }
+            if(req.body[param] instanceof Array){
+                //multiple "to" users
+                mongoose.model('User').find({user:{$in: req.body[param]}},(err,usrs)=>{
+                    if(!usr || !usr.length){
+                        //cannot find users
+                        return next();
+                    }
+                    req.body.users = usrs.map(q=>({user:usr.user,displayName:usr.displayNames}))
+                    next();
+                })
+            }else{
+                mongoose.model('User').findOne({user:req.body[param]},(err,usr)=>{
+                    if(!usr){
+                        //cannot find user
+                        return next();
+                    }
+                    req.body.user = usr.user,
+                    req.body.displayName = usr.displayName;
+                    next();
+                })
+            }
+        }
+    }
+    router.post('/testRoute',this.findUserNames('tchr'),(req,res,next)=>{
+        console.log(req.body)
+        res.send('done!')
+    })
     //login/acct creation
     router.post('/new', function (req, res, next) {
         passport.authenticate('local-signup', function (err, user, info) {
@@ -423,7 +455,7 @@ const routeExp = function (io, pp) {
             });
         });
     });
-    router.post('/sendMsg', this.authbit, (req, res, next) => {
+    router.post('/sendMsg', this.findUserNames('to'), this.authbit, (req, res, next) => {
         //user sends message to other user(s)
         console.log('SEND MSG', req.body);
         //first, let's push this into our outBox
@@ -432,7 +464,7 @@ const routeExp = function (io, pp) {
             // console.log('TEXT IS',txtOut)
 
             req.user.outMsgs.push({
-                to: req.body.to,
+                to: req.body.users,
                 date: Date.now(),
                 mdMsg: req.body.mdMsg,
                 htmlMsg: req.body.htmlMsg,
@@ -442,21 +474,21 @@ const routeExp = function (io, pp) {
                 res.send('refresh')
             });
             const nao = Date.now()
-            req.body.to.forEach(tu => {
+            req.body.users.forEach(tu => {
                 //note that we can send the above "done" response before actually submitting our mails
                 mongoose.model('User').findOne({
-                    user: tu
+                    user: tu.user
                 }, function (err, tousr) {
                     if (!tousr || err) {
                         //Cannot find this user!
                         return req.user.inMsgs.push({
-                            from: 'System',
+                            from: {user:'System',displayName:null},
                             date: nao,
                             msg: '<h3 class="content">Undeliverable Message</h3> The following user cannot be found:<br>' + tu
                         })
                     }
                     tousr.inMsgs.push({
-                        from: req.user.user,
+                        from:{user:req.user.user,displayName:req.user.displayName},
                         date: nao,
                         mdMsg: req.body.mdMsg,
                         htmlMsg: req.body.htmlMsg,
@@ -817,26 +849,31 @@ const routeExp = function (io, pp) {
             // res.send('done');
             const htmlMsg = `Hi ${req.body.displayName || req.body.user}! User ${req.user.displayName || req.user.user} wants a mentor for the following topics!<br><ul>${req.body.topics.map(q => {
                 return '<li>' + q + '</li>';
-            })}</ul><br>Go ahead and reply back to connect with them!`,
+            })}</ul><br>If you're ready to teach, go ahead and click the Teach button below!`,
 
                 mdMsg = `Hi ${req.body.displayName || req.body.user}! User ${req.user.displayName || req.user.user} wants to a mentor for the following topics!\n
             ${req.body.topics.map(q => {
-                    return ' - ' + q;
-                })}`;
+                    return ' - ' + q+'\n';
+                })}.\n If you're ready to teach, go ahead and click the Teach button below!`,
+                rawMsg = `Hi ${req.body.displayName || req.body.user}! User ${req.user.displayName || req.user.user} wants to a mentor for the following topics! ${req.body.topics.join('')}. If you're ready to teach, go ahead and click the Teach button below!`;
             req.user.outMsgs.push({
-                to: req.body.displayName || req.body.user,
+                to: {user:req.body.user,displayName:req.body.displayName},
+                displayTo:req.body.displayName,
                 date: Date.now(),
                 htmlMsg: htmlMsg,
-                rawMsg: `User ${req.user.displayName || req.user.user} wants to connect!`,
-                mdMsg: mdMsg
+                rawMsg: rawMsg,
+                mdMsg: mdMsg,
+                isConMsg:true,
+                topics:req.body.topics
             });
-            console.log('TO USE INMSG', tu.inMsg, 'of', tu.user)
             tu.inMsgs.push({
-                from: req.user.displayName || req.user.user,
+                from: {user:req.user.user,displayName:req.user.displayName},
                 date: Date.now(),
                 htmlMsg: htmlMsg,
-                rawMsg: `User ${req.user.displayName || req.user.user} wants to connect!`,
-                mdMsg: mdMsg
+                rawMsg: rawMsg,
+                mdMsg: mdMsg,
+                isConMsg:true,
+                topics:req.body.topics
             })
             tu.save();
             req.user.save((ef, uf) => {
@@ -844,10 +881,16 @@ const routeExp = function (io, pp) {
             })
         })
     })
+    router.put('/teach',this.authbit,(req,res,next)=>{
+        req.user.teaching.push({
+            user:req.body.other,
+            topics:req.body.msg
+        })
+        console.log('Didnt save, but user teaching is',req.user.teaching)
+    })
 
     //lesson request stuffs
     router.post('/lessonReq', this.authbit, (req, res, next) => {
-
         const simpTopics = req.body.map(q => q.toLowerCase()).sort();
         mongoose.model('LessonRequest').find({
             user: req.body.user
@@ -914,16 +957,16 @@ const routeExp = function (io, pp) {
             res.send('done')
         })
     })
-    router.post('/acceptLesson', this.authbit, (req, res, next) => {
-        console.log('TRYING TO ACCEPT', req.body)
+    router.post('/acceptLesson', this.authbit, this.findUserNames('teacher'), (req, res, next) => {
+        // console.log('TRYING TO ACCEPT', req.body)
         mongoose.model('LessonRequest').findOne({
             user: req.user.user,
             _id: req.body.id
         }, (erra, alsn) => {
             console.log('ERR', erra, 'ALSN', alsn)
-            const htmlMsg = `Hi ${req.body.teacher}! Student ${req.user.user} has accepted your offer to teach them the following skills: <ul>${alsn.topics.map(q => "<li>" + q + "</li>").join('')}</ul><br/>Go ahead and reply back to this message to start learning!`,
-                mdMsg = `Hi ${req.body.teacher}! Student ${req.user.user} has accepted your offer to teach them the following skills: ${alsn.topics.join(', ')}. Go ahead and reply back to this message to start learning!`,
-                rawMsg = `Hi ${req.body.teacher}! Student ${req.user.user} has accepted your offer to teach them the following skills: ${alsn.topics.map(q => " - " + q + "\n").join('')}\n Go ahead and reply back to this message to start learning!`;
+            const htmlMsg = `Hi ${req.body.user}! Student ${req.user.user} has accepted your offer to teach them the following skills: <ul>${alsn.topics.map(q => "<li>" + q + "</li>").join('')}</ul><br/>If you're ready to teach, go ahead and click the Teach button below!`,
+                mdMsg = `Hi ${req.body.user}! Student ${req.user.user} has accepted your offer to teach them the following skills: ${alsn.topics.join(', ')}. If you're ready to teach, go ahead and click the Teach button below!`,
+                rawMsg = `Hi ${req.body.user}! Student ${req.user.user} has accepted your offer to teach them the following skills: ${alsn.topics.map(q => " - " + q + "\n").join('')}\n If you're ready to teach, go ahead and click the Teach button below!`;
 
             mongoose.model('User').findOne({ user: req.body.teacher }, (errt, toUsr) => {
                 if (!toUsr) {
@@ -931,20 +974,25 @@ const routeExp = function (io, pp) {
                 }
                 const nunc = Date.now();
                 toUsr.inMsgs.push({
-                    from: req.user.user,
+                    from: {user:req.user.user,displayName:req.user.displayName},
                     mdMsg: mdMsg,
                     date: nunc,
                     htmlMsg: htmlMsg,
-                    rawMsg: rawMsg
+                    rawMsg: rawMsg,
+                    isConMsg:true,
+                    topics:alsn.topics
                 });
                 toUsr.save((errt, utsv) => {
                 })
                 req.user.outMsgs.push({
-                    to: req.body.tchr,
+                    to: [{user:req.body.user,displayName:req.body.displayName}],
+                    displayTo:req.body.displayName,
                     mdMsg: mdMsg,
                     date: nunc,
                     htmlMsg: htmlMsg,
-                    rawMsg: rawMsg
+                    rawMsg: rawMsg,
+                    isConMsg:true,
+                    topics:alsn.topics
                 })
                 req.user.save((errf, svf) => {
                     if (errt) {
@@ -1019,16 +1067,16 @@ const routeExp = function (io, pp) {
     // router.get('/temp',(req,res,next)=>{
     //     res.send('Random number: '+Math.floor(Math.random()*100));
     // })
-    // router.get('/wipeMail', (req, res, next) => {
-    //     mongoose.model('User').find({}, (err, usrs) => {
-    //         usrs.forEach(u => {
-    //             u.inMsgs = [];
-    //             u.outMsgs = [];
-    //             u.save();
-    //         })
-    //         res.send('DONE');
-    //     })
-    // })
+    router.get('/wipeMail',this.authbit,isMod, (req, res, next) => {
+        mongoose.model('User').find({}, (err, usrs) => {
+            usrs.forEach(u => {
+                u.inMsgs = [];
+                u.outMsgs = [];
+                u.save();
+            })
+            res.send('DONE');
+        })
+    })
     return router;
 };
 
