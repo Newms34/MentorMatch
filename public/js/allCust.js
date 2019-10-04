@@ -65,6 +65,10 @@ app
                 url: '/', //default route, if not 404
                 templateUrl: 'components/dash.html'
             })
+            .state('app.mentor', {
+                url: '/mentor',
+                templateUrl: 'components/mentor.html'
+            })
             .state('app.help', {
                 url: '/help',
                 templateUrl: 'components/help/help.html'
@@ -648,13 +652,16 @@ app.controller('mail-cont', ($scope, $http, $q) => {
         other:false
     }
     $scope.viewMsg = d => {
+        console.log('incoming msg object is',d)
         $scope.mailView.title = d.to ? `Message to ${$scope.getUserList(d.to)}` : `Message from ${d.from.displayName||d.from.user}`;
         $scope.mailView.htmlMsg = d.htmlMsg;
         $scope.mailView.isConMsg= !!d.isConMsg;
         $scope.mailView.date = d.date;
         $scope.mailView.toMode = !!d.to;
         $scope.mailView.other= d.to||d.from;
+        $scope.mailView.topics = d.topics;
         $scope.mailView._id = d._id;
+        $scope.mailView.msgId = d.msgId||0;
         $scope.mailView.show = true;
         $scope.mailView.isRep = !!d.isRep;
     }
@@ -677,6 +684,7 @@ app.controller('mail-cont', ($scope, $http, $q) => {
     $scope.startTeach = () =>{
         $http.put('/user/teach',$scope.mailView).then(r=>{
             //do nuffin
+            $scope.mailView.show=false;
         })
     }
     $scope.explStartTeach =()=>{
@@ -1161,6 +1169,7 @@ app.controller('match-cont', function ($scope, $http, $q) {
         $scope.mentCon.plusHtmlMsg = $scope.conv.makeHtml($scope.mentCon.plusMdMsg);
         // return false;
         $http.put('/user/connect', $scope.mentCon).then(r => {
+            $scope.mentCon.show=false;
             bulmabox.alert('Connect Request Sent', `User ${$scope.mentCon.displayName||$scope.mentCon.user} has been notified that you'd like them as a mentor!`);
         });
     };
@@ -1241,6 +1250,11 @@ app.controller('match-cont', function ($scope, $http, $q) {
         $scope.regetReqLsns();
     });
 })
+app.controller('mentor-cont', ($scope, $http, $q, userFact) => {
+    // console.log("mentor ctrl registered")
+    $scope.totalStars = [0,1,2,3,4];
+})
+
 app.controller('nav-cont',function($scope,$http,$state, $log){
 	$scope.logout = function() {
         bulmabox.confirm('Logout','Are you sure you wish to logout?', function(resp) {

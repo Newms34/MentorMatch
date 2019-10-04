@@ -170,6 +170,7 @@ app.controller('match-cont', function ($scope, $http, $q) {
         $scope.mentCon.plusHtmlMsg = $scope.conv.makeHtml($scope.mentCon.plusMdMsg);
         // return false;
         $http.put('/user/connect', $scope.mentCon).then(r => {
+            $scope.mentCon.show=false;
             bulmabox.alert('Connect Request Sent', `User ${$scope.mentCon.displayName||$scope.mentCon.user} has been notified that you'd like them as a mentor!`);
         });
     };

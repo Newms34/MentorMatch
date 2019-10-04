@@ -91,34 +91,47 @@
                         </div>
                     </div>
                 </div>
-                <div class="column is-three-fifths message">
-                    <div class="message-header"> Interests </div>
-                    <div class="message-body has-background-grey-lighter">
-                        <table class="table is-fullwidth">
-                            <thead>
-                                <tr>
-                                    <th>Skill Name</th>
-                                    <th>Level (1-10)</th>
-                                    <th>Can Teach?</th>
-                                    <th>Remove Skill</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat='sk in $parent.user.interests'>
-                                    <td>{{sk.title}}</td> <!-- ng-keyup='updateTopics($event)' ng-click -->
-                                    <td><input type="number" ng-model='sk.lvl' class="number" change-re-focus change-fn='updateTopics()' min='0' max='10'></td>
-                                    <td>
-                                        <!-- ng-click='sk.canTeach=!sk.cantTeach;' --> <input type='checkbox' ng-model='sk.canTeach' change-re-focus change-fn='updateTopics()' id='skCanTeach-{{$index}}'> <label for="skCanTeach-{{$index}}">{{sk.canTeach?'Yes':'No'}}</label> </td>
-                                    <td> <button class="button is-info" ng-click='removeSkill(sk.title)'><i class="fa fa-trash"></i>&nbsp;Remove</button> </td>
-                                </tr>
-                                <tr ng-if='!user.interests.length'>
-                                    <td colspan='4' class='has-text-centered is-italic'> You have not yet added any skills! </td>
-                                </tr>
-                                <tr>
-                                    <td colspan='4' class='has-text-centered '> <button class="button is-large is-info" ng-click='addIntDial()'><i class="fa fa-plus"></i>&nbsp; Add New Skill</button> </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="column is-three-fifths">
+                    <div class="message">
+                        <div class="message-header"> Skills </div>
+                        <div class="message-body has-background-grey-lighter">
+                            <table class="table is-fullwidth">
+                                <thead>
+                                    <tr>
+                                        <th>Skill Name</th>
+                                        <th>Level (1-10)</th>
+                                        <th>Can Teach?</th>
+                                        <th>Remove Skill</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat='sk in $parent.user.interests'>
+                                        <td>{{sk.title}}</td> <!-- ng-keyup='updateTopics($event)' ng-click -->
+                                        <td><input type="number" ng-model='sk.lvl' class="number" change-re-focus change-fn='updateTopics()' min='0' max='10'></td>
+                                        <td>
+                                            <!-- ng-click='sk.canTeach=!sk.cantTeach;' --> <input type='checkbox' ng-model='sk.canTeach' change-re-focus change-fn='updateTopics()' id='skCanTeach-{{$index}}'> <label for="skCanTeach-{{$index}}">{{sk.canTeach?'Yes':'No'}}</label> </td>
+                                        <td> <button class="button is-info" ng-click='removeSkill(sk.title)'><i class="fa fa-trash"></i>&nbsp;Remove</button> </td>
+                                    </tr>
+                                    <tr ng-if='!user.interests.length'>
+                                        <td colspan='4' class='has-text-centered is-italic'> You have not yet added any skills! </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan='4' class='has-text-centered '> <button class="button is-large is-info" ng-click='addIntDial()'><i class="fa fa-plus"></i>&nbsp; Add New Skill</button> </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="message">
+                        <div class="message-header">
+                            My Current Lessons
+                        </div>
+                        <div class="message-body has-background-grey-lighter">
+                            <div class="notification has-background-white is-italic" ng-if='!activeLessons || !activeLessons.length'>
+                                You currently have no registered lessons! Head on over to the <a href="/match">Match</a> tab to connect with a mentor!
+                            </div>
+                            LESSONS STUDENT IS BEING TAUGHT
+                        </div>
                     </div>
                 </div>
             </div>

@@ -62,6 +62,10 @@ app
                 url: '/', //default route, if not 404
                 templateUrl: 'components/dash.html'
             })
+            .state('app.mentor', {
+                url: '/mentor',
+                templateUrl: 'components/mentor.html'
+            })
             .state('app.help', {
                 url: '/help',
                 templateUrl: 'components/help/help.html'

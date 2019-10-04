@@ -11,13 +11,16 @@ app.controller('mail-cont', ($scope, $http, $q) => {
         other:false
     }
     $scope.viewMsg = d => {
+        console.log('incoming msg object is',d)
         $scope.mailView.title = d.to ? `Message to ${$scope.getUserList(d.to)}` : `Message from ${d.from.displayName||d.from.user}`;
         $scope.mailView.htmlMsg = d.htmlMsg;
         $scope.mailView.isConMsg= !!d.isConMsg;
         $scope.mailView.date = d.date;
         $scope.mailView.toMode = !!d.to;
         $scope.mailView.other= d.to||d.from;
+        $scope.mailView.topics = d.topics;
         $scope.mailView._id = d._id;
+        $scope.mailView.msgId = d.msgId||0;
         $scope.mailView.show = true;
         $scope.mailView.isRep = !!d.isRep;
     }
@@ -40,6 +43,7 @@ app.controller('mail-cont', ($scope, $http, $q) => {
     $scope.startTeach = () =>{
         $http.put('/user/teach',$scope.mailView).then(r=>{
             //do nuffin
+            $scope.mailView.show=false;
         })
     }
     $scope.explStartTeach =()=>{

@@ -28,6 +28,7 @@ const router = express.Router(),
 
 // const oldUsers = JSON.parse(fs.readFileSync('oldUsers.json', 'utf-8'))
 let sgApi;
+mongoose.Promise = Promise;
 if (fs.existsSync('sparky.json')) {
     sparkyConf = JSON.parse(fs.readFileSync('sparky.json', 'utf-8'));
 } else {
@@ -79,41 +80,54 @@ const routeExp = function (io, pp) {
     };
     this.findUserNames = (param) => {
         return function (req, res, next) {
-            if (!req.body || !req.body[param]) {
+            if (!req.body || !req.body[param] || !req.body[param].length) {
                 return next();//cannot find param, so just run Next
             }
-            console.log('incoming data to findUserNames', req.body, param)
-            if (req.body[param] instanceof Array) {
-                //multiple "to" users
-                console.log('finding MULTIPLE users', req.body[param])
-                mongoose.model('User').find({
-                    $or: [{ user: { $in: req.body[param] } }, { displayName: { $in: req.body[param] } }]
-                }, (err, usrs) => {
-                    console.log('ERR?', err)
-                    if (!usrs || !usrs.length) {
-                        //cannot find users
-                        return next();
-                    }
-                    req.body.users = usrs.map(q => ({ user: q.user, displayName: q.displayNames }))
-                    next();
+            // console.log('incoming data to findUserNames', req.body, param)
+            const usrProms = req.body[param].map(q => {
+                // console.log('Trying to find user to match:', q)
+                return mongoose.model('User').findOne({
+                    $or: [{ user: q }, { displayName: q }]
                 })
-            } else {
-                console.log('finding ONE user', req.body[param])
+            })
+            Promise.all(usrProms).then(r => {
+                // console.log(r)
+                req.body.users = r.map(a => ({ user: a.user, displayName: a.displayName }));
+                next();
+            })
+            // if (req.body[param] instanceof Array) {
+            //     //multiple "to" users
+            //     console.log('finding MULTIPLE users', req.body[param])
+            //     mongoose.model('User').find({
+            //         $or: [{ user: { $in: req.body[param] } }, { displayName: { $in: req.body[param] } }]
+            //     }, (err, usrs) => {
+            //         console.log('ERR?', err)
+            //         if (!usrs || !usrs.length) {
+            //             //cannot find users
+            //             return next();
+            //         }
+            //         req.body.users = usrs.map(q => ({ user: q.user, displayName: q.displayNames }))
+            //         next();
+            //     })
+            // } else {
+            //     console.log('finding ONE user', req.body[param])
 
-                mongoose.model('User').findOne({
-                    $or: [{ user: req.body[param] }, { displayName: req.body[param] }]
-                }, (err, usr) => {
-                    if (!usr) {
-                        //cannot find user
-                        return next();
-                    }
-                    req.body.users = [{ user: usr.user, displayName: usr.displayName }];
-                    next();
-                })
-            }
+            //     mongoose.model('User').findOne({
+            //         $or: [{ user: req.body[param][0] }, { displayName: req.body[param][0] }]
+            //     }, (err, usr) => {
+            //         console.log(req.body)
+            //         if (!usr) {
+            //             //cannot find user
+            //             return next();
+            //         }
+            //         req.body.users = [{ user: usr.user, displayName: usr.displayName }];
+            //         console.log('body now',req.body)
+            //         next();
+            //     })
+            // }
         }
     }
-    router.post('/testRoute', this.findUserNames('tchr'), (req, res, next) => {
+    router.post('/testRoute', this.findUserNames('derp'), (req, res, next) => {
         console.log(req.body)
         res.send('done!')
     })
@@ -235,9 +249,7 @@ const routeExp = function (io, pp) {
         });
     });
     router.get('/nameOkay', function (req, res, next) {
-        mongoose.model('User').find({
-            'user': req.query.name
-        }, function (err, user) {
+        mongoose.model('User').find({ $or: [{ user: req.query.name }, { displayName: req.query.name }] }, function (err, user) {
             console.log('USER CHECK', user);
             res.send(!user.length);
         });
@@ -462,29 +474,18 @@ const routeExp = function (io, pp) {
     //msg stuff
     //note that there is NO reply route; replies are generated on the front end, and are treated here as just regular messages
     router.get('/setOneRead', this.authbit, (req, res, next) => {
-        if (!req.query.id) {
-            res.send('err');
+        if (!req.query.msgId || !req.user.inMsgs.find(m => m.msgId == req.query.msgId)) {
+            res.status(400).send('err');
         }
-        mongoose.model('User').findOne({
-            _id: req.session.passport.user
-        }, function (err, usr) {
-            usr.inMsgs.filter(m => m._id == req.query.id)[0].read = true;
-            usr.save((errsv, usrsv) => {
-                res.send(usrsv);
-            });
+        req.user.inMsgs.find(m => m.msgId == req.query.msgId).read = true;
+        req.user.save((errsv, usrsv) => {
+            res.send(usrsv);
         });
     });
     router.get('/setAllRead', this.authbit, (req, res, next) => {
-        if (!req.query.id) {
-            res.send('err');
-        }
-        mongoose.model('User').findOne({
-            _id: req.session.passport.user
-        }, function (err, usr) {
-            usr.inMsgs.forEach(m => m.read = true);
-            usr.save((errsv, usrsv) => {
-                res.send(usrsv);
-            });
+        req.user.inMsgs.forEach(m => m.read = true);
+        req.user.save((errsv, usrsv) => {
+            res.send(usrsv);
         });
     });
     router.post('/sendMsg', this.findUserNames('to'), this.authbit, (req, res, next) => {
@@ -494,19 +495,19 @@ const routeExp = function (io, pp) {
         remark().use(strip).process(req.body.mdMsg, function (err, txt) {
             const rawMsg = String(txt).replace(/($|\\)#/g, '').replace(/\n|\r/g, ' ')
             // console.log('TEXT IS',txtOut)
-
+            const msgId = Math.floor(Math.random() * 999999999).toString(32);
             req.user.outMsgs.push({
                 to: req.body.users,
                 date: Date.now(),
                 mdMsg: req.body.mdMsg,
                 htmlMsg: req.body.htmlMsg,
-                rawMsg: rawMsg
+                rawMsg: rawMsg,
+                msgId: msgId
             });
             req.user.save((ef, fu) => {
                 res.send('refresh')
             });
             const nao = Date.now();
-            let hadBadUsrs = false;
             req.body.users.forEach(tu => {
                 //note that we can send the above "done" response before actually submitting our mails
                 mongoose.model('User').findOne({
@@ -528,7 +529,8 @@ const routeExp = function (io, pp) {
                         date: nao,
                         mdMsg: req.body.mdMsg,
                         htmlMsg: req.body.htmlMsg,
-                        rawMsg: rawMsg
+                        rawMsg: rawMsg,
+                        msgId: msgId
                     });
                     tousr.save((errt, svt) => {
                         io.emit('refresh', { user: tu })
@@ -539,51 +541,22 @@ const routeExp = function (io, pp) {
     });
     router.get('/delMsg', this.authbit, (req, res, next) => {
         //user deletes an old message sent TO them by user and id. this removes from inbox
-        mongoose.model('User').findOne({
-            _id: req.session.passport.user
-        }, function (err, usr) {
-            if (!usr || err) {
-                res.send('err');
-            } else {
-                console.log('USER', usr.user, 'MSGS', usr.inMsgs, 'QUERY', req.query);
-                for (var i = 0; i < usr.inMsgs.length; i++) {
-                    if (usr.inMsgs[i]._id == req.query.id) {
-                        // usr.inMsgs[i].msg +='|FAKE DELETE AT '+Date.now()
-                        usr.inMsgs.splice(i, 1);
-                        break;
-                    }
-                }
-                usr.save(function (err, usr) {
-                    req.user = usr;
-                    res.send('refresh');
-                });
-            }
-        });
+        req.user.outMsgs = req.user.inMsgs.filter(q => q.msgId != req.query.id);
+        req.user.save((a, b) => {
+            res.send('refresh')
+        })
     });
     router.get('/delMyMsg', this.authbit, (req, res, next) => {
         //user deletes an old message sent FROM them by user and id. This removes from outMsgs
-        mongoose.model('User').findOne({
-            _id: req.session.passport.user
-        }, function (err, usr) {
-            if (!usr || err) {
-                res.send('err');
-            } else {
-                for (var i = 0; i < usr.outMsgs.length; i++) {
-                    if (usr.outMsgs[i]._id == req.query.id) {
-                        usr.outMsgs.splice(i, 1);
-                        break;
-                    }
-                }
-                usr.save(function (err, usr) {
-                    req.user = usr;
-                    res.send(usr);
-                });
-            }
-        });
+        req.user.outMsgs = req.user.outMsgs.filter(q => q.msgId != req.query.id);
+        req.user.save((a, b) => {
+            res.send('refresh')
+        })
     });
     router.post('/repMsg', this.authbit, (req, res, next) => {
+        //report, not reply!
         //sends a message to all users flagged as 'mods' with message body, to, from
-        const theMsg = req.user.inMsgs.filter(m => m._id == req.body._id)[0];
+        const theMsg = req.user.inMsgs.find(m => m.msgId == req.body.msgId);
         if (theMsg.isRep) {
             return res.send('dupRep');
         }
@@ -595,6 +568,7 @@ const routeExp = function (io, pp) {
             res.send('refresh')
         });
         // throw new Error('err!')
+
         mongoose.model('User').find({
             mod: true
         }, (err, mods) => {
@@ -607,7 +581,8 @@ const routeExp = function (io, pp) {
                     <br>From:${req.body.from}
                     <br>To:${req.user.user}
                     <br>Message:${req.body.msg}`,
-                    date: Date.now()
+                    date: Date.now(),
+                    msgId: req.body.msgId
                 });
                 io.emit('refresh', { user: mod.user })
                 mod.save();
@@ -616,7 +591,7 @@ const routeExp = function (io, pp) {
             mongoose.model('User').findOne({
                 user: req.body.from
             }, (ferr, fusr) => {
-                let repd = fusr.outMsgs.filter(orp => orp.msgId == theMsg.msgId)[0];
+                let repd = fusr.outMsgs.find(orp => orp.msgId == theMsg.msgId);
                 console.log(repd, fusr);
                 repd.isRep = true;
                 fusr.save((oerr, ousr) => {
@@ -749,6 +724,7 @@ const routeExp = function (io, pp) {
     //rating
     router.put('/rate', this.authbit, (req, res, next) => {
         //add rating
+        //note that rating is from 0 to 5
         //for this, we need a teacher to rate, and a lesson that involves both these two.
         //note that I was originally planning to only have completed (active==false) lessons rateable, but that doesnt really make sense if the teacher doesn't end the lesson (i.e., goes AWOL)
         if (!req.body || !req.body.teacher || !req.body.rateNum) {
@@ -881,6 +857,7 @@ const routeExp = function (io, pp) {
             if (err || !tu) {
                 return res.status(400).send('err');
             }
+            const msgId = Math.floor(Math.random() * 999999999).toString(32);
             console.log('attempting to connect btwn usrs', req.body, 'USER IS', tu, typeof tu, tu.inMsgs);
             // res.send('done');
             const htmlMsg = `Hi ${req.body.displayName || req.body.user}! User ${req.user.displayName || req.user.user} wants a mentor for the following topics!<br><ul>${req.body.topics.map(q => {
@@ -899,7 +876,8 @@ const routeExp = function (io, pp) {
                 rawMsg: rawMsg,
                 mdMsg: mdMsg,
                 isConMsg: true,
-                topics: req.body.topics
+                topics: req.body.topics,
+                msgId: msgId
             });
             tu.inMsgs.push({
                 from: { user: req.user.user, displayName: req.user.displayName },
@@ -908,7 +886,8 @@ const routeExp = function (io, pp) {
                 rawMsg: rawMsg,
                 mdMsg: mdMsg,
                 isConMsg: true,
-                topics: req.body.topics
+                topics: req.body.topics,
+                msgId: msgId
             })
             tu.save();
             req.user.save((ef, uf) => {
@@ -916,16 +895,58 @@ const routeExp = function (io, pp) {
             })
         })
     })
-    router.put('/teach', this.authbit, this.findUserNames('other'), (req, res, next) => {
-        req.user.teaching.push({
-            user: {
-                user: req.body.user,
-                displayName: req.body.displayName
-            },
-            topics: req.body.topics
+    router.get('/activeLessons', this.authbit, (req, res, next) => {
+        mongoose.model('User').find({}).exec((err, allUsrs) => {
+            const hazLesson = allUsrs.map(q => {
+                console.log('checking', q.user, 'vs', req.user.user)
+                let lsn = q.teaching.find(a => a.user.user == req.user.user);
+                if (q.user != req.user.user && lsn) {
+                    lsn = JSON.parse(JSON.stringify(lsn))
+                    console.log('found a lesson by', q.user, 'for', req.user.user)
+                    lsn.teacher = { user: q.user, displayName: q.displayName };
+                }
+                return lsn;
+            }).filter(a => !!a);
+            res.send(hazLesson)
         })
-        console.log('Didnt save, but user teaching is', req.user.teaching, 'and body was', req.body)
-        res.send('done')
+    })
+    router.put('/teach', this.authbit, (req, res, next) => {
+        mongoose.model('User').findOne({
+            $or: [
+                { user: req.body.other.user },
+                { displayName: req.body.other.user },
+                { user: req.body.other.displayName },
+                { displayName: req.body.other.displayName }
+            ]
+        }, (err, usr) => {
+            if (err || !usr) {
+                return res.status(400).send('err')
+            }
+            req.user.teaching.push({
+                user: {
+                    user: usr.user,
+                    displayName: usr.displayName
+                },
+                topics: req.body.topics
+            });
+            //we've pushed in that the teacher is teaching. Now we need to update both messages (teacher && student)
+            //teacher first
+            const msg = req.user.inMsgs.find(q => q.msgId == req.body.msgId);
+            msg.htmlMsg = msg.htmlMsg.replace("If you're ready to teach, go ahead and click the Teach button below!", " You've already connected!");
+            msg.rawMsg = msg.rawMsg.replace("If you're ready to teach, go ahead and click the Teach button below!", " You've already connected!");
+            msg.mdMsg = msg.mdMsg.replace("If you're ready to teach, go ahead and click the Teach button below!", " You've already connected!");
+            msg.isConMsg = false;
+
+            //now student
+            const stuMsg = usr.outMsgs.find(q => q.msgId == req.body.msgId);
+            stuMsg.htmlMsg = stuMsg.htmlMsg.replace("If you're ready to teach, go ahead and click the Teach button below!", " You've already connected!");
+            stuMsg.rawMsg = stuMsg.rawMsg.replace("If you're ready to teach, go ahead and click the Teach button below!", " You've already connected!");
+            stuMsg.mdMsg = stuMsg.mdMsg.replace("If you're ready to teach, go ahead and click the Teach button below!", " You've already connected!");
+            stuMsg.isConMsg = false;
+            req.user.save((erru, usv) => {
+                res.send('refresh')
+            })
+        })
     })
 
     //lesson request stuffs
@@ -1005,7 +1026,8 @@ const routeExp = function (io, pp) {
             console.log('ERR', erra, 'ALSN', alsn)
             const htmlMsg = `Hi ${req.body.user}! Student ${req.user.user} has accepted your offer to teach them the following skills: <ul>${alsn.topics.map(q => "<li>" + q + "</li>").join('')}</ul><br/>If you're ready to teach, go ahead and click the Teach button below!`,
                 mdMsg = `Hi ${req.body.user}! Student ${req.user.user} has accepted your offer to teach them the following skills: ${alsn.topics.join(', ')}. If you're ready to teach, go ahead and click the Teach button below!`,
-                rawMsg = `Hi ${req.body.user}! Student ${req.user.user} has accepted your offer to teach them the following skills: ${alsn.topics.map(q => " - " + q + "\n").join('')}\n If you're ready to teach, go ahead and click the Teach button below!`;
+                rawMsg = `Hi ${req.body.user}! Student ${req.user.user} has accepted your offer to teach them the following skills: ${alsn.topics.map(q => " - " + q + "\n").join('')}\n If you're ready to teach, go ahead and click the Teach button below!`,
+                msgId = Math.floor(Math.random() * 999999999).toString(32);
 
             mongoose.model('User').findOne({ user: req.body.teacher }, (errt, toUsr) => {
                 if (!toUsr) {
@@ -1019,7 +1041,8 @@ const routeExp = function (io, pp) {
                     htmlMsg: htmlMsg,
                     rawMsg: rawMsg,
                     isConMsg: true,
-                    topics: alsn.topics
+                    topics: alsn.topics,
+                    msgId: msgId
                 });
                 toUsr.save((errt, utsv) => {
                 })
@@ -1031,7 +1054,8 @@ const routeExp = function (io, pp) {
                     htmlMsg: htmlMsg,
                     rawMsg: rawMsg,
                     isConMsg: true,
-                    topics: alsn.topics
+                    topics: alsn.topics,
+                    msgId: msgId
                 })
                 req.user.save((errf, svf) => {
                     if (errt) {
