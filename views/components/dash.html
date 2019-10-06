@@ -130,7 +130,61 @@
                             <div class="notification has-background-white is-italic" ng-if='!activeLessons || !activeLessons.length'>
                                 You currently have no registered lessons! Head on over to the <a href="/match">Match</a> tab to connect with a mentor!
                             </div>
-                            LESSONS STUDENT IS BEING TAUGHT
+                            <div class="is-fullwidth columns is-multiline">
+                                <div class="message" ng-repeat='al in activeLessons'>
+                                    <div class="message-header has-text-dark has-background-grey-light">Lesson by: {{al.teacher.displayName||al.teacher.user}} <button class="button is-small is-info" title='Write a review for this teacher.' ng-click='writeReview(al.teacher)'><i class="fa fa-star"></i>&nbsp;<i class="fa fa-pencil"></i></button></div>
+                                    <div class="message-body chalkboard">
+                                        <strong>
+                                            Topics:
+                                        </strong>
+                                        <ul>
+                                            <li ng-repeat='t in al.topics'>{{t}}</li>
+                                        </ul>
+                                        <br><br>
+                                        <div class="is-fullwidth has-text-centered">
+                                            <button class="button is-small is-link" ng-click='messageTeacher(al)' title="Send a message to this lesson's mentor that you wish to discuss this lesson"><i class="fa fa-envelope"></i>&nbsp;Message Mentor</button>
+                                            <button class="button is-small is-info" ng-click='reqEndLesson(al)' title='Request that the mentor end this lesson'><i class="fa fa-times"></i>&nbsp;Request End</button>
+                                            <button class="button is-small is-danger" ng-click='reportLesson(al)' title='Report this lesson to the moderator team.'><i class="fa fa-exclamation-circle"></i>&nbsp;Report Lesson</button>
+                                        </div>
+                                        <br>
+                                        <div class="eraser is-pulled-right"></div>
+                                    </div>
+                                </div>
+                                <!-- <div class="message has-background-white column is-half" ng-repeat="al in activeLessons" ng-show='!al.deleted'>
+                                    <div class="message-body is-fullwidth columns is-multiline">
+                                        <div class="column is-full">&nbsp;</div>
+                                        <div class="column is-two-fifths notification">
+                                            <strong>Mentor: </strong>
+                                        </div>
+                                        <div class="column is-three-fifths">
+                                            {{al.teacher.displayName||al.teacher.user}}
+                                        </div>
+                                        <div class="column is-full">&nbsp;</div>
+                                        <div class="column is-two-fifths notification content">
+                                            <strong>Topics: </strong>
+
+                                        </div>
+                                        <div class="column is-three-fifths content">
+                                            <ul>
+                                                <li ng-repeat='t in al.topics'>{{t}}</li>
+                                            </ul>
+                                        </div>
+                                        <div class="column is-full">&nbsp;</div>
+                                        <div class="column is-two-fifths notification">
+                                            <strong>Ongoing?: </strong>
+                                        </div>
+                                        <div class="column is-three-fifths">
+                                            <i class="fa fa{{al.active?'-check':''}}-square-o is-size-4"></i>&nbsp;{{al.active?"Yes":"No"}}
+
+                                        </div>
+                                        <div class="column is-full has-text-centered">
+                                            <button class="button is-small is-link"><i class="fa fa-envelope"></i>&nbsp;Message Teacher</button>
+                                            <button class="button is-small is-info"><i class="fa fa-times"></i>&nbsp;Request End</button>
+                                            <button class="button is-small is-danger"><i class="fa fa-exclamation-circle"></i>&nbsp;Report Lesson</button>
+                                        </div>
+                                    </div>
+                                </div> -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -226,4 +280,42 @@
             </div>
         </div>
     </div>
+
+    <div class="modal" ng-class='{"is-active":reviewPage.show==true}'>
+            <div class="modal-background" ng-click='reviewPage.show=false'></div>
+            <div class="modal-content modal-wide">
+                <div class="panel">
+                    <div class="panel-heading is-link"> Write review for: {{reviewPage.teacher.displayName||reviewPage.teacher.user}} <button class="button is-danger is-small is-pulled-right" ng-click='reviewPage.show=false'>x</button> </div>
+                    <div class="panel-block has-background-white blocky content">
+                        <div class="columns is-fullwidth is-multiline">
+                            <div class="column is-one-fifth notification notif-spaced"> Comment: </div>
+                            <div class="column is-four-fifths">
+                                <div class="is-fullwidth is-italic">Tell us what you think about this mentor. Be nice!</div> 
+                                <textarea class="textarea" ng-model='reviewPage.msg' placeholder='e.g., I learned so much!'></textarea>
+                            </div>
+                            <div class="column is-full">
+                                <hr>
+                            </div>
+                            <div class="column is-one-fifth notification notif-spaced"> Stars: </div>
+                            <div class="column is-four-fifths">
+                                <div class="is-fullwidth is-italic">How many stars (out of 5) do you think this mentor earned?</div>
+                                <i class="fa fa-star{{isActiveStar($index,str)?'':'-o'}} is-size-3 pokey star-fade" ng-mouseover='toggleOverStars(true,str);' ng-mouseout='toggleOverStars(false,str);' ng-repeat ='str in reviewPage.starsArr track by $index' ng-click='reviewPage.stars =$index+1;'></i>
+                            </div>
+                            <div class="column is-full">
+                                <hr>
+                            </div>
+                            <div class="column is-one-fifth notification notif-spaced"> Hide Name: </div>
+                            <div class="column is-four-fifths">
+                                <div class="is-fullwidth is-italic">Would you like to make this review anonymous?</div>
+                                <input type="checkbox" ng-model='reviewPage.hideName' id='hide-name-box'> <label for="hide-name-box">Hide Name (make anonymous)</label>
+                            </div>
+                            <div class="column is-full">
+                                <hr>
+                            </div>
+                            <div class="column is-full has-text-centered"> <button class="button is-info is-large" ng-click='submitReview()'><i class="fa fa-pencil"></i>&nbsp;add/edit review</button> </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 </div>

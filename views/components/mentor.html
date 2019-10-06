@@ -9,7 +9,7 @@
                         <div class="is-fullwidth notification has-text-centered" ng-if='!$parent.user.teaching.length'>
                             <i class="fa fa-exclamation-circle is-size-4"></i>&nbsp;You are not currently mentoring anyone (that we know of)!
                         </div>
-                        <div class="is-fullwidth columns" ng-show='$parent.user.teaching.length'>
+                        <div class="is-fullwidth columns is-multiline" ng-show='$parent.user.teaching.length'>
                             <div class="column is-{{$parent.user.teaching.length==1?'full':'half'}}" ng-repeat='ls in $parent.user.teaching' ng-show='!ls.deleted'>
                                 <div class="message is-link">
                                     <div class="message-header"></div>
@@ -40,10 +40,9 @@
                         <div class="is-fullwidth notification has-text-centered" ng-if='!$parent.user.ratings.length'>
                             <i class="fa fa-exclamation-circle is-size-4"></i>&nbsp;No one has rated you yet! That may or may not be a good thing...
                         </div>
-                        <div class="is-fullwidth columns" ng-show='$parent.user.ratings.length'>
+                        <div class="is-fullwidth columns is-multiline" ng-show='$parent.user.ratings.length'>
                             <div class="column is-{{$parent.user.ratings.length==1?'full':'half'}}" ng-repeat='rv in $parent.user.ratings'>
                                 <div class="message is-info">
-
                                     <div class="message-header"></div>
                                     <div class="message-body has-background-grey-lighter">
                                         <div class="is-fullwidth notification">

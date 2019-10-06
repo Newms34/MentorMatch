@@ -5,6 +5,7 @@ const router = express.Router(),
     _ = require('lodash'),
     maxAttempts = 10,
     mongoose = require('mongoose'),
+    uuid = require('uuid'),
     passport = require('passport'),
     axios = require('axios'),
     remark = require('remark'),
@@ -229,6 +230,7 @@ const routeExp = function (io, pp) {
         // console.log('asking for secure(ish) user',req.cleanUsr)
         res.send(req.cleanUsr);
     });
+
     router.get('/allUsrs', this.authbit, (req, res, next) => {
         let aus = Date.now();
         console.log('Start time for AllUsrs route', aus);
@@ -495,7 +497,7 @@ const routeExp = function (io, pp) {
         remark().use(strip).process(req.body.mdMsg, function (err, txt) {
             const rawMsg = String(txt).replace(/($|\\)#/g, '').replace(/\n|\r/g, ' ')
             // console.log('TEXT IS',txtOut)
-            const msgId = Math.floor(Math.random() * 999999999).toString(32);
+            const msgId = uuid.v4();
             req.user.outMsgs.push({
                 to: req.body.users,
                 date: Date.now(),
@@ -630,9 +632,9 @@ const routeExp = function (io, pp) {
                 res.send('err');
                 return;
             } else {
-                let jrrToken = Math.floor(Math.random() * 99999).toString(32);
+                let jrrToken = uuid.v4();
                 for (let i = 0; i < 15; i++) {
-                    jrrToken += Math.floor(Math.random() * 99999).toString(32);
+                    jrrToken += uuid.v4();
                 }
                 if (!usr.email) {
                     res.send('err');
@@ -721,79 +723,107 @@ const routeExp = function (io, pp) {
             });
         }
     });
-    //rating
-    router.put('/rate', this.authbit, (req, res, next) => {
-        //add rating
-        //note that rating is from 0 to 5
+    //ratings/reviews
+
+    router.get('/review', this.authbit, (req, res, next) => {
+        //get ONE review by teacher. this route is used to see if we're replacing a review or writing a new one, and is from the STUDENT who's reviewing that teacher
+        mongoose.model('User').findOne({ $or: [{ user: req.query.tch }, { displayName: req.query.tch }] }, function (err, tc) {
+            if (err || !tc) {
+                return res.status(400).send('err');
+            }
+            console.log('tch',tc)
+            const oldReview = tc.ratings.find(q => q.rateUsr && q.rateUsr.user == req.user.user);
+            res.send(oldReview)
+        })
+        // res.send(false)
+    })
+    router.put('/review', this.authbit, (req, res, next) => {
+        //upsert review
+        //note that rateNum, the number of stars, is from 0 to 5
         //for this, we need a teacher to rate, and a lesson that involves both these two.
         //note that I was originally planning to only have completed (active==false) lessons rateable, but that doesnt really make sense if the teacher doesn't end the lesson (i.e., goes AWOL)
-        if (!req.body || !req.body.teacher || !req.body.rateNum) {
+        if (!req.body || !req.body.tch || !req.body.rateNum) {
             return res.status(400).send({
                 status: 'missingRateData'
             });
         }
-        mongoose.model('user').find({ user: req.body.teacher }, (err, tc) => {
+        const derply = [{
+            "user": {
+                "user": "dave",
+                "displayName": "HealyUnit"
+            },
+            "topics": ["JavaScript"], "active": true, "deleted": false, "_id": "5d965916a0f48b2afcbb7459"
+        }]
+        mongoose.model('User').findOne({ $or: [{ user: req.body.tch.user }, { displayName: req.body.tch.displayName }] }, (err, tc) => {
             if (err || !tc) {
                 return res.status(400).send({
                     status: 'noTeacher'
                 });
             }
-            const hasLessons = !!tc.teaching.filter(q => q.user == req.user.user).length;
-            if (!hasLessons) {
+            const hasLesson = tc.teaching.find(q =>  q.user.user == req.user.user);
+
+            // console.log('TEACHING', tc.teaching, '. ATTEMPTED TO FIND LESSON FROM THIS USR:', hasLesson, req.user.user)
+            if (!hasLesson) {
                 //user has not taken any lessons with this teacher. Cannot rate a teacher you've not 'experienced'!
                 return res.status(400).send({
                     status: 'noLessons'
                 });
             }
-            const hasRating = tc.ratings.find(q => q.rateUsr == req.user.user);
+            // return res.send('STOP')
+            const hasRating = tc.ratings.find(q => q.rateUsr.user == req.user.user);
             if (hasRating) {
                 //if this user has already rated this teacher, simply change their rating
                 hasRating.rateNum = req.body.rateNum;
-                hasRating.rateText = req.body.rateText || hasRating.rateText || null;
+                hasRating.rateText = req.body.rateText;
                 hasRating.hideName = !!req.body.hideName;
             } else {
                 tc.ratings.push({
-                    rateUsr: req.user.user,
+                    rateUsr: {user:req.user.user,displayName:req.user.displayName},
                     rateNum: Math.min(5, Math.max(0, req.body.rateNum)),
                     rateText: req.body.rateText || null,
                     hideName: !!req.body.hideName
                 });
             }
+            // console.log('TC RATINGS', tc.ratings)
             tc.save((err, usv) => {
-                res.send('done');
+                io.emit('refresh', { user: tc.user });
+                res.send({err:err,usv:usv});
             })
         })
     })
-    router.delete('/rating', this.authbit, (req, res, next) => {
+    router.delete('/review', this.authbit, (req, res, next) => {
         //remove a rating
-        if (!req.body || !req.body.teacher) {
+        if (!req.body || !req.body.tch) {
             return res.status(400).send('noTeacher');
         }
-        mongoose.model('user').find({ user: req.body.teacher }, (err, tc) => {
+        mongoose.model('user').findOne({ $or: [{ user: req.body.tch.user }, { displayName: req.body.tch.displayName }] }, (err, tc) => {
             if (err || !tc) {
                 return res.status(400).send('noTeacher');
             }
-            const theRating = tc.ratings.find(q => q.rateUsr == req.user.user);
+            const theRating = tc.ratings.find(q => q.rateUsr.user == req.user.user);
             if (!theRating) {
                 return res.status(400).send('noRating');
             }
-            tc.ratings = tc.ratings.filter(q => q.rateUsr != req.user.user);
-            tc.save();
-            res.send('done');
+            tc.ratings = tc.ratings.filter(q => q.rateUsr.user != req.user.user);
+            tc.save((a, b) => {
+                io.emit('refresh', { user: tc.user });
+                res.send('done');
+            });
         })
     })
-    router.get('/rating', this.authbit, (req, res, next) => {
+    router.post('/reviews', this.authbit, (req, res, next) => {
         //get the ratings + calculated avg for this user
-        if (!req.body || !req.body.usr) {
+        if (!req.body || !req.body.tch) {
             return res.status(400).send('noTeacher');
         }
-        mongoose.model('user').find({ user: req.body.usr }, (err, ru) => {
+        //we COULD use req.user here, but this will also be used for other accounts to see this user's reviews. IOW, if a student wants to see a teacher's reviews before applying to take a course from them
+        mongoose.model('User').findOne({ $or: [{ user: req.body.tch.user }, { displayName: req.body.tch.displayName }] }, (err, ru) => {
             if (err || !ru) {
                 return res.status(400).send('noUsr');
             }
             const rateObj = {
                 msg: null,
-                ratings: null,
+                ratings: [],
                 stars: null
             }
             if (!ru.ratings.length) {
@@ -810,13 +840,14 @@ const routeExp = function (io, pp) {
                     rateCount = 0;
                 rateObj.ratings.forEach(roi => {
                     rateCount++;
-                    rateSum += roi.rateNum
+                    rateSum += roi.num
                 });
                 rateObj.stars = rateSum / rateCount;
             }
             res.send(rateObj)
         })
     })
+
     //match stuff
     router.post('/topicSearch', this.authbit, (req, res, next) => {
         //search for a user by list of topic titles. Return users that have ALL of those topics and have the canTeach flag set to true for each topic
@@ -857,7 +888,7 @@ const routeExp = function (io, pp) {
             if (err || !tu) {
                 return res.status(400).send('err');
             }
-            const msgId = Math.floor(Math.random() * 999999999).toString(32);
+            const msgId = uuid.v4();
             console.log('attempting to connect btwn usrs', req.body, 'USER IS', tu, typeof tu, tu.inMsgs);
             // res.send('done');
             const htmlMsg = `Hi ${req.body.displayName || req.body.user}! User ${req.user.displayName || req.user.user} wants a mentor for the following topics!<br><ul>${req.body.topics.map(q => {
@@ -898,11 +929,11 @@ const routeExp = function (io, pp) {
     router.get('/activeLessons', this.authbit, (req, res, next) => {
         mongoose.model('User').find({}).exec((err, allUsrs) => {
             const hazLesson = allUsrs.map(q => {
-                console.log('checking', q.user, 'vs', req.user.user)
+                // console.log('checking', q.user, 'vs', req.user.user)
                 let lsn = q.teaching.find(a => a.user.user == req.user.user);
                 if (q.user != req.user.user && lsn) {
                     lsn = JSON.parse(JSON.stringify(lsn))
-                    console.log('found a lesson by', q.user, 'for', req.user.user)
+                    // console.log('found a lesson by', q.user, 'for', req.user.user)
                     lsn.teacher = { user: q.user, displayName: q.displayName };
                 }
                 return lsn;
@@ -1027,7 +1058,7 @@ const routeExp = function (io, pp) {
             const htmlMsg = `Hi ${req.body.user}! Student ${req.user.user} has accepted your offer to teach them the following skills: <ul>${alsn.topics.map(q => "<li>" + q + "</li>").join('')}</ul><br/>If you're ready to teach, go ahead and click the Teach button below!`,
                 mdMsg = `Hi ${req.body.user}! Student ${req.user.user} has accepted your offer to teach them the following skills: ${alsn.topics.join(', ')}. If you're ready to teach, go ahead and click the Teach button below!`,
                 rawMsg = `Hi ${req.body.user}! Student ${req.user.user} has accepted your offer to teach them the following skills: ${alsn.topics.map(q => " - " + q + "\n").join('')}\n If you're ready to teach, go ahead and click the Teach button below!`,
-                msgId = Math.floor(Math.random() * 999999999).toString(32);
+                msgId = uuid.v4();
 
             mongoose.model('User').findOne({ user: req.body.teacher }, (errt, toUsr) => {
                 if (!toUsr) {
@@ -1087,6 +1118,147 @@ const routeExp = function (io, pp) {
             })
         })
     });
+
+    //dashboard lesson stuff: request lesson discussion, request lesson end, report lesson.
+    router.post('/reqDiscussLesson', this.authbit, (req, res, next) => {
+        if (!req.body || !req.body.user || !req.body.teacher) {
+            return res.status(400).send('err')
+        }
+        const topList = req.body.topics.length > 1 ? req.body.topics.slice(0, -1).join(', ') + ' and ' + req.body.topics.slice(-1) : req.body.topics[0],
+            mdMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Your student ${req.body.user.displayName || req.body.user.user} wishes to discuss the lesson on \n${req.body.topics.map(q => ' - ' + q + '\n')} Go ahead and reply back to this message!`,
+            htmlMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Your student ${req.body.user.displayName || req.body.user.user} wishes to discuss the lesson on <ul>${req.body.topics.map(q => '<li>' + q + '</li>')}</ul><br> Go ahead and reply back to this message!`,
+            rawMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Your student ${req.body.user.displayName || req.body.user.user} wishes to discuss the lesson on ${topList}. Go ahead and reply back to this message!`
+        msgId = uuid.v4();
+        req.user.outMsgs.push({
+            to: [{
+                user: req.body.teacher.user,
+                displayName: req.body.teacher.displayName
+            }],
+            mdMsg: mdMsg,
+            htmlMsg: htmlMsg,
+            rawMsg: rawMsg,
+            msgId: msgId
+        });
+        mongoose.model('User').findOne({
+            $or: [{ user: req.body.teacher.user },
+            { displayName: req.body.teacher.displayName }]
+        }, (err, usr) => {
+            if (!usr) {
+                return res.status(400).send('err');
+            }
+            usr.inMsgs.push({
+                from: {
+                    user: req.body.user.user,
+                    displayName: req.body.user.displayName
+                },
+                mdMsg: mdMsg,
+                htmlMsg: htmlMsg,
+                rawMsg: rawMsg,
+                msgId: msgId
+            })
+            usr.save((a, b) => {
+                io.emit('refresh', { user: req.body.teacher.user })
+            })
+            req.user.save((a, b) => {
+                res.send('refresh');
+            })
+        })
+    })
+
+    router.post('/reqEndLesson', this.authbit, (req, res, next) => {
+        if (!req.body || !req.body.user || !req.body.teacher) {
+            return res.status(400).send('err')
+        }
+        const topList = req.body.topics.length > 1 ? req.body.topics.slice(0, -1).join(', ') + ' and ' + req.body.topics.slice(-1) : req.body.topics[0],
+            mdMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Your student ${req.body.user.displayName || req.body.user.user} wants to end the lesson  \n${req.body.topics.map(q => ' - ' + q + '\n')} If you agree, head over to the Mentoring page and end this lesson.`,
+            htmlMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Your student ${req.body.user.displayName || req.body.user.user} wants to end the lesson  <ul>${req.body.topics.map(q => '<li>' + q + '</li>')}</ul><br> If you agree, head over to the Mentoring page and end this lesson.`,
+            rawMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Your student ${req.body.user.displayName || req.body.user.user} wants to end the lesson  ${topList}. If you agree, head over to the Mentoring page and end this lesson.`
+        msgId = uuid.v4();
+        req.user.outMsgs.push({
+            to: [{
+                user: req.body.teacher.user,
+                displayName: req.body.teacher.displayName
+            }],
+            mdMsg: mdMsg,
+            htmlMsg: htmlMsg,
+            rawMsg: rawMsg,
+            msgId: msgId
+        });
+        mongoose.model('User').findOne({
+            $or: [{ user: req.body.teacher.user },
+            { displayName: req.body.teacher.displayName }]
+        }, (err, usr) => {
+            if (!usr) {
+                return res.status(400).send('err');
+            }
+            usr.inMsgs.push({
+                from: {
+                    user: req.body.user.user,
+                    displayName: req.body.user.displayName
+                },
+                mdMsg: mdMsg,
+                htmlMsg: htmlMsg,
+                rawMsg: rawMsg,
+                msgId: msgId
+            })
+            usr.save((a, b) => {
+                io.emit('refresh', { user: req.body.teacher.user })
+            })
+            req.user.save((a, b) => {
+                res.send('refresh');
+            })
+        })
+    })
+
+    router.post('/repLesson', this.authbit, (req, res, next) => {
+        if (!req.body || !req.body.user || !req.body.teacher) {
+            return res.status(400).send('err')
+        }
+        const topList = req.body.topics.length > 1 ? req.body.topics.slice(0, -1).join(', ') + ' and ' + req.body.topics.slice(-1) : req.body.topics[0],
+            mdMsg = `User ${req.user.displayName || req.user.user} reported a lesson by mentor ${req.body.teacher.displayName || req.body.teacher.user} on: \n${req.body.topics.map(q => ' - ' + q + '\n')} \nReport time: ${new Date().toLocaleString()}`,
+            htmlMsg = `User ${req.user.displayName || req.user.user} reported a lesson by mentor ${req.body.teacher.displayName || req.body.teacher.user} on: <ul>${req.body.topics.map(q => '<li>' + q + '</li>')}</ul><br> Report time: ${new Date().toLocaleString()}`,
+            rawMsg = `User ${req.user.displayName || req.user.user} reported a lesson by mentor ${req.body.teacher.displayName || req.body.teacher.user} on: ${topList}. Report time: ${new Date().toLocaleString()}`
+        msgId = uuid.v4();
+        req.user.outMsgs.push({
+            to: [{
+                user: '(mod team)',
+                displayName: '(mod team)'
+            }],
+            mdMsg: mdMsg,
+            htmlMsg: htmlMsg,
+            rawMsg: rawMsg,
+            msgId: msgId
+        });
+        mongoose.model('User').find({
+            mod: true,
+            user: {
+                $in: [req.user.user,
+                req.body.teacher.user]
+            }
+        }, (err, usrs) => {
+            if (!usrs || !usrs.length) {
+                return res.status(400).send('noUsrs');
+            }
+            usrs.forEach(usr => {
+                usr.inMsgs.push({
+                    from: {
+                        user: req.body.iser.user,
+                        displayName: req.body.iser.displayName
+                    },
+                    mdMsg: mdMsg,
+                    htmlMsg: htmlMsg,
+                    rawMsg: rawMsg,
+                    msgId: msgId
+                })
+                usr.save((a, b) => {
+                    io.emit('refresh', { user: usr.user })
+                })
+            })
+            req.user.save((a, b) => {
+                res.send('refresh');
+            })
+        })
+    })
 
     router.get('/genDemoUser', this.authbit, isMod, (req, res, next) => {
         const user = `${demoNames.adjectives[Math.floor(Math.random() * demoNames.adjectives.length)]}-${demoNames.animals[Math.floor(Math.random() * demoNames.animals.length)]}-${Math.ceil(Math.random() * 99)}`

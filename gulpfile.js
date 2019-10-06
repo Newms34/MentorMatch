@@ -110,9 +110,10 @@ gulp.task('scripts', function () {
         .pipe(iife())
         .pipe(gulp.dest('public/js'))
         .pipe(babel({
-            presets: ['es2015']
+            presets: ['es2015'],
+            plugins:['angularjs-annotate']
         }))
-        .pipe(ngAnnotate())
+        // .pipe(ngAnnotate())
         .pipe(terser())
         // .pipe(uglify({warnings:true}).on('error', gutil.log))
         .pipe(th2.obj((file, enc, cb) => {

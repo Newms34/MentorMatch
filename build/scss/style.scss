@@ -57,18 +57,57 @@ $tenNames: two, three, four, five, six, seven, eight, nine;
 .check-list {
   list-style-type: none !important;
 }
-.prof-pic{
-  max-width:300px;
+.prof-pic {
+  max-width: 300px;
 }
-.notif-spaced{
-  margin-top:0.75rem;
+.notif-spaced {
+  margin-top: 0.75rem;
 }
-.dave-tabs{
-  border-bottom:none!important;
-  & li a{
-    text-decoration:none!important;
-    &:not(.is-active){
+.dave-tabs {
+  border-bottom: none !important;
+  & li a {
+    text-decoration: none !important;
+    &:not(.is-active) {
       background: #ddd;
     }
+  }
+}
+.chalkboard {
+  background: #242;
+  font-family: "Papyrus";
+  color: #e0dbd1;
+  border-bottom: 1px solid #aaa;
+  border-bottom-width: 10px !important;
+  border-left: 1px solid #aaa;
+  border-left-width: 2px !important;
+  border-right: 1px solid #aaa;
+  border-right-width: 2px !important;
+  & li {
+    list-style-type: none;
+    &::before {
+      content: "✓ ";
+    }
+  }
+  & .eraser {
+    width: 20px;
+    height: 10px;
+    background:#777;
+    box-shadow: 1px 1px 1px #121;
+    position:relative;
+    bottom:0px;
+    transition-duration: .2s;
+    &:hover{
+      transform:translateY(-5px) translateX(-1px);
+      box-shadow: 6px 2px 1px #121;
+    }
+  }
+}
+.pokey{
+  cursor:pointer;
+}
+.star-fade{
+  transition-duration:.5s;
+  &:hover{
+    color:#55c;
   }
 }
