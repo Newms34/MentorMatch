@@ -202,7 +202,7 @@
             <div class="is-fullwidth" ng-show='viewReqLessons'>
                 <!-- lesson cards -->
                 <div class="is-fullwidth columns">
-                    <div class="column is-full is-italic has-text-centered">
+                    <div class="column is-full is-italic has-text-centered" ng-if='!requestedLessons || !requestedLessons.length'>
                         There are no requested lessons currently!
                     </div>
                     <div class="column is-one-fifth message is-info" ng-repeat='rl in requestedLessons'>
