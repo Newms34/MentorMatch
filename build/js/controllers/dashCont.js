@@ -1,6 +1,7 @@
 app.controller('dash-cont', ($scope, $http, $q, userFact) => {
     // console.log("Dashboard ctrl registered")
     $scope.refUsr = $scope.$parent.refUsr;
+    
     $scope.refUsr();
     $scope.updateTopics = () => {
         // console.log('Would updoot topics here! Val we passed was',e)

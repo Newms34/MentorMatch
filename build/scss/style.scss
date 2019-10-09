@@ -91,23 +91,54 @@ $tenNames: two, three, four, five, six, seven, eight, nine;
   & .eraser {
     width: 20px;
     height: 10px;
-    background:#777;
+    background: #777;
     box-shadow: 1px 1px 1px #121;
-    position:relative;
-    bottom:0px;
-    transition-duration: .2s;
-    &:hover{
-      transform:translateY(-5px) translateX(-1px);
+    position: relative;
+    bottom: 0px;
+    transition-duration: 0.2s;
+    &:hover {
+      transform: translateY(-5px) translateX(-1px);
       box-shadow: 6px 2px 1px #121;
     }
   }
 }
-.pokey{
-  cursor:pointer;
+.pokey {
+  cursor: pointer;
 }
-.star-fade{
-  transition-duration:.5s;
-  &:hover{
-    color:#55c;
+.star-fade {
+  transition-duration: 0.5s;
+  &:hover {
+    color: #55c;
+  }
+}
+#bg-wait {
+  font-size: 24pt;
+  height: 102vh;
+  width: 100%;
+  background: hsla(0, 0%, 0%, 0.9);
+  position: fixed;
+  color: #fff;
+  text-align: center;
+  top: 0;
+  left:0;
+  line-height: 12;
+  z-index:99;
+}
+.loady-spin{
+  display:inline-block;
+  height:40px;
+  width:40px;
+  border-radius: 50%;
+  border-top:2px solid #ddd;
+  border-left:2px solid #ddd;
+  animation: spin 1s linear infinite;
+  transform-origin:50% 50%;
+}
+@keyframes spin{
+  from{
+    transform:rotateZ(0deg);
+  }
+  to{
+    transform:rotateZ(360deg)
   }
 }

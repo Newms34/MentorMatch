@@ -188,7 +188,7 @@ app
                             //needs to resize img (usually for avatar)
                             resizeDataUrl(scope, theURI, scope.$parent.needsResize, scope.$parent.needsResize, tempName);
                         } else {
-                            console.log('APPLYING file to $parent',scope.$parent);
+                            console.log('APPLYING file to $parent', scope.$parent);
                             scope.$apply(function () {
                                 if (scope.$parent && scope.$parent.$parent && scope.$parent.$parent.avas) {
 
@@ -222,7 +222,69 @@ app
                 });
             }
         };
+    }])
+    .directive("waitForData", [function () {
+        return {
+            restrict: 'A',
+            // scope: {
+            //     props: "="
+            // },
+            link: function (scope, element, attributes) {
+                console.log('wfd el is', element, 'scope is', scope, 'attribs are (is?)', attributes)
+                scope.wfdArr = attributes.waitForData.split(',').map(q => q.trim());
+                // setTimeout(function () {
+                //     // scope.watch()
+                //     propsToWatch.forEach(q => {
+                //         const propName = q.trim(),
+                //             propVal = getVal(scope, q);
+                //         console.log('prop', q, 'is', scope[q])
+                //     });
+                // }, 3000);
+                const bgWait = document.createElement('div');
+                // bgWait.className = 'modal-background';
+                bgWait.id = 'bg-wait';
+                bgWait.innerHTML = 'Loading <div class="loady-spin"></div>';
+                document.querySelector('body').append(bgWait);
+                document.querySelector('#full-win').style.filter = "blur(9px)";
+                let waiters = scope.wfdArr.map(function(q){
+                    // console.log('SCOPE HERE IS',scope)
+                    const wfdIObj = {
+                        fn: null,
+                        name: q,
+                        data:null
+                    }
+                    wfdIObj.fn = scope.$watch(q, function(nv, ov) {
+                            wfdIObj.data=nv;
+                            console.log('WANNA COMPARE',waiters.filter(a=>!!a.data),'TO',scope.wfdArr)
+                            if(waiters.filter(a=>!!a.data).length>=scope.wfdArr.length){
+                                waiters = [];//clear waiters so we're not polluting the scope;
+                                document.querySelector('body').removeChild(document.querySelector('#bg-wait'));
+                                document.querySelector('#full-win').style.filter = "none";
+                            }
+                            // console.log('WAITERS W DATA',waiters.filter(a=>!!a.data))
+                        });
+                    return wfdIObj;
+                });
+                console.log('waiters',waiters)
+            }
+            // controller:function($scope, $element, $attrs,){
+            //     console.log('SCOPE',$scope,'EL',$element)
+            // }
+        };
     }]);
+const getVal = (s, v) => {
+    const props = v.split('.'), theObjs = []; // split property names
+    theObjs.push(s);
+    for (let i = 0; i < props.length; i++) {
+        // console.log('S IS NOW',s,'AND TRYING TO GET PROP',props[i],'FULL LIST IS',theObjs)
+        if (typeof s != "undefined") {
+            // s = s[props[i]]; // go next level
+            theObjs.push(theObjs[theObjs.length - 1][props[i]]);
+        }
+    }
+    console.log('FINAL OBJ FOR', v, 'IS', theObjs[theObjs.length - 1])
+    return theObjs[theObjs.length - 1]
+}
 // .filter('markdown', ['$sce', function ($sce) {
 //     return function (md) {
 //         // const video_id = url.split('v=')[1].split('&')[0];
@@ -293,6 +355,7 @@ function postrenderAction($timeout) {
 app.controller('dash-cont', ($scope, $http, $q, userFact) => {
     // console.log("Dashboard ctrl registered")
     $scope.refUsr = $scope.$parent.refUsr;
+    
     $scope.refUsr();
     $scope.updateTopics = () => {
         // console.log('Would updoot topics here! Val we passed was',e)
