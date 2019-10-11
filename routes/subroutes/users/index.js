@@ -30,8 +30,8 @@ const router = express.Router(),
 // const oldUsers = JSON.parse(fs.readFileSync('oldUsers.json', 'utf-8'))
 let sgApi;
 mongoose.Promise = Promise;
-if (fs.existsSync('sparky.json')) {
-    sparkyConf = JSON.parse(fs.readFileSync('sparky.json', 'utf-8'));
+if (fs.existsSync('./config/sparky.json')) {
+    sparkyConf = JSON.parse(fs.readFileSync('./config/sparky.json', 'utf-8'));
 } else {
     sparkyConf = {
         SPARKPOST_API_KEY: process.env.SPARKPOST_API_KEY,
@@ -620,7 +620,7 @@ const routeExp = function (io, pp) {
         });
     });
     router.post('/forgot', function (req, res, next) {
-        //user enters password, requests reset email
+        //user enters username, requests reset email
         //this IS call-able without credentials, but
         //as all it does is send out a reset email, this
         //shouldn't be an issue
@@ -632,7 +632,7 @@ const routeExp = function (io, pp) {
                 res.send('err');
                 return;
             } else {
-                let jrrToken = uuid.v4();
+                let jrrToken = uuid.v1();
                 for (let i = 0; i < 15; i++) {
                     jrrToken += uuid.v4();
                 }
@@ -692,8 +692,10 @@ const routeExp = function (io, pp) {
             mongoose.model('User').findOne({
                 reset: rst
             }, function (err, usr) {
-                if (err || !usr) {
-                    res.send('err');
+                if (err) {
+                    res.status(400).send('err');
+                }else if(!usr){
+                    res.status(400).send('noUsr');
                 } else {
                     res.send(usr);
                 }
@@ -747,13 +749,7 @@ const routeExp = function (io, pp) {
                 status: 'missingRateData'
             });
         }
-        const derply = [{
-            "user": {
-                "user": "dave",
-                "displayName": "HealyUnit"
-            },
-            "topics": ["JavaScript"], "active": true, "deleted": false, "_id": "5d965916a0f48b2afcbb7459"
-        }]
+  
         mongoose.model('User').findOne({ $or: [{ user: req.body.tch.user }, { displayName: req.body.tch.displayName }] }, (err, tc) => {
             if (err || !tc) {
                 return res.status(400).send({
@@ -1260,6 +1256,40 @@ const routeExp = function (io, pp) {
         })
     })
 
+    //mentor page routes (message student, toggle active, hide)
+    router.post('/LCmsgStudent',this.authbit,(req,res,next)=>{
+
+    })
+    router.get('/LCtoggleHide',this.authbit,(req,res,next)=>{
+        if(!req.query.id){
+            return res.status(400).send('err');
+        }
+        const theLesson = req.user.teaching.find(q=>q._id==req.query.id);
+        if(!theLesson){
+            return res.status(400).send('err');
+        }
+        theLesson.hidden = !theLesson.hidden;
+        req.user.save((a,b)=>{
+            io.emit('refresh',{user:theLesson.user.user});
+            res.send('refresh');
+        })
+    })
+    router.get('/LCtoggleActive',this.authbit,(req,res,next)=>{
+        if(!req.query.id){
+            return res.status(400).send('err');
+        }
+        const theLesson = req.user.teaching.find(q=>q._id==req.query.id);
+        if(!theLesson){
+            return res.status(400).send('err');
+        }
+        theLesson.active = !theLesson.active;
+        req.user.save((a,b)=>{
+            io.emit('refresh',{user:theLesson.user.user});
+            res.send('refresh');
+        })
+    })
+
+    //generate a demo user (mod only!)
     router.get('/genDemoUser', this.authbit, isMod, (req, res, next) => {
         const user = `${demoNames.adjectives[Math.floor(Math.random() * demoNames.adjectives.length)]}-${demoNames.animals[Math.floor(Math.random() * demoNames.animals.length)]}-${Math.ceil(Math.random() * 99)}`
         req.body = {

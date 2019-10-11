@@ -18,7 +18,7 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
             return;
         }
         $http.post('/user/forgot', { user: $scope.user }).then(function (r) {
-            $log.debug('forgot route response', r);
+            console.log('forgot route response', r);
             if (r.data == 'err') {
                 bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Forgot Password Error', "It looks like that account either doesn't exist, or doesn't have an email registered with it! Contact a mod for further help.");
             } else {
@@ -73,7 +73,7 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
             $log.debug('derp');
             bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Password Mismatch', 'Your passwords don\'t match, or are missing!');
         } else if (!$scope.email || $scope.emailBad) {
-            bulmabox.confirm('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Send Without Email?', `You've either not included an email, or the format you're using doesn't seem to match any we know. <br>While you can register without a valid email, it'll be much more difficult to recover your account.<br>Register anyway?`, function (resp) {
+            bulmabox.confirm('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Send Without Email?', `You've either not included an email, or the format you're using doesn't seem to match any we know. <br>While you <i>can</i> register without a valid email, it'll be much more difficult to recover your account if you forget your password!<br>Register anyway?`, function (resp) {
                 if (!resp || resp == null) {
                     return false;
                 }

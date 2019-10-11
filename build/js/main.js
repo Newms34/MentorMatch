@@ -78,7 +78,7 @@ app
                 url: '/mail',
                 templateUrl: 'components/mail.html'
             })
-            //SIMPLE (unauth'd: login, register, forgot, 404, 500)
+            //SIMPLE (unauth'd: login, register, forgot, 404, 500,reset)
             .state('appSimp', {
                 abstract: true,
                 templateUrl: 'components/layout/simp.html'
@@ -227,69 +227,32 @@ app
             //     props: "="
             // },
             link: function (scope, element, attributes) {
-                console.log('wfd el is', element, 'scope is', scope, 'attribs are (is?)', attributes)
                 scope.wfdArr = attributes.waitForData.split(',').map(q => q.trim());
-                // setTimeout(function () {
-                //     // scope.watch()
-                //     propsToWatch.forEach(q => {
-                //         const propName = q.trim(),
-                //             propVal = getVal(scope, q);
-                //         console.log('prop', q, 'is', scope[q])
-                //     });
-                // }, 3000);
                 const bgWait = document.createElement('div');
-                // bgWait.className = 'modal-background';
                 bgWait.id = 'bg-wait';
                 bgWait.innerHTML = 'Loading <div class="loady-spin"></div>';
                 document.querySelector('body').append(bgWait);
                 document.querySelector('#full-win').style.filter = "blur(9px)";
-                let waiters = scope.wfdArr.map(function(q){
+                let waiters = scope.wfdArr.map(function (q) {
                     // console.log('SCOPE HERE IS',scope)
                     const wfdIObj = {
                         fn: null,
                         name: q,
-                        data:null
+                        data: null
                     }
-                    wfdIObj.fn = scope.$watch(q, function(nv, ov) {
-                            wfdIObj.data=nv;
-                            console.log('WANNA COMPARE',waiters.filter(a=>!!a.data),'TO',scope.wfdArr)
-                            if(waiters.filter(a=>!!a.data).length>=scope.wfdArr.length){
-                                waiters = [];//clear waiters so we're not polluting the scope;
-                                document.querySelector('body').removeChild(document.querySelector('#bg-wait'));
-                                document.querySelector('#full-win').style.filter = "none";
-                            }
-                            // console.log('WAITERS W DATA',waiters.filter(a=>!!a.data))
-                        });
+                    wfdIObj.fn = scope.$watch(q, function (nv, ov) {
+                        wfdIObj.data = nv;
+                        if (waiters.filter(a => !!a.data).length >= scope.wfdArr.length) {
+                            waiters = [];//clear waiters so we're not polluting the scope;
+                            document.querySelector('body').removeChild(document.querySelector('#bg-wait'));
+                            document.querySelector('#full-win').style.filter = "none";
+                        }
+                    });
                     return wfdIObj;
                 });
-                console.log('waiters',waiters)
             }
-            // controller:function($scope, $element, $attrs,){
-            //     console.log('SCOPE',$scope,'EL',$element)
-            // }
         };
     }]);
-const getVal = (s, v) => {
-    const props = v.split('.'), theObjs = []; // split property names
-    theObjs.push(s);
-    for (let i = 0; i < props.length; i++) {
-        // console.log('S IS NOW',s,'AND TRYING TO GET PROP',props[i],'FULL LIST IS',theObjs)
-        if (typeof s != "undefined") {
-            // s = s[props[i]]; // go next level
-            theObjs.push(theObjs[theObjs.length - 1][props[i]]);
-        }
-    }
-    console.log('FINAL OBJ FOR', v, 'IS', theObjs[theObjs.length - 1])
-    return theObjs[theObjs.length - 1]
-}
-// .filter('markdown', ['$sce', function ($sce) {
-//     return function (md) {
-//         // const video_id = url.split('v=')[1].split('&')[0];
-//         const conv = new showdown.Converter();
-//         return $sce.trustAsHtml(conv.makeHtml(md));
-//     };
-// }]);
-
 
 String.prototype.titleCase = function () {
     return this.split(/\s/).map(t => t.slice(0, 1).toUpperCase() + t.slice(1).toLowerCase()).join(' ');

@@ -97,8 +97,8 @@ const usrSchema = new mongoose.Schema({
             type: Boolean,
             default: true
         },
-        deleted: {
-            //note that we never actually DELETE a lesson, since we need this to tell if a user can rate a particular teacher. However, deleted lessons will not show up on a teacher's history.
+        hidden: {
+            //note that we never actually DELETE a lesson, since we need them to tell if a user can rate a particular teacher. However, hidden lessons will not show up on a teacher's history.
             type: Boolean,
             default: false
         }

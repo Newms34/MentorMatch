@@ -5,15 +5,14 @@
             <h3 class='card-header-title is-primary'>Register</h3>
         </div>
         <div class='panel-block has-background-white'>
-            <form name='regForm' novalidate>
+            <form name='regForm' novalidate class='is-fullwidth'>
                 <div class='card card-content' ng-if='!noWarn'>
                     Warning:
                     <button class="button is-small is-danger is-pulled-right" ng-click='noWarn=true;'>x</button>
                     <div class='is-size-7'>
-                        
-                     Do <i>not</i> use your Guild Wars 2 account information! I (Dave) hold <i>no</i> responsibility for your accounts!<br>
-                    Please note that you will <i>not</i> be able to view the site until you're approved by a moderator.</div>
+                        This app isn't 100% secure yet. Use at your own risk!
                     </div>
+                </div>
                 <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>Account Information</h4>
                 <div class="field">
                     <p class="control has-icons-left">
@@ -22,7 +21,7 @@
                             <i class="fa fa-user"></i>
                         </span>
                     </p>
-                        <div class='notification is-danger' ng-if='!nameOkay'>This username is already in use!</div>
+                    <div class='notification is-danger' ng-if='!nameOkay'>This username is already in use!</div>
                 </div>
                 <div class="field">
                     <p class="control has-icons-left">
@@ -47,8 +46,8 @@
                         </span>
                     </p>
                 </div>
-                <button class='button is-success' type='submit' ng-click='register()'>Register</button>
-                <button class='button is-warning' ng-click='goLog()'>I have an account</button>
+                <button class='button is-link' type='submit' ng-click='register()'>Register</button>
+                <button class='button is-info' ng-click='goLog()'>I have an account</button>
             </form>
         </div>
     </div>

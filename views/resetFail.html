@@ -24,17 +24,21 @@
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
 </head>
 
-<body ng-app='reset-app' ng-controller='reset-contr'>
-    <div class="panel">
+<body class='columns'>
+    <div class="column is-one-quarter"></div>
+    <div class="column is-half panel">
         <div class="panel-heading has-background-danger has-text-white"><i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Password Reset Failure</div>
-        <div class="panel-block has-background-white">
-            <div class="notification">
+        <div class="panel-block has-background-white blocky">
+            <div class="notification is-fullwidth">
             	We are unable to find an account associated with the provided reset code. Please check your email and try again.
             </div>
-            <button class="button has-background-white" ng-click='goLogin()'><i class="fa fa-arrow-left"></i> Back to Login</button>
+            <div class="is-fullwidth has-text-centered">
+                <a href="../../login" class="button has-background-white"><i class="fa fa-arrow-left"></i> Back to Login</a>
+                <!-- <button class="button has-background-white" ng-click='goLogin()'><i class="fa fa-arrow-left"></i> Back to Login</button> -->
+            </div>
         </div>
     </div>
-    <script src="/js/all.min.js"></script>
+    <!-- <script src="/js/all.min.js"></script> -->
 
 </body>
 

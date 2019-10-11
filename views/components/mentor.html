@@ -23,10 +23,11 @@
                                                 <li ng-repeat='t in ls.topics'>{{t}}</li>
                                             </ul>
                                         </div>
+                                        {{ls}}
                                         <div class="is-fullwidth has-text-centered">
-                                            <button class="button is-small is-link"><i class="fa fa-envelope"></i>&nbsp;Send Message</button>
-                                            <button class="button is-small is-info"><i class="fa fa-{{ls.active?'times':'check'}}"></i>&nbsp;{{ls.active?'Deactivate':'Activate'}}</button>
-                                            <button class="button is-small is-danger" title='Delete this lesson from your list'><i class="fa fa-trash"></i>&nbsp;Delete</button>
+                                            <button class="button is-small is-link" ng-click='messageUser(ls)' title="Send a message to {{ls.user.displayName||ls.user.user}} that you'd like to talk to them."><i class="fa fa-envelope"></i>&nbsp;Send Message</button>
+                                            <button class="button is-small is-info" title ='{{!!ls.active?"Deactivate":"Activate"}} this lesson' ng-click='toggleActive(ls)'><i class="fa fa-{{ls.active?'times':'check'}}"></i>&nbsp;{{ls.active?'Deactivate':'Activate'}}</button>
+                                            <button class="button is-small is-dark" ng-click='toggleHide(ls)' title='{{ls.hidden?"Unhide":"Hide"}} this lesson'><i class="fa fa-eye{{ls.hidden?'':'-slash'}}"></i>&nbsp;{{ls.hidden?'Unhide':'Hide'}}</button>
                                         </div>
                                     </div>
                                 </div>

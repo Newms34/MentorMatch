@@ -81,7 +81,7 @@ app
                 url: '/mail',
                 templateUrl: 'components/mail.html'
             })
-            //SIMPLE (unauth'd: login, register, forgot, 404, 500)
+            //SIMPLE (unauth'd: login, register, forgot, 404, 500,reset)
             .state('appSimp', {
                 abstract: true,
                 templateUrl: 'components/layout/simp.html'
@@ -230,69 +230,32 @@ app
             //     props: "="
             // },
             link: function (scope, element, attributes) {
-                console.log('wfd el is', element, 'scope is', scope, 'attribs are (is?)', attributes)
                 scope.wfdArr = attributes.waitForData.split(',').map(q => q.trim());
-                // setTimeout(function () {
-                //     // scope.watch()
-                //     propsToWatch.forEach(q => {
-                //         const propName = q.trim(),
-                //             propVal = getVal(scope, q);
-                //         console.log('prop', q, 'is', scope[q])
-                //     });
-                // }, 3000);
                 const bgWait = document.createElement('div');
-                // bgWait.className = 'modal-background';
                 bgWait.id = 'bg-wait';
                 bgWait.innerHTML = 'Loading <div class="loady-spin"></div>';
                 document.querySelector('body').append(bgWait);
                 document.querySelector('#full-win').style.filter = "blur(9px)";
-                let waiters = scope.wfdArr.map(function(q){
+                let waiters = scope.wfdArr.map(function (q) {
                     // console.log('SCOPE HERE IS',scope)
                     const wfdIObj = {
                         fn: null,
                         name: q,
-                        data:null
+                        data: null
                     }
-                    wfdIObj.fn = scope.$watch(q, function(nv, ov) {
-                            wfdIObj.data=nv;
-                            console.log('WANNA COMPARE',waiters.filter(a=>!!a.data),'TO',scope.wfdArr)
-                            if(waiters.filter(a=>!!a.data).length>=scope.wfdArr.length){
-                                waiters = [];//clear waiters so we're not polluting the scope;
-                                document.querySelector('body').removeChild(document.querySelector('#bg-wait'));
-                                document.querySelector('#full-win').style.filter = "none";
-                            }
-                            // console.log('WAITERS W DATA',waiters.filter(a=>!!a.data))
-                        });
+                    wfdIObj.fn = scope.$watch(q, function (nv, ov) {
+                        wfdIObj.data = nv;
+                        if (waiters.filter(a => !!a.data).length >= scope.wfdArr.length) {
+                            waiters = [];//clear waiters so we're not polluting the scope;
+                            document.querySelector('body').removeChild(document.querySelector('#bg-wait'));
+                            document.querySelector('#full-win').style.filter = "none";
+                        }
+                    });
                     return wfdIObj;
                 });
-                console.log('waiters',waiters)
             }
-            // controller:function($scope, $element, $attrs,){
-            //     console.log('SCOPE',$scope,'EL',$element)
-            // }
         };
     }]);
-const getVal = (s, v) => {
-    const props = v.split('.'), theObjs = []; // split property names
-    theObjs.push(s);
-    for (let i = 0; i < props.length; i++) {
-        // console.log('S IS NOW',s,'AND TRYING TO GET PROP',props[i],'FULL LIST IS',theObjs)
-        if (typeof s != "undefined") {
-            // s = s[props[i]]; // go next level
-            theObjs.push(theObjs[theObjs.length - 1][props[i]]);
-        }
-    }
-    console.log('FINAL OBJ FOR', v, 'IS', theObjs[theObjs.length - 1])
-    return theObjs[theObjs.length - 1]
-}
-// .filter('markdown', ['$sce', function ($sce) {
-//     return function (md) {
-//         // const video_id = url.split('v=')[1].split('&')[0];
-//         const conv = new showdown.Converter();
-//         return $sce.trustAsHtml(conv.makeHtml(md));
-//     };
-// }]);
-
 
 String.prototype.titleCase = function () {
     return this.split(/\s/).map(t => t.slice(0, 1).toUpperCase() + t.slice(1).toLowerCase()).join(' ');
@@ -725,7 +688,7 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
             return;
         }
         $http.post('/user/forgot', { user: $scope.user }).then(function (r) {
-            $log.debug('forgot route response', r);
+            console.log('forgot route response', r);
             if (r.data == 'err') {
                 bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Forgot Password Error', "It looks like that account either doesn't exist, or doesn't have an email registered with it! Contact a mod for further help.");
             } else {
@@ -780,7 +743,7 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
             $log.debug('derp');
             bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Password Mismatch', 'Your passwords don\'t match, or are missing!');
         } else if (!$scope.email || $scope.emailBad) {
-            bulmabox.confirm('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Send Without Email?', `You've either not included an email, or the format you're using doesn't seem to match any we know. <br>While you can register without a valid email, it'll be much more difficult to recover your account.<br>Register anyway?`, function (resp) {
+            bulmabox.confirm('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Send Without Email?', `You've either not included an email, or the format you're using doesn't seem to match any we know. <br>While you <i>can</i> register without a valid email, it'll be much more difficult to recover your account if you forget your password!<br>Register anyway?`, function (resp) {
                 if (!resp || resp == null) {
                     return false;
                 }
@@ -1437,7 +1400,34 @@ app.controller('match-cont', function ($scope, $http, $q) {
 })
 app.controller('mentor-cont', ($scope, $http, $q, userFact) => {
     // console.log("mentor ctrl registered")
-    $scope.totalStars = [0,1,2,3,4];
+    $scope.totalStars = [0, 1, 2, 3, 4];
+    $scope.messageUser = l => {
+        console.log('Would send message to', l.user);
+    }
+    $scope.toggleActive = l => {
+        const title = l.active ? "Deactivate Lesson" : "Re-activate Lesson",
+            msg = l.active ? `Are you sure you wish to deactivate (end) this lesson?` : `Are you sure you wish to re-activate (resume) this lesson?`
+        bulmabox.confirm(title, msg, r => {
+            if (!!r) {
+                $http.get('/user/LCtoggleActive?id=' + l._id)
+                    .then(r => {
+                        //do nuffin
+                    })
+            }
+        })
+    }
+    $scope.toggleHide = l => {
+        const title = l.active ? "Hide Lesson" : "Un-Hide Lesson",
+            msg = l.active ? `Are you sure you wish to hide this lesson?<br>Hiding a lesson will prevent it from showing up on your Teacher Review panel.` : `Are you sure you wish to un-hide this lesson? <br>Un-hiding a lesson will make it visible again on your Teacher Review panel.`
+        bulmabox.confirm(title, msg, r => {
+            if (!!r) {
+                $http.get('/user/LCtoggleHide?id=' + l._id)
+                    .then(r => {
+                        //do nuffin
+                    })
+            }
+        })
+    }
 })
 
 app.controller('nav-cont',function($scope,$http,$state, $log){
@@ -1459,10 +1449,18 @@ app.controller('nav-cont',function($scope,$http,$state, $log){
 });
 resetApp.controller('reset-contr',function($scope,$http,$location, $log){
     $scope.key = window.location.search.slice(5);
-
+    console.log(window.location.href)
+    $scope.isRf = window.location.href.includes('rf');
+    if(!$scope.key && !$scope.isRf){
+        window.location.href='/rf'
+    }
     $http.get('/user/resetUsr?key='+$scope.key).then(function(u){
         $log.debug('getting reset user status?',u);
         $scope.user=u.data;
+    }).catch(e=>{
+        if(e.data=='noUsr' && !$scope.isRf){
+            window.location.href='/rf'
+        }
     });
     $scope.doReset = function(){
         if(!$scope.user || !$scope.pwd || !$scope.pwdDup || $scope.pwdDup!=$scope.pwd ||!$scope.key){
