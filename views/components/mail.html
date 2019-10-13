@@ -14,15 +14,14 @@
                         <tr>
                             <th>From</th>
                             <th>Date</th>
-                            <th>Blurb</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr ng-repeat='im in $parent.user.inMsgs'>
-                            <td>{{im.from.join(',')}}</td>
+                            <td>{{im.from.displayName||im.from.user}}</td>
                             <td>{{im.date|numToDate}}</td>
-                            <td>{{im.rawMsg}}</td>
+
                             <td><button class="button is-success" title='View this message' ng-click='viewMsg(im)'><i class="fa fa-eye"></i>&nbsp;View Message</button> &nbsp;<button class="button is-info" title='Reply to this message' ng-click="replyMsg(im)"><i class="fa fa-mail-reply"></i>&nbsp;Reply</button> &nbsp;<button class="button is-info" title='{{im.isRep?"This message has already been reported!":"Report this message to the moderator team"}}' ng-disabled='im.isRep' ng-click="reportMsg(im)"><i class="fa fa-exclamation-circle"></i>&nbsp;Report</button> &nbsp;<button class="button is-info" title='Delete this message' ng-click="delMsg(im)"><i class="fa fa-trash"></i>&nbsp;Delete</button></td>
                         </tr>
                         <tr ng-if='!$parent.user || !$parent.user.inMsgs || !$parent.user.inMsgs.length'>
@@ -37,7 +36,6 @@
                         <tr>
                             <th>To</th>
                             <th>Date</th>
-                            <th>blurb</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -45,7 +43,6 @@
                         <tr ng-repeat='om in $parent.user.outMsgs'>
                             <td>{{getUserList(om.to)}}</td>
                             <td>{{om.date|numToDate}}</td>
-                            <td>{{om.rawMsg}}</td>
                             <td><button class="button is-success" title='View this message' ng-click='viewMsg(om)'><i class="fa fa-eye"></i>&nbsp;View Message</button> &nbsp;<button class="button is-info" title='Delete this message' ng-click="delMsg(om)"><i class="fa fa-trash"></i>&nbsp;Delete</button></td>
                         </tr>
                         <tr ng-if='!$parent.user || !$parent.user.outMsgs || !$parent.user.outMsgs.length'>

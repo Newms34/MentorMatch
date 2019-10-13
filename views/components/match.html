@@ -107,30 +107,12 @@
                                                 </div>
                                                 <div class="column is-three-fifths is-size-7 has-background-white">
                                                     <div class="columns is-multiline">
-                                                        <div class="column is-two-fifth has-text-weight-bold">
-                                                            <i class="fa fa-briefcase"></i>&nbsp;Company:
-                                                        </div>
-                                                        <div class="column is-three-fifths">
-                                                            {{mt.company||'(None)'}}
-                                                        </div>
-                                                        <div class="column is-full has-bottom-border"></div>
-                                                        <div class="column is-two-fifth has-text-weight-bold">
-                                                            <i class="fa fa-briefcase"></i>&nbsp;Git Link:
-                                                        </div>
-                                                        <div class="column is-three-fifths">
-                                                            <a href="{{mt.gitLink}}" ng-if='mt.gitLink' target='_blank'>{{mt.gitLink}}</a>
-                                                            <span ng-if='!mt.gitLink'>(None)</span>
-                                                        </div>
-                                                        <div class="column is-full has-bottom-border"></div>
-                                                        <hr>
-                                                        <!-- skills && toggle -->
-                                                        <div class="column is-full has-text-weight-bold" ng-class='{"has-bottom-border":mt.showProj}'>
+
+                                                        <div class="column is-full has-text-weight-bold is-size-4 has-text-centered">
                                                             <i class="fa fa-cogs"></i>&nbsp;Skills:
-                                                            <button class="button is-small is-info is-pulled-right" ng-click='mt.showProj = !mt.showProj'>
-                                                                <i class="fa fa-{{!mt.showProj?'eye-slash':'eye'}}"></i>
-                                                            </button>
+
                                                         </div>
-                                                        <div class="column is-full has-bottom-border" ng-show='!mt.showProj && mt.interests.length'>
+                                                        <div class="column is-full has-bottom-border" ng-show='mt.interests.length'>
                                                             <table class="table">
                                                                 <thead>
                                                                     <tr>
@@ -151,45 +133,16 @@
                                                                 </tbody>
                                                             </table>
                                                         </div>
-                                                        <div class="column is-full has-bottom-border" ng-show='!mt.showProj && !mt.interests.length'>
+                                                        <div class="column is-full has-bottom-border" ng-show='!mt.interests.length'>
                                                             {{mt.displayName||mt.user}} has not included any skills!
-                                                        </div>
-                                                        <!-- projects && toggle -->
-                                                        <div class="column is-full has-text-weight-bold" ng-class='{"has-bottom-border":!mt.showProj}'>
-                                                            <i class="fa fa-cogs"></i>&nbsp;Projects:
-                                                            <button class="button is-small is-info is-pulled-right" ng-click='mt.showProj=!mt.showProj'>
-                                                                <i class="fa fa-{{mt.showProj?'eye-slash':'eye'}}"></i>
-                                                            </button>
-                                                        </div>
-                                                        <div class="column is-full has-bottom-border" ng-show='mt.showProj && mt.projects.length'>
-                                                            <table class="table">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>Name</th>
-                                                                        <th>Description</th>
-                                                                        <th>Position</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <tr ng-repeat='prj in mt.projects'>
-                                                                        <td>{{prj.name}}</td>
-                                                                        <td>{{prj.description}}</td>
-                                                                        <td>{{prj.position}}</td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-
-                                                        <div class="column is-full has-bottom-border" ng-show='mt.showProj && !mt.projects.length'>
-                                                            {{mt.displayName||mt.user}} has not included any projects!
                                                         </div>
                                                         <div class="column is-full has-text-centered">
                                                             <button class="button is-link" ng-click='doConnect(mt)' ng-if='!mt.isDemoUser'><i class="fa fa-handshake-o"></i>&nbsp;Connect!</button>
+                                                            <button class="button is-info" ng-click='showTchrInfo(mt)'><i class="fa fa-eye"></i>&nbsp;View Info</button>
                                                             <button class="button is-default" disabled ng-if='mt.isDemoUser' title='This is a demo user!'><i class="fa fa-times"></i>&nbsp;Connect!</button>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                </img>
                                             </div>
                                         </div>
                                     </div>
@@ -227,7 +180,7 @@
                                 <div class='is-fullwidth is-size-7 is-italic'>The following people wanna teach you:</div>
                                 <hr>
                                 <div class="is-fullwidth" ng-repeat='an in rl.answerers'>
-                                    {{an}} <button class="button is-small is-link is-pulled-right" title='Accept this mentor' ng-click='acceptMentor(an,rl)'><i class="fa fa-check"></i>&nbsp;Accept</button>
+                                    {{an.displayName||an.user}} <button class="button is-small is-link is-pulled-right" title='Accept this mentor' ng-click='acceptMentor(an,rl)'><i class="fa fa-check"></i>&nbsp;Accept</button>
                                 </div>
                             </div>
                             <div class="is-fullwidth notification" ng-if='(!rl.answerers || !rl.answerers.length) && rl.user == $parent.user.user'>
@@ -355,6 +308,155 @@
                             <button class="button is-link is-large" ng-click='sendConnectMsg()'><i class="fa fa-check"></i>&nbsp;Connect!</button>
                             <button class="button is-info is-large" ng-click='mentCon.show=false'><i class="fa fa-times"></i>&nbsp;Nevermind...</button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" ng-class='{"is-active":tchrInfo.show==true}'>
+        <div class="modal-background" ng-click='tchrInfo.show=false'></div>
+        <div class="modal-content modal-wide">
+            <div class="panel">
+                <div class="panel-heading has-text-white has-background-grey-dark">
+                    Mentor Info: {{tchrInfo.tchr.displayName||tchrInfo.tchr.user}}
+                    <button class="button is-danger is-small is-pulled-right" ng-click='tchrInfo.show=false'>x</button>
+                </div>
+                <div class="panel-block has-background-white blocky content">
+                    <div class="is-fullwidth columns is-multiline">
+                        <div class="column is-full">&nbsp;</div>
+                        <div class="column is-full is-size-5 has-text-centered has-background-grey-lighter">
+                            <hr />About {{tchrInfo.tchr.displayName||tchrInfo.tchr.user}}
+                            <hr />
+                        </div>
+                        <div class="column is-one-fifth has-background-grey-dark has-text-white notification notif-spaced">
+                            Skills:
+                        </div>
+                        <div class="column is-four-fifths">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Skill</th>
+                                        <th>Experience (1-10)</th>
+                                        <th>Teaching?</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat='skl in tchrInfo.tchr.interests'>
+                                        <td>{{skl.title}}</td>
+                                        <td>{{skl.lvl}}</td>
+                                        <td ng-if='skl.canTeach'><i class="fa fa-check has-text-success"></i>
+                                        </td>
+                                        <td ng-if='!skl.canTeach'><i class="fa fa-times has-text-danger"></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="column is-one-fifth has-background-grey-dark has-text-white notification notif-spaced">
+                            Current company:
+                        </div>
+                        <div class="column is-four-fifths">
+                            {{tchrInfo.tchr.company||"(None given)"}}
+                        </div>
+                        <div class="column is-one-fifth has-background-grey-dark has-text-white notification notif-spaced">
+                            Github link:
+                        </div>
+                        <div class="column is-four-fifths">
+                            <div class="is-fullwidth columns">
+
+                                <div class="column is-one-tenth">&nbsp;</div>
+                                <div class="column is-nine-tenths is-italic" ng-if='!tchrInfo.tchr.gitLink'>
+                                    No github link provided!<br /> A Github link can take you to a list of this mentor's publically-available projects.
+                                </div>
+                                <div class="class='column is-nine-tenths'">
+
+                                    <a href="{{tchrInfo.tchr.gitLink}}" target="_blank">{{tchrInfo.tchr.gitLink}}</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-one-fifth has-background-grey-dark has-text-white notification notif-spaced">
+                            Projects:
+                        </div>
+                        <div class="column is-four-fifths">
+                            <div class="is-fullwidth columns is-multiline">
+                                <div class="column is-one-tenth">&nbsp;</div>
+                                <div class="column is-nine-tenths is-italic" ng-if='!tchrInfo.tchr.projects.length'>
+                                    No projects given!
+                                </div>
+                                <div class="column is-one-third notification notif-spaced" ng-repeat='p in tchrInfo.tchr.projects'>
+                                    <div class="is-fullwidth is-size-5"><em>Title:</em>&nbsp;{{p.name}}</div>
+                                    <div class="is-fullwidth">
+                                        <em>Description:</em>&nbsp;{{p.description}}
+                                    </div>
+                                    <div class="is-fullwidth">
+                                        <em>Position:</em>&nbsp;{{p.position}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-full">&nbsp;</div>
+                        <div class="column is-full is-size-5 has-text-centered has-background-grey-lighter">
+                            <hr />What They've Taught
+                            <hr />
+                        </div>
+                        <div class="column is-one-fifth has-background-grey-dark has-text-white notification notif-spaced">
+                            Lessons:
+                        </div>
+                        <div class="column is-four-fifths">
+                            <div class="is-fullwidth columns is-multiline">
+                                <div class="column is-one-tenth">&nbsp;</div>
+                                <div class="column is-nine-tenths is-italic" ng-if='!tchrInfo.tchr.teaching.length'>
+                                    This mentor hasn't started (or finished) any lessons yet!
+                                </div>
+                                <div class="column is-one-third notification notif-spaced contents" ng-repeat='t in tchrInfo.tchr.teaching' ng-if='!t.hidden'>
+                                    <div class="is-fullwidth">
+                                        <strong>Student:</strong>
+                                        {{user.displayName||user.user}}
+                                    </div>
+                                    <div class="is-fullwidth">
+                                        <strong>Skills:</strong><br>
+                                        <ul>
+                                            <li ng-repeat='tsk in t.topics'>{{tsk}}</li>
+                                        </ul>
+                                    </div>
+                                    <div class="is-fullwidth">
+                                        <strong>Ongoing?:</strong>
+                                        {{t.active?'Yes':'No'}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-full">&nbsp;</div>
+                        <div class="column is-one-fifth has-background-grey-dark has-text-white notification notif-spaced">
+                            Reviews:
+                        </div>
+                        <div class="column is-four-fifths">
+                            <div class="is-fullwidth columns is-multiline">
+                                <div class="column is-one-tenth">&nbsp;</div>
+                                <div class="column is-nine-tenths is-italic" ng-if='!tchrInfo.tchr.reviews.length'>
+                                    No one has reviewed this mentor yet! That may or may not be a good thing...
+                                </div>
+                                <div class="column is-one-third notification notif-spaced contents" ng-repeat='rv in tchrInfo.tchr.reviews'>
+                                    <div class="is-fullwidth notification">
+                                        <div class="is-fullwidth is-italic">
+                                            "{{rv.rateText||'...'}}"
+                                        </div>
+                                        - {{!rv.hideName?(rv.rateUsr.displayName||rv.rateUsr.user):'(Anonymous)'}}
+                                    </div>
+                                    <div class="is-fullwidth" title='This user gave you a rating of {{rv.rateNum}} out of 5 stars.'>
+                                        <div class="" style='display:inline-block' ng-repeat='st in totalStars'>
+                                            <i class="fa fa-{{$index>rv.rateNum-1?'star-o':'star'}}"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-full">&nbsp;</div>
+                        <div class="column is-full has-text-centered">
+                                <button class="button is-link is-large" ng-click='tchrInfo.show=false;doConnect(tchrInfo.tchr)' ng-if='!mt.isDemoUser'><i class="fa fa-handshake-o"></i>&nbsp;Connect!</button>
+                                <button class="button is-info is-large" ng-click='tchrInfo.show=false'><i class="fa fa-times"></i>&nbsp;Close</button>
+                            </div>
                     </div>
                 </div>
             </div>

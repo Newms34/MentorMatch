@@ -47,7 +47,7 @@ app.controller('mail-cont', ($scope, $http, $q) => {
         })
     }
     $scope.explStartTeach =()=>{
-        bulmabox.alert('Start Teaching', `Clicking the "Teach" button will allow the student to leave reviews for you. While there's nothing explicitly preventing you from connecting on your own, we'd still recommend you click this button, as well-written reviews are always helpful!`);
+        bulmabox.alert('Start Teaching', `Clicking the "Teach" button will allow the student to leave reviews for you. <br>While there's nothing explicitly preventing you from connecting on your own, we'd still recommend you click this button, as well-written reviews are always helpful!`);
     }
     $scope.replyMsg = m => {
         // alert('NEED MESSAGE WRITING UI!');
@@ -156,7 +156,7 @@ app.controller('mail-cont', ($scope, $http, $q) => {
     $scope.delMsg = m => {
         bulmabox.confirm('Delete Message', `Are you sure you wish to delete this message? This is <i>not</i> reversable!`, a => {
             if (a && a != null) {
-                const uri = m.from ? `/user/delMsg?id=${m._id}` : `/user/delMyMsg?id=${m._id}`
+                const uri = m.from ? `/user/delMsg?msgId=${m.msgId}` : `/user/delMyMsg?msgId=${m.msgId}`
                 $http.get(uri)
                     .then(r => {
                         //do nothing; should refresh.

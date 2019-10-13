@@ -166,7 +166,7 @@ app.controller('match-cont', function ($scope, $http, $q) {
         // $scope.$apply();
     }
     $scope.sendConnectMsg = t => {
-        console.log('would send', $scope.mentCon)
+        // console.log('would send', $scope.mentCon)
         $scope.mentCon.plusHtmlMsg = $scope.conv.makeHtml($scope.mentCon.plusMdMsg);
         // return false;
         $http.put('/user/connect', $scope.mentCon).then(r => {
@@ -207,6 +207,7 @@ app.controller('match-cont', function ($scope, $http, $q) {
                 $http.post('/user/teachLessonReq', {
                     id: rl._id
                 }).then(r=>{
+                    bulmabox.alert('Teach Offer Sent', `This student has been notified that you wish to teach this lesson. You'll be notified when they respond to your request.`)
                     $scope.regetReqLsns();
                 })
             }
@@ -247,6 +248,17 @@ app.controller('match-cont', function ($scope, $http, $q) {
             $scope.requestedLessons = r.data;
         })
     }
+    $scope.tchrInfo = {
+        teacher:null,
+        show:false
+    }
+    $scope.showTchrInfo = t=>{
+        console.log("Would show teacher info for ",t)
+        $scope.tchrInfo.tchr = t;
+        $scope.tchrInfo.show=true;
+     }
+     
+    $scope.totalStars = [0, 1, 2, 3, 4];
     socket.on('refReqLs', o => {
         $scope.regetReqLsns();
     });

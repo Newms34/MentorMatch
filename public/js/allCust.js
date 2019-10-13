@@ -836,7 +836,7 @@ app.controller('mail-cont', ($scope, $http, $q) => {
         })
     }
     $scope.explStartTeach =()=>{
-        bulmabox.alert('Start Teaching', `Clicking the "Teach" button will allow the student to leave reviews for you. While there's nothing explicitly preventing you from connecting on your own, we'd still recommend you click this button, as well-written reviews are always helpful!`);
+        bulmabox.alert('Start Teaching', `Clicking the "Teach" button will allow the student to leave reviews for you. <br>While there's nothing explicitly preventing you from connecting on your own, we'd still recommend you click this button, as well-written reviews are always helpful!`);
     }
     $scope.replyMsg = m => {
         // alert('NEED MESSAGE WRITING UI!');
@@ -945,7 +945,7 @@ app.controller('mail-cont', ($scope, $http, $q) => {
     $scope.delMsg = m => {
         bulmabox.confirm('Delete Message', `Are you sure you wish to delete this message? This is <i>not</i> reversable!`, a => {
             if (a && a != null) {
-                const uri = m.from ? `/user/delMsg?id=${m._id}` : `/user/delMyMsg?id=${m._id}`
+                const uri = m.from ? `/user/delMsg?msgId=${m.msgId}` : `/user/delMyMsg?msgId=${m.msgId}`
                 $http.get(uri)
                     .then(r => {
                         //do nothing; should refresh.
@@ -1313,7 +1313,7 @@ app.controller('match-cont', function ($scope, $http, $q) {
         // $scope.$apply();
     }
     $scope.sendConnectMsg = t => {
-        console.log('would send', $scope.mentCon)
+        // console.log('would send', $scope.mentCon)
         $scope.mentCon.plusHtmlMsg = $scope.conv.makeHtml($scope.mentCon.plusMdMsg);
         // return false;
         $http.put('/user/connect', $scope.mentCon).then(r => {
@@ -1354,6 +1354,7 @@ app.controller('match-cont', function ($scope, $http, $q) {
                 $http.post('/user/teachLessonReq', {
                     id: rl._id
                 }).then(r=>{
+                    bulmabox.alert('Teach Offer Sent', `This student has been notified that you wish to teach this lesson. You'll be notified when they respond to your request.`)
                     $scope.regetReqLsns();
                 })
             }
@@ -1394,6 +1395,17 @@ app.controller('match-cont', function ($scope, $http, $q) {
             $scope.requestedLessons = r.data;
         })
     }
+    $scope.tchrInfo = {
+        teacher:null,
+        show:false
+    }
+    $scope.showTchrInfo = t=>{
+        console.log("Would show teacher info for ",t)
+        $scope.tchrInfo.tchr = t;
+        $scope.tchrInfo.show=true;
+     }
+     
+    $scope.totalStars = [0, 1, 2, 3, 4];
     socket.on('refReqLs', o => {
         $scope.regetReqLsns();
     });
@@ -1402,7 +1414,11 @@ app.controller('mentor-cont', ($scope, $http, $q, userFact) => {
     // console.log("mentor ctrl registered")
     $scope.totalStars = [0, 1, 2, 3, 4];
     $scope.messageUser = l => {
-        console.log('Would send message to', l.user);
+        // console.log('Would send message to', l.user);
+        $http.post('/user/LCmsgStudent',l)
+            .then(r=>{
+                bulmabox.alert('Message Sent','Your student {{l.user.displayName||l.user.user}} has been notified that you wish to speak with them regarding this lesson.')
+            })
     }
     $scope.toggleActive = l => {
         const title = l.active ? "Deactivate Lesson" : "Re-activate Lesson",

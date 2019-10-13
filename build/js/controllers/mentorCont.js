@@ -2,7 +2,11 @@ app.controller('mentor-cont', ($scope, $http, $q, userFact) => {
     // console.log("mentor ctrl registered")
     $scope.totalStars = [0, 1, 2, 3, 4];
     $scope.messageUser = l => {
-        console.log('Would send message to', l.user);
+        // console.log('Would send message to', l.user);
+        $http.post('/user/LCmsgStudent',l)
+            .then(r=>{
+                bulmabox.alert('Message Sent','Your student {{l.user.displayName||l.user.user}} has been notified that you wish to speak with them regarding this lesson.')
+            })
     }
     $scope.toggleActive = l => {
         const title = l.active ? "Deactivate Lesson" : "Re-activate Lesson",
