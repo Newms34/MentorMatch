@@ -46,11 +46,12 @@ const dcRedirect = ['$location', '$q', '$injector', function ($location, $q, $in
 }];
 app
     .constant('IsDevelopment', window.location.hostname === 'localhost')
-    .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider', '$compileProvider', '$logProvider', function ($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider, $compileProvider, $logProvider, IsDevelopment) {
+    .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider', '$compileProvider', '$logProvider','IsDevelopment', function ($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider, $compileProvider, $logProvider, IsDevelopment) {
         $locationProvider.html5Mode(true);
         $urlRouterProvider.otherwise('/404');
         $compileProvider.debugInfoEnabled(IsDevelopment);
         $logProvider.debugEnabled(IsDevelopment);
+        if(IsDevelopment) console.log('-------------------------\nDebug mode enabled \n-------------------------');
         $stateProvider
             //the states
             //NORMAL states (auth'd)
@@ -121,17 +122,17 @@ app
                 // optional method
                 'response': function (response, $http) {
                     // do something on success
-                    // console.log('RESPONSE INTERCEPTOR', response && response.data)
+                    // $log.debug('RESPONSE INTERCEPTOR', response && response.data)
                     if (response && response.data && response.data == 'refresh') {
                         fetch('/user/usrData').then(r => {
-                            return r.json()
+                            return r.json();
                         }).then(r => {
-                            // console.log('triggered refresh and got data back',r)
+                            // $log.debug('triggered refresh and got data back',r)
                             const scp = angular.element(document.querySelector('#full-win')).scope();
                             scp.user = r;
-                            // console.log('MAIN SCOPE',scp,'TIME DIF',scp.user.lastAction-oldTime);
+                            // $log.debug('MAIN SCOPE',scp,'TIME DIF',scp.user.lastAction-oldTime);
                             scp.$digest();
-                        })
+                        });
                     }
                     return response;
                 },
@@ -152,17 +153,17 @@ app
             },
             link: function (scope, element, attributes) {
                 // const theFn = scope.changeFn();
-                // console.log('THE FUNCTION IS',scope.changeFn())
+                // $log.debug('THE FUNCTION IS',scope.changeFn())
                 element.bind("change", function (changeEvent) {
-                    // console.log('SCOPE',scope,'ELEMENT',element,'ATTRIBS',attributes,scope.changeFn)
+                    // $log.debug('SCOPE',scope,'ELEMENT',element,'ATTRIBS',attributes,scope.changeFn)
                     scope.changeFn().then(r => {
                         element[0].focus();
-                    })
+                    });
                     // scope.theFn('HELLOTHERE');
                 });
             }
             // controller:function($scope, $element, $attrs,){
-            //     console.log('SCOPE',$scope,'EL',$element)
+            //     $log.debug('SCOPE',$scope,'EL',$element)
             // }
         };
     }])
@@ -177,15 +178,15 @@ app
                     const reader = new FileReader(),
                         theFile = changeEvent.target.files[0],
                         tempName = theFile.name;
-                    console.log('UPLOADING FILE', theFile);
+                    $log.debug('UPLOADING FILE', theFile);
                     reader.onload = function (loadEvent) {
                         let theURI = loadEvent.target.result;
-                        console.log('URI before optional resize', theURI, theURI.length);
+                        $log.debug('URI before optional resize', theURI, theURI.length);
                         if (scope.$parent.needsResize) {
                             //needs to resize img (usually for avatar)
                             resizeDataUrl(scope, theURI, scope.$parent.needsResize, scope.$parent.needsResize, tempName);
                         } else {
-                            console.log('APPLYING file to $parent', scope.$parent);
+                            $log.debug('APPLYING file to $parent', scope.$parent);
                             scope.$apply(function () {
                                 if (scope.$parent && scope.$parent.$parent && scope.$parent.$parent.avas) {
 
@@ -234,12 +235,12 @@ app
                 document.querySelector('body').append(bgWait);
                 document.querySelector('#full-win').style.filter = "blur(9px)";
                 let waiters = scope.wfdArr.map(function (q) {
-                    // console.log('SCOPE HERE IS',scope)
+                    // $log.debug('SCOPE HERE IS',scope)
                     const wfdIObj = {
                         fn: null,
                         name: q,
                         data: null
-                    }
+                    };
                     wfdIObj.fn = scope.$watch(q, function (nv, ov) {
                         wfdIObj.data = nv;
                         if (waiters.filter(a => !!a.data).length >= scope.wfdArr.length) {

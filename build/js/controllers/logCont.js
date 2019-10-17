@@ -1,5 +1,6 @@
 app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) {
     $scope.noWarn = false;
+    $scope.derp()
     $scope.nameOkay = true;
     delete localStorage.geoUsr;
     $scope.checkTimer = false;
@@ -18,7 +19,7 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
             return;
         }
         $http.post('/user/forgot', { user: $scope.user }).then(function (r) {
-            console.log('forgot route response', r);
+            $log.debug('forgot route response', r);
             if (r.data == 'err') {
                 bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Forgot Password Error', "It looks like that account either doesn't exist, or doesn't have an email registered with it! Contact a mod for further help.");
             } else {

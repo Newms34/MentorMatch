@@ -49,11 +49,12 @@ const dcRedirect = ['$location', '$q', '$injector', function ($location, $q, $in
 }];
 app
     .constant('IsDevelopment', window.location.hostname === 'localhost')
-    .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider', '$compileProvider', '$logProvider', function ($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider, $compileProvider, $logProvider, IsDevelopment) {
+    .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider', '$compileProvider', '$logProvider','IsDevelopment', function ($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider, $compileProvider, $logProvider, IsDevelopment) {
         $locationProvider.html5Mode(true);
         $urlRouterProvider.otherwise('/404');
         $compileProvider.debugInfoEnabled(IsDevelopment);
         $logProvider.debugEnabled(IsDevelopment);
+        if(IsDevelopment) console.log('-------------------------\nDebug mode enabled \n-------------------------');
         $stateProvider
             //the states
             //NORMAL states (auth'd)
@@ -124,17 +125,17 @@ app
                 // optional method
                 'response': function (response, $http) {
                     // do something on success
-                    // console.log('RESPONSE INTERCEPTOR', response && response.data)
+                    // $log.debug('RESPONSE INTERCEPTOR', response && response.data)
                     if (response && response.data && response.data == 'refresh') {
                         fetch('/user/usrData').then(r => {
-                            return r.json()
+                            return r.json();
                         }).then(r => {
-                            // console.log('triggered refresh and got data back',r)
+                            // $log.debug('triggered refresh and got data back',r)
                             const scp = angular.element(document.querySelector('#full-win')).scope();
                             scp.user = r;
-                            // console.log('MAIN SCOPE',scp,'TIME DIF',scp.user.lastAction-oldTime);
+                            // $log.debug('MAIN SCOPE',scp,'TIME DIF',scp.user.lastAction-oldTime);
                             scp.$digest();
-                        })
+                        });
                     }
                     return response;
                 },
@@ -155,17 +156,17 @@ app
             },
             link: function (scope, element, attributes) {
                 // const theFn = scope.changeFn();
-                // console.log('THE FUNCTION IS',scope.changeFn())
+                // $log.debug('THE FUNCTION IS',scope.changeFn())
                 element.bind("change", function (changeEvent) {
-                    // console.log('SCOPE',scope,'ELEMENT',element,'ATTRIBS',attributes,scope.changeFn)
+                    // $log.debug('SCOPE',scope,'ELEMENT',element,'ATTRIBS',attributes,scope.changeFn)
                     scope.changeFn().then(r => {
                         element[0].focus();
-                    })
+                    });
                     // scope.theFn('HELLOTHERE');
                 });
             }
             // controller:function($scope, $element, $attrs,){
-            //     console.log('SCOPE',$scope,'EL',$element)
+            //     $log.debug('SCOPE',$scope,'EL',$element)
             // }
         };
     }])
@@ -180,15 +181,15 @@ app
                     const reader = new FileReader(),
                         theFile = changeEvent.target.files[0],
                         tempName = theFile.name;
-                    console.log('UPLOADING FILE', theFile);
+                    $log.debug('UPLOADING FILE', theFile);
                     reader.onload = function (loadEvent) {
                         let theURI = loadEvent.target.result;
-                        console.log('URI before optional resize', theURI, theURI.length);
+                        $log.debug('URI before optional resize', theURI, theURI.length);
                         if (scope.$parent.needsResize) {
                             //needs to resize img (usually for avatar)
                             resizeDataUrl(scope, theURI, scope.$parent.needsResize, scope.$parent.needsResize, tempName);
                         } else {
-                            console.log('APPLYING file to $parent', scope.$parent);
+                            $log.debug('APPLYING file to $parent', scope.$parent);
                             scope.$apply(function () {
                                 if (scope.$parent && scope.$parent.$parent && scope.$parent.$parent.avas) {
 
@@ -237,12 +238,12 @@ app
                 document.querySelector('body').append(bgWait);
                 document.querySelector('#full-win').style.filter = "blur(9px)";
                 let waiters = scope.wfdArr.map(function (q) {
-                    // console.log('SCOPE HERE IS',scope)
+                    // $log.debug('SCOPE HERE IS',scope)
                     const wfdIObj = {
                         fn: null,
                         name: q,
                         data: null
-                    }
+                    };
                     wfdIObj.fn = scope.$watch(q, function (nv, ov) {
                         wfdIObj.data = nv;
                         if (waiters.filter(a => !!a.data).length >= scope.wfdArr.length) {
@@ -315,21 +316,21 @@ function postrenderAction($timeout) {
         }, 0);
     }
 }
-app.controller('dash-cont', ($scope, $http, $q, userFact) => {
-    // console.log("Dashboard ctrl registered")
+app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
+    // $log.debug("Dashboard ctrl registered")
     $scope.refUsr = $scope.$parent.refUsr;
-    
+
     $scope.refUsr();
     $scope.updateTopics = () => {
-        // console.log('Would updoot topics here! Val we passed was',e)
-        return $http.put('/user/interests', $scope.$parent.user.interests)
-    }
+        // $log.debug('Would updoot topics here! Val we passed was',e)
+        return $http.put('/user/interests', $scope.$parent.user.interests);
+    };
     $scope.removeSkill = skt => {
-        // console.log('USER WISHES TO REMOVE',skt)
+        // $log.debug('USER WISHES TO REMOVE',skt)
         $http.delete('/user/interests?t=' + skt).then(r => {
             //do nothing 
-        })
-    }
+        });
+    };
     $scope.debounceTimer = null;
     $scope.saveDebounce = (q) => {
         if (!!$scope.debounceTimer) {
@@ -337,8 +338,8 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
         }
         $scope.debounceTimer = setTimeout(function () {
             $scope.saveGeneral();
-        }, 500)
-    }
+        }, 500);
+    };
     $scope.saveGeneral = () => {
         //general save thing for pretty much everything BUT topics
         const dispName = $scope.user.displayName;
@@ -348,11 +349,11 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
                 bulmabox.alert('Duplicate Name', `Sorry, but the name ${dispName} is already in use. Please use another name.`);
                 $scope.$parent.refUsr();
             }
-        })
-    }
+        });
+    };
     //avy stuff
     $scope.loadFile = (o) => {
-        console.log('loadFile sez', o)
+        $log.debug('loadFile sez', o);
         $scope.loadingFile = true;
         const fr = new FileReader();
     };
@@ -361,44 +362,44 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
     $scope.topicToAdd = '';
     $scope.needsResize = 200;//the max pic width
     $scope.saveDataURI = (d) => {
-        // console.log('trying to update datauri to',d)
+        // $log.debug('trying to update datauri to',d)
         $scope.user.avatar = d;
         $scope.saveGeneral();
     };
 
     $scope.filterMe = (query) => {
         const lowercaseQuery = query.toLowerCase();
-        // console.log('picked topics map', $scope.pickedTopics.map(q => q.value))
+        // $log.debug('picked topics map', $scope.pickedTopics.map(q => q.value))
         if (!$scope.topicObjs) {
-            return []
+            return [];
         }
         let tops = $scope.topicObjs.filter(topic => {
             return (topic.value.indexOf(lowercaseQuery) > -1);
         });
-        // console.log('tops', tops)
+        // $log.debug('tops', tops)
         return tops;
-    }
+    };
     $scope.hazTopic = t => {
         // does this topic already exist?
         return $scope.topicObjsAll && $scope.topicObjsAll.length && t && $scope.topicObjsAll.find(q => q.display == t);
-    }
+    };
     $scope.newTopic = {
         title: null,
         desc: null,
         show: false
-    }
+    };
     $scope.refTopObjs = (cb) => {
         $http.get('/topic/topic').then(r => {
             $scope.topicObjsAll = r.data.map(q => {
-                return { value: q.title.toLowerCase(), display: q.title, desc: q.desc }
-            })
-            console.log('All Topic Objs now:', $scope.topicObjsAll)
+                return { value: q.title.toLowerCase(), display: q.title, desc: q.desc };
+            });
+            $log.debug('All Topic Objs now:', $scope.topicObjsAll);
             $scope.topicObjs = angular.copy($scope.topicObjsAll);
             if (cb) {
                 cb();
             }
-        })
-    }
+        });
+    };
     $scope.refTopObjs();
     $scope.toggleNewTopicDia = () => {
         if (!$scope.newTopic.show) {
@@ -414,20 +415,20 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
 
         }
         $scope.newTopic.show = !$scope.newTopic.show;
-    }
+    };
     $scope.addNewTopic = () => {
         $http.post('/topic/topic', $scope.newTopic)
             .then(r => {
                 //do nothing. We refresh in the socket response, just so EVERYONE can no we added a topic.
-                socket.emit()
+                socket.emit();
                 $scope.toggleNewTopicDia();
             })
             .catch(e => {
                 if (e.data == 'duplicate') {
                     bulmabox.alert('Duplicate Topic', `Hey! That topic already exists!`);
                 }
-            })
-    }
+            });
+    };
     //add skill
     $scope.addInt = {
         title: null,
@@ -435,7 +436,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
         lvl: 0,
         newDesc: null,
         canTeach: false,
-    }
+    };
     $scope.addIntDial = (t) => {
         $scope.addInt = {
             title: t || null,
@@ -443,27 +444,24 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
             lvl: 0,
             newDesc: null,
             canTeach: false,
-        }
-    }
+        };
+    };
     let alreadyAdded = false;
     $scope.saveSkills = () => {
         if (!$scope.topicToAdd) {
-            return bulmabox.alert('No Skill Name', `Please enter a skill name!`)
+            return bulmabox.alert('No Skill Name', `Please enter a skill name!`);
         }
         const skList = $scope.$parent.user.interests;
-        // console.log($scope.selectedTopic,$scope.topicToAdd);
+        // $log.debug($scope.selectedTopic,$scope.topicToAdd);
         if (!!skList.find(q => q.title == $scope.topicToAdd)) {
             $scope.topicToAdd = '';
             return bulmabox.alert('Duplicate Skill', "You've already added that skill!");
         } else if (!$scope.hazTopic($scope.topicToAdd)) {
-            // return console.log('USER TRYIN TO ADD NEW TOPIC LIKE A PLEB',$scope.topicToAdd,$scope.addInt.newDesc)
-            if (alreadyAdded) {
-                return console.error('O SHIT')
-            }
+            // return $log.debug('USER TRYIN TO ADD NEW TOPIC LIKE A PLEB',$scope.topicToAdd,$scope.addInt.newDesc)
             alreadyAdded = true;
             $http.post('/topic/topic', { title: $scope.topicToAdd, desc: $scope.addInt.newDesc }).then(r => {
                 $scope.refTopObjs($scope.saveSkills);
-            })
+            });
         } else {
             skList.push({
                 title: $scope.topicToAdd,
@@ -479,16 +477,16 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
                         show: false,
                         lvl: 0,
                         canTeach: false,
-                    }
+                    };
                 });
         }
-    }
+    };
     //add/edit proj
     $scope.modProj = {
         show: false,
         proj: null,
         editMode: false
-    }
+    };
     $scope.modProjDial = (oldP) => {
         if (!oldP) {
             oldP = { name: null, description: null, position: null };
@@ -499,16 +497,16 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
         }
         $scope.modProj.proj = oldP;
         $scope.modProj.show = true;
-    }
+    };
     $scope.saveProjs = (t) => {
         const projArr = angular.copy($scope.$parent.user.projects);
-        console.log('Saving projects. List is', projArr, 'modProj', $scope.modProj)
+        $log.debug('Saving projects. List is', projArr, 'modProj', $scope.modProj);
         if (!$scope.modProj.editMode) {
             projArr.push(angular.copy($scope.modProj.proj));
         }
         const dupName = countDups(projArr, 'name');
         if (!!dupName) {
-            return bulmabox.alert('Duplicate Project Name', `The name ${dupName} is already being used! Please pick another one for this project.`)
+            return bulmabox.alert('Duplicate Project Name', `The name ${dupName} is already being used! Please pick another one for this project.`);
         }
         $http.put('/user/projs', projArr)
             .then(r => {
@@ -517,19 +515,19 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
                     show: false,
                     proj: null,
                     editMode: false
-                }
-            })
-    }
+                };
+            });
+    };
     $scope.deleteProj = (t) => {
         bulmabox.confirm('Remove Project', `Are you sure you wish to remove the project ${t}?`, r => {
             if (!!r) {
                 $http.delete('/user/projs', { name: t })
                     .then(r => {
 
-                    })
+                    });
             }
-        })
-    }
+        });
+    };
     //curr lesson stuffs
     $scope.countDups = countDups;
     $scope.messageTeacher = l => {
@@ -539,10 +537,10 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
             }
             $http.post('/user/reqDiscussLesson?id=', l)
                 .then(r => {
-                    bulmabox.alert('Message Sent', `Your mentor has been notified that you wish to discuss this lesson.`)
-                })
-        })
-    }
+                    bulmabox.alert('Message Sent', `Your mentor has been notified that you wish to discuss this lesson.`);
+                });
+        });
+    };
     $scope.reqEndLesson = l => {
         bulmabox.confirm('Request Lesson End', "Do you wish to notify this mentor that you wish to end the lesson?", function (r) {
             if (!r || r == null) {
@@ -550,29 +548,29 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
             }
             $http.post('/user/reqEndLesson?id=', l)
                 .then(r => {
-                    bulmabox.alert('Lesson End Requested', `Your mentor has been notified that you wish to end this lesson. <br>Please note that it is still up to them to end the lesson.`)
-                })
-        })
-    }
+                    bulmabox.alert('Lesson End Requested', `Your mentor has been notified that you wish to end this lesson. <br>Please note that it is still up to them to end the lesson.`);
+                });
+        });
+    };
     $scope.reportLesson = l => {
         bulmabox.confirm('Report Lesson', "Are you sure you wish to report this lesson to the moderator team? <br>Please note that abuse of the report feature in any context is grounds for account termination.", function (r) {
             if (!r || r == null) {
                 return false;
             }
             $http.post('/usr/repLesson', l).then(r => {
-                bulmabox.alert('Lesson Reported', `This lesson has been reported to the moderator team. In addition, the lesson has automatically been stopped, and a message has been sent to the lesson's mentor.`)
-            })
-        })
-    }
+                bulmabox.alert('Lesson Reported', `This lesson has been reported to the moderator team. In addition, the lesson has automatically been stopped, and a message has been sent to the lesson's mentor.`);
+            });
+        });
+    };
 
 
     $scope.getLessons = () => {
         $http.get('/user/activeLessons')
             .then(r => {
-                console.log('ACTIVE LESSONS', r)
+                $log.debug('ACTIVE LESSONS', r);
                 $scope.activeLessons = (r && r.data) || [];
-            })
-    }
+            });
+    };
     $scope.getLessons();
 
     //review stuffs
@@ -585,11 +583,11 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
         $scope.reviewPage.teacher = {
             user: tch.user,
             displayName: tch.displayName || null
-        }
+        };
         $scope.reviewPage.hideName = false;
 
         const oldReview = await $http.get(`/user/review?tch=${(tch.displayName || tch.user)}`);
-        console.log('OLD REVIEW', oldReview)
+        $log.debug('OLD REVIEW', oldReview);
         if (oldReview) {
             //old review exists, so use it
             $scope.reviewPage.msg = oldReview.data.rateText;
@@ -600,11 +598,12 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
         $scope.reviewPage.starsArr = [0, 1, 2, 3, 4];
         $scope.reviewPage.show = true;
         $scope.$apply();
-    }
+    };
     $scope.overStars = false;
     $scope.toggleOverStars = (t, s) => {
         if (t === false) {
-            return $scope.overStars = false;
+            $scope.overStars = false;
+            return false;
         }
         $scope.overStars = s;
     };
@@ -614,7 +613,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
             return i < $scope.reviewPage.stars;
         }
         return $scope.overStars !== false && $scope.overStars + 1 > i;
-    }
+    };
     $scope.reviewPage = {
         show: false,
         stars: 5,
@@ -624,7 +623,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
             displayName: 'DoesntExist'
         },
         msg: null
-    }
+    };
     $scope.submitReview = () => {
         const rvwObj = {
             // rateUsr: {
@@ -638,9 +637,9 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
                 user: $scope.reviewPage.teacher.user,
                 displayName: $scope.reviewPage.teacher.displayName
             }
-        }
-        console.log('WOULD SUBMIT',rvwObj)
-        $http.put('/user/review',rvwObj).then(r=>{
+        };
+        $log.debug('WOULD SUBMIT', rvwObj);
+        $http.put('/user/review', rvwObj).then(r => {
             $scope.reviewPage = {
                 show: false,
                 stars: 5,
@@ -650,10 +649,10 @@ app.controller('dash-cont', ($scope, $http, $q, userFact) => {
                     displayName: 'DoesntExist'
                 },
                 msg: null
-            }
-        })
-    }
-})
+            };
+        });
+    };
+});
 const countDups = (arr, p) => {
     if (!arr || !arr.length) {
         return false;
@@ -667,9 +666,10 @@ const countDups = (arr, p) => {
         }
     }
     return false;
-}
+};
 app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) {
     $scope.noWarn = false;
+    $scope.derp()
     $scope.nameOkay = true;
     delete localStorage.geoUsr;
     $scope.checkTimer = false;
@@ -688,7 +688,7 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
             return;
         }
         $http.post('/user/forgot', { user: $scope.user }).then(function (r) {
-            console.log('forgot route response', r);
+            $log.debug('forgot route response', r);
             if (r.data == 'err') {
                 bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Forgot Password Error', "It looks like that account either doesn't exist, or doesn't have an email registered with it! Contact a mod for further help.");
             } else {
@@ -787,8 +787,8 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
         }
     };
 });
-app.controller('mail-cont', ($scope, $http, $q) => {
-    console.log("Mailbox ctrl registered");
+app.controller('mail-cont', ($scope, $http, $q, $log) => {
+    $log.debug("Mailbox ctrl registered");
     $scope.outMode = false;
     $scope.mailView = {
         title: 'No Message Selected',
@@ -798,9 +798,9 @@ app.controller('mail-cont', ($scope, $http, $q) => {
         toMode: false,
         date: 12345,
         other:false
-    }
+    };
     $scope.viewMsg = d => {
-        console.log('incoming msg object is',d)
+        $log.debug('incoming msg object is',d);
         $scope.mailView.title = d.to ? `Message to ${$scope.getUserList(d.to)}` : `Message from ${d.from.displayName||d.from.user}`;
         $scope.mailView.htmlMsg = d.htmlMsg;
         $scope.mailView.isConMsg= !!d.isConMsg;
@@ -812,37 +812,36 @@ app.controller('mail-cont', ($scope, $http, $q) => {
         $scope.mailView.msgId = d.msgId||0;
         $scope.mailView.show = true;
         $scope.mailView.isRep = !!d.isRep;
-    }
+    };
     $scope.newMsg = {
         to: [],
         htmlMsg: '',
         isReply: false,
         show: false,
-    }
+    };
     $scope.reportMsg = m => {
         bulmabox.confirm('Report Message', `Are you sure you wish to report this message from ${m.other} to the moderator team?`, a => {
             if (a && a != null) {
                 $http.post('/user/repMsg', m)
                     .then(r => {
                         bulmabox.alert('Reported!', 'A notification has been sent to the moderator team!');
-                    })
+                    });
             }
-        })
-    }
+        });
+    };
     $scope.startTeach = () =>{
         $http.put('/user/teach',$scope.mailView).then(r=>{
             //do nuffin
             $scope.mailView.show=false;
-        })
-    }
+        });
+    };
     $scope.explStartTeach =()=>{
         bulmabox.alert('Start Teaching', `Clicking the "Teach" button will allow the student to leave reviews for you. <br>While there's nothing explicitly preventing you from connecting on your own, we'd still recommend you click this button, as well-written reviews are always helpful!`);
-    }
+    };
     $scope.replyMsg = m => {
-        // alert('NEED MESSAGE WRITING UI!');
-        console.log('attempting to setup reply to msg', m)
+        $log.debug('attempting to setup reply to msg', m);
         $scope.newMsg.show = true;
-        $scope.newMsg.to = [m.from||m.other]
+        $scope.newMsg.to = [m.from||m.other];
         $scope.newMsg.isReply = m;
         $scope.mailView = {
             title: 'No Message Selected',
@@ -853,8 +852,8 @@ app.controller('mail-cont', ($scope, $http, $q) => {
             toMode: false,
             date: 12345,
             other:false
-        }
-    }
+        };
+    };
     $scope.cancelSend = () => {
         if ($scope.newMsg.mdMsg && $scope.newMsg.mdMsg.length) {
             bulmabox.confirm('Discard Message', 'Are you sure you wish to discard this message?', ra => {
@@ -864,25 +863,25 @@ app.controller('mail-cont', ($scope, $http, $q) => {
                         htmlMsg: '',
                         isReply: false,
                         show: false
-                    }
+                    };
                     $scope.$digest();
                 }
-            })
+            });
         } else {
             $scope.newMsg = {
                 to: [],
                 htmlMsg: '',
                 isReply: false,
                 show: false,
-            }
+            };
         }
-    }
+    };
     $scope.makeNewMsg = () => {
         //new, blank msg
         $scope.newMsg.show = true;
-        $scope.newMsg.to = []
+        $scope.newMsg.to = [];
         $scope.newMsg.isReply = false;
-    }
+    };
     $scope.sendMsg = () => {
         if (!$scope.newMsg.to.length || !$scope.newMsg.mdMsg || !$scope.newMsg.mdMsg.length) {
             return bulmabox.alert('Missing Information', 'Please provide at least one user and something to say!');
@@ -892,9 +891,9 @@ app.controller('mail-cont', ($scope, $http, $q) => {
         if (!!$scope.newMsg.isReply) {
             //concatenate the old and new msgs.
             $scope.newMsg.htmlMsg = `${$scope.newMsg.isReply.htmlMsg}<hr>${$scope.newMsg.htmlMsg}`;
-            $scope.newMsg.mdMsg = `${$scope.newMsg.isReply.mdMsg}\n---\n${$scope.newMsg.mdMsg}`
+            $scope.newMsg.mdMsg = `${$scope.newMsg.isReply.mdMsg}\n---\n${$scope.newMsg.mdMsg}`;
         }
-        // return console.log('WOULD SEND:', $scope.newMsg)
+        // return $log.debug('WOULD SEND:', $scope.newMsg)
         $http.post('/user/sendMsg', {
             to: $scope.newMsg.to,
             htmlMsg: $scope.newMsg.htmlMsg,
@@ -905,20 +904,20 @@ app.controller('mail-cont', ($scope, $http, $q) => {
                 htmlMsg: '',
                 isReply: false,
                 show: false,
-            }
+            };
             bulmabox.alert('Message Sent!','Your message is on its way!');
-        })
-    }
+        });
+    };
     $scope.newMsgAdd = e => {
         if (!$scope.newMsg.show) {
             return false;
         }
-        // console.log('EVENT:',e);
+        // $log.debug('EVENT:',e);
         if (e.key.toLowerCase() === 'enter' && !$scope.newMsg.to.includes($scope.newMsg.possUsr)) {
             $scope.newMsg.to.push($scope.newMsg.possUsr);
             $scope.newMsg.possUsr = '';
         } else if (e.key.toLowerCase() === 'enter') {
-            // console.log('ALREADY HAZ', thisTag)
+            // $log.debug('ALREADY HAZ', thisTag)
             const timerFn = function () {
                 let tl = 250;
                 const thisTag = document.querySelector(`.user-to-tag[data-name='${$scope.newMsg.possUsr}']`),
@@ -931,32 +930,32 @@ app.controller('mail-cont', ($scope, $http, $q) => {
                         const lite = ~~(46 * ((250 - tl) / 250)),
                             col = `hsl(0,${~~(100 * tl / 250)}%,${lite + 50}%)`;
                         thisTag.style.background = col;
-                    }, 10)
+                    }, 10);
             }();
             $scope.newMsg.possUsr = '';
         }
-    }
+    };
     $scope.newMsgRem = u => {
         if (!$scope.newMsg.show) {
             return false;
         }
         $scope.newMsg.to = $scope.newMsg.to.filter(q => q != u);
-    }
+    };
     $scope.delMsg = m => {
         bulmabox.confirm('Delete Message', `Are you sure you wish to delete this message? This is <i>not</i> reversable!`, a => {
             if (a && a != null) {
-                const uri = m.from ? `/user/delMsg?msgId=${m.msgId}` : `/user/delMyMsg?msgId=${m.msgId}`
+                const uri = m.from ? `/user/delMsg?msgId=${m.msgId}` : `/user/delMyMsg?msgId=${m.msgId}`;
                 $http.get(uri)
                     .then(r => {
                         //do nothing; should refresh.
-                    })
+                    });
             }
-        })
-    }
+        });
+    };
     $scope.getUserList = (o)=>{
-        return o.map(q=>q.displayName||q.user).join(', ')
-    }
-})
+        return o.map(q=>q.displayName||q.user).join(', ');
+    };
+});
 String.prototype.capMe = function () {
     return this.slice(0, 1).toUpperCase() + this.slice(1);
 }; 
@@ -967,13 +966,13 @@ app.controller('main-cont', function ($scope, $http, $state, userFact, $log) {
         userFact.getUser().then(r => {
             $scope.user = r.data;            
         }); 
-    }
+    };
     $scope.refUsr();
     socket.on('refresh',u=>{
         if($scope.user && u.user==$scope.user.user){
             $scope.refUsr();
         }
-    })
+    });
     $scope.isActive=true;
     $scope.pokeTimer = null;
     $scope.faceOpen = false;
@@ -1146,8 +1145,8 @@ app.controller('main-cont', function ($scope, $http, $state, userFact, $log) {
     };
 });
 
-app.controller('match-cont', function ($scope, $http, $q) {
-    console.log("matcher ctrl registered")
+app.controller('match-cont', function ($scope, $http, $q, $log) {
+    $log.debug("matcher ctrl registered");
     // $scope.searchTerm = '';
     // $scope.topics = [];
     // $scope.searchTimer = null;
@@ -1156,13 +1155,13 @@ app.controller('match-cont', function ($scope, $http, $q) {
     //         clearTimeout($scope.searchTimer);
     //     }
     //     $scope.searchTimer = setTimeout(function(){
-    //         // console.log('Searching for:',$scope.searchTerm,'http module is',$http)
+    //         // $log.debug('Searching for:',$scope.searchTerm,'http module is',$http)
     //         $http.get('/topic/search?q='+$scope.searchTerm)
     //             .then(r=>{
     //                 $scope.topics = r.data;
     //             })
     //             .catch(e=>{
-    //                 console.log(e)
+    //                 $log.debug(e)
     //             })
     //     },500)
     // }
@@ -1171,26 +1170,26 @@ app.controller('match-cont', function ($scope, $http, $q) {
     $scope.regetTopics = () => {
         $http.get('/topic/topic').then(r => {
             $scope.topicObjsAll = r.data.map(q => {
-                return { value: q.title.toLowerCase(), display: q.title, desc: q.desc }
-            })
-            $scope.topicObjs = angular.copy($scope.topicObjsAll)
-        })
-    }
+                return { value: q.title.toLowerCase(), display: q.title, desc: q.desc };
+            });
+            $scope.topicObjs = angular.copy($scope.topicObjsAll);
+        });
+    };
     $scope.regetTopics();
     $scope.filterMe = (query) => {
         const lowercaseQuery = query.toLowerCase();
-        // console.log('picked topics map', $scope.pickedTopics.map(q => q.value))
+        // $log.debug('picked topics map', $scope.pickedTopics.map(q => q.value))
         let tops = $scope.topicObjs.filter(topic => {
             return (topic.value.indexOf(lowercaseQuery) > -1);
         });
-        // console.log('tops', tops)
+        // $log.debug('tops', tops)
         return tops;
-    }
+    };
     $scope.newTopic = {
         title: null,
         desc: null,
         show: false
-    }
+    };
     $scope.toggleNewTopicDia = () => {
         if (!$scope.newTopic.show) {
             $scope.newTopic.title = $scope.topicToAdd;
@@ -1209,7 +1208,7 @@ app.controller('match-cont', function ($scope, $http, $q) {
             waitingForTopic = false;
             $scope.regetTopics();
         }
-    }
+    };
     let waitingForTopic = false;
     socket.on('topicUpdate', u => {
         if (!!$scope.newTopic.show) {
@@ -1218,7 +1217,7 @@ app.controller('match-cont', function ($scope, $http, $q) {
         } else {
             $scope.regetTopics();
         }
-    })
+    });
     $scope.addNewTopic = () => {
         $http.post('/topic/topic', $scope.newTopic)
             .then(r => {
@@ -1229,39 +1228,38 @@ app.controller('match-cont', function ($scope, $http, $q) {
                 if (e.data == 'duplicate') {
                     bulmabox.alert('Duplicate Topic', `Hey! That topic already exists!`);
                 }
-            })
-    }
+            });
+    };
     $scope.pickedTopics = [];
     $scope.addTopicBtn = () => {
-        // console.log( $scope.pickedTopics.length,$scope.topicObjs.length)
+        // $log.debug( $scope.pickedTopics.length,$scope.topicObjs.length)
         const simpPT = $scope.pickedTopics.map(a => a.value).sort().join(''),
             simpTO = $scope.topicObjs ? $scope.topicObjs.map(b => b.value).sort().join('') : '';
-        // console.log("simple data",simpPT,simpTO)
+        // $log.debug("simple data",simpPT,simpTO)
         if ($scope.topicToAdd && simpPT != simpTO) {
-            return 'Click to add your selected skill!'
+            return 'Click to add your selected skill!';
         } else if (simpPT != simpTO) {
-            return `You need to select a skill before you can add it!`
+            return `You need to select a skill before you can add it!`;
         } else {
-            return `You've added all possible skills. Create a new one if you want!`
-
+            return `You've added all possible skills. Create a new one if you want!`;
         }
-    }
+    };
     $scope.changeTopList = () => {
-        // console.log('simpTops', tl, 'all', $scope.topicObjsAll)
-        const tl = $scope.pickedTopics.map(s => s.value.toLowerCase())
+        // $log.debug('simpTops', tl, 'all', $scope.topicObjsAll)
+        const tl = $scope.pickedTopics.map(s => s.value.toLowerCase());
         //remove this from our list of available topics to add
         $scope.topicObjs = $scope.topicObjsAll.filter(tf => !tl.includes(tf.value));
         $http.post('/user/topicSearch', $scope.pickedTopics).then(r => {
             $scope.availTeachs = r.data;
-            // console.log('TEACHERS',$scope.availTeachs)
-        })
-    }
+            // $log.debug('TEACHERS',$scope.availTeachs)
+        });
+    };
     $scope.addSearchTopic = (q) => {
-        console.log('topic', q)
+        $log.debug('topic', q);
         if ($scope.pickedTopics.map(a => a.value.toLowerCase()).includes(q.value)) {
-            // console.log('Duplicate!',q)
+            // $log.debug('Duplicate!',q)
             $scope.topicToAdd = '';
-            return bulmabox.alert(`Already Added`, `You've already added this topic!`)
+            return bulmabox.alert(`Already Added`, `You've already added this topic!`);
         }
         const topicPush = angular.copy(q);
         topicPush.min = 1;
@@ -1270,11 +1268,11 @@ app.controller('match-cont', function ($scope, $http, $q) {
         // $scope.filterMe('')
         // $scope.topicObjs = $scope.topicObjsAll.filter(q => !.includes(q));
         $scope.topicToAdd = '';
-    }
+    };
     $scope.removeTopic = t => {
         $scope.pickedTopics = $scope.pickedTopics.filter(q => q.value != t.value);
         $scope.changeTopList();
-    }
+    };
     $scope.mentCon = {
         topics: [],
         user: null,
@@ -1293,12 +1291,11 @@ app.controller('match-cont', function ($scope, $http, $q) {
         return {
             label: tl,
             num: i
-        }
-    })
-    $scope.lvls = ['None', 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    $scope.lvls = new Array(10).fill(1).map((q, i) => ({ lbl: i > 1 ? i : 'None', num: i }))
+        };
+    });
+    // $scope.lvls = ['None', 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    $scope.lvls = new Array(10).fill(1).map((q, i) => ({ lbl: i > 1 ? i : 'None', num: i }));
     $scope.conv = new showdown.Converter();
-    console.log('TIMES', $scope.times)
     $scope.doConnect = u => {
         //set up the dialog box for connecting w/ mentor
         $scope.mentCon.user = u.user;
@@ -1308,25 +1305,25 @@ app.controller('match-cont', function ($scope, $http, $q) {
         $scope.mentCon.plusHtmlMsg = null;
         $scope.mentCon.tz = { from: null, to: null };
         $scope.mentCon.show = true;
-        $scope.mentCon.topics = $scope.pickedTopics.map(q=>q.display);
-        // console.log('original incoming object to doConnect was',u)
+        $scope.mentCon.topics = $scope.pickedTopics.map(q => q.display);
+        // $log.debug('original incoming object to doConnect was',u)
         // $scope.$apply();
-    }
+    };
     $scope.sendConnectMsg = t => {
-        // console.log('would send', $scope.mentCon)
+        // $log.debug('would send', $scope.mentCon)
         $scope.mentCon.plusHtmlMsg = $scope.conv.makeHtml($scope.mentCon.plusMdMsg);
         // return false;
         $http.put('/user/connect', $scope.mentCon).then(r => {
-            $scope.mentCon.show=false;
-            bulmabox.alert('Connect Request Sent', `User ${$scope.mentCon.displayName||$scope.mentCon.user} has been notified that you'd like them as a mentor!`);
+            $scope.mentCon.show = false;
+            bulmabox.alert('Connect Request Sent', `User ${$scope.mentCon.displayName || $scope.mentCon.user} has been notified that you'd like them as a mentor!`);
         });
     };
     //lesson request stuff
     $scope.reqLess = () => {
-        console.log('User', $scope.$parent.user, 'wants lesosn on topics', $scope.pickedTopics);
+        $log.debug('User', $scope.$parent.user, 'wants lesosn on topics', $scope.pickedTopics);
         //now we need to prepare an object to send to our lessonReq model
         const lro = $scope.pickedTopics.map(q => q.display);
-        console.log('Final LRO:', lro);
+        $log.debug('Final LRO:', lro);
         $http.post('/user/lessonReq', lro).then(r => {
             bulmabox.alert('Lesson Request Sent', `Your lesson request has been sent! You can head on over to the "View Requested Lessons" tab if you wanna view or delete it.`);
         }).catch(e => {
@@ -1353,98 +1350,97 @@ app.controller('match-cont', function ($scope, $http, $q) {
             if (!!r && r != null) {
                 $http.post('/user/teachLessonReq', {
                     id: rl._id
-                }).then(r=>{
-                    bulmabox.alert('Teach Offer Sent', `This student has been notified that you wish to teach this lesson. You'll be notified when they respond to your request.`)
+                }).then(r => {
+                    bulmabox.alert('Teach Offer Sent', `This student has been notified that you wish to teach this lesson. You'll be notified when they respond to your request.`);
                     $scope.regetReqLsns();
-                })
+                });
             }
-        })
-    }
-    $scope.noAnswerRl = o =>{
-        bulmabox.confirm("Cancel Teaching Offer",`Are you sure you wish to rescind your offer to teach these skills to ${o.displayName||o.user}?`,r=>{
-            if(!!r && r!=null){
-                $http.post('/user/teachLessonReq',{
-                    id:o._id
-                }).then(r=>{
+        });
+    };
+    $scope.noAnswerRl = o => {
+        bulmabox.confirm("Cancel Teaching Offer", `Are you sure you wish to rescind your offer to teach these skills to ${o.displayName || o.user}?`, r => {
+            if (!!r && r != null) {
+                $http.post('/user/teachLessonReq', {
+                    id: o._id
+                }).then(r => {
                     $scope.regetReqLsns();
-                })
+                });
             }
-        })
-    }
+        });
+    };
     $scope.deleteRl = (o) => {
-        console.log('WANNA DELETE LESSON', o)
+        $log.debug('WANNA DELETE LESSON', o);
         bulmabox.confirm('Delete Lesson Request', `Are you sure you wish to delete this lesson request?<br/>You'll need to make a new one if you wanna learn these skills!`, r => {
-            if (!!r && r!= null) {
-                $http.delete('/user/lessonReq?id='+o._id).then(r=>{
+            if (!!r && r != null) {
+                $http.delete('/user/lessonReq?id=' + o._id).then(r => {
                     $scope.regetReqLsns();
-                })
+                });
             }
-        })
-    }
-    $scope.acceptMentor = (tchr,lsn)=>{
+        });
+    };
+    $scope.acceptMentor = (tchr, lsn) => {
         bulmabox.confirm('Accept Mentor', `Are you sure you wish to accept this mentor? This will remove the lesson from the list of Requested Lessons and send a message to both of you to connect.`, r => {
-            if (!!r && r!= null) {
-                $http.post('/user/acceptLesson',{id:lsn._id,teacher:tchr}).then(r=>{
+            if (!!r && r != null) {
+                $http.post('/user/acceptLesson', { id: lsn._id, teacher: tchr }).then(r => {
                     $scope.regetReqLsns();
-                })
+                });
             }
-        })
-    }
+        });
+    };
     $scope.regetReqLsns = () => {
         $http.get('/user/lessonReq').then(r => {
             $scope.requestedLessons = r.data;
-        })
-    }
+        });
+    };
     $scope.tchrInfo = {
-        teacher:null,
-        show:false
-    }
-    $scope.showTchrInfo = t=>{
-        console.log("Would show teacher info for ",t)
+        teacher: null,
+        show: false
+    };
+    $scope.showTchrInfo = t => {
+        // $log.debug("Would show teacher info for ",t)
         $scope.tchrInfo.tchr = t;
-        $scope.tchrInfo.show=true;
-     }
-     
+        $scope.tchrInfo.show = true;
+    };
     $scope.totalStars = [0, 1, 2, 3, 4];
     socket.on('refReqLs', o => {
         $scope.regetReqLsns();
     });
-})
-app.controller('mentor-cont', ($scope, $http, $q, userFact) => {
-    // console.log("mentor ctrl registered")
+});
+app.controller('mentor-cont', ($scope, $http, $q, userFact, $log) => {
+    $log.debug("mentor ctrl registered");
     $scope.totalStars = [0, 1, 2, 3, 4];
     $scope.messageUser = l => {
-        // console.log('Would send message to', l.user);
-        $http.post('/user/LCmsgStudent',l)
-            .then(r=>{
-                bulmabox.alert('Message Sent','Your student {{l.user.displayName||l.user.user}} has been notified that you wish to speak with them regarding this lesson.')
-            })
-    }
+        $log.debug('sending message to', l.user);
+        $http.post('/user/LCmsgStudent', l)
+            .then(r => {
+                bulmabox.alert('Message Sent', 'Your student {{l.user.displayName||l.user.user}} has been notified that you wish to speak with them regarding this lesson.');
+            });
+    };
     $scope.toggleActive = l => {
         const title = l.active ? "Deactivate Lesson" : "Re-activate Lesson",
-            msg = l.active ? `Are you sure you wish to deactivate (end) this lesson?` : `Are you sure you wish to re-activate (resume) this lesson?`
+            msg = l.active ? `Are you sure you wish to deactivate (end) this lesson?` : `Are you sure you wish to re-activate (resume) this lesson?`;
         bulmabox.confirm(title, msg, r => {
             if (!!r) {
                 $http.get('/user/LCtoggleActive?id=' + l._id)
                     .then(r => {
                         //do nuffin
-                    })
+                    });
             }
-        })
-    }
+        });
+    };
     $scope.toggleHide = l => {
         const title = l.active ? "Hide Lesson" : "Un-Hide Lesson",
-            msg = l.active ? `Are you sure you wish to hide this lesson?<br>Hiding a lesson will prevent it from showing up on your Teacher Review panel.` : `Are you sure you wish to un-hide this lesson? <br>Un-hiding a lesson will make it visible again on your Teacher Review panel.`
+            msg = l.active ? `Are you sure you wish to hide this lesson?<br>Hiding a lesson will prevent it from showing up on your Teacher Review panel.` : `Are you sure you wish to un-hide this lesson? <br>Un-hiding a lesson will make it visible again on your Teacher Review panel.`;
         bulmabox.confirm(title, msg, r => {
             if (!!r) {
                 $http.get('/user/LCtoggleHide?id=' + l._id)
                     .then(r => {
                         //do nuffin
-                    })
+                    });
             }
-        })
-    }
-})
+        });
+    };
+});
 
 app.controller('nav-cont',function($scope,$http,$state, $log){
 	$scope.logout = function() {
@@ -1465,17 +1461,16 @@ app.controller('nav-cont',function($scope,$http,$state, $log){
 });
 resetApp.controller('reset-contr',function($scope,$http,$location, $log){
     $scope.key = window.location.search.slice(5);
-    console.log(window.location.href)
     $scope.isRf = window.location.href.includes('rf');
     if(!$scope.key && !$scope.isRf){
-        window.location.href='/rf'
+        window.location.href='/rf';
     }
     $http.get('/user/resetUsr?key='+$scope.key).then(function(u){
         $log.debug('getting reset user status?',u);
         $scope.user=u.data;
     }).catch(e=>{
         if(e.data=='noUsr' && !$scope.isRf){
-            window.location.href='/rf'
+            window.location.href='/rf';
         }
     });
     $scope.doReset = function(){

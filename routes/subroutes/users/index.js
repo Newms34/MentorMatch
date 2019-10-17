@@ -81,7 +81,7 @@ const routeExp = function (io, pp) {
     };
     this.findUserNames = (param) => {
         return function (req, res, next) {
-            console.log('incoming data to findUserNames', req.body, param)
+            console.log('incoming data to findUserNames', req.body, param);
             if (!req.body || !req.body[param] || !req.body[param].length) {
                 return next();//cannot find param, so just run Next
             }
@@ -89,49 +89,19 @@ const routeExp = function (io, pp) {
                 // console.log('Trying to find user to match:', q)
                 return mongoose.model('User').findOne({
                     $or: [{ user: q }, { displayName: q }]
-                })
-            })
+                });
+            });
             Promise.all(usrProms).then(r => {
                 // console.log(r)
                 req.body.users = r.map(a => ({ user: a.user, displayName: a.displayName }));
                 next();
-            })
-            // if (req.body[param] instanceof Array) {
-            //     //multiple "to" users
-            //     console.log('finding MULTIPLE users', req.body[param])
-            //     mongoose.model('User').find({
-            //         $or: [{ user: { $in: req.body[param] } }, { displayName: { $in: req.body[param] } }]
-            //     }, (err, usrs) => {
-            //         console.log('ERR?', err)
-            //         if (!usrs || !usrs.length) {
-            //             //cannot find users
-            //             return next();
-            //         }
-            //         req.body.users = usrs.map(q => ({ user: q.user, displayName: q.displayNames }))
-            //         next();
-            //     })
-            // } else {
-            //     console.log('finding ONE user', req.body[param])
-
-            //     mongoose.model('User').findOne({
-            //         $or: [{ user: req.body[param][0] }, { displayName: req.body[param][0] }]
-            //     }, (err, usr) => {
-            //         console.log(req.body)
-            //         if (!usr) {
-            //             //cannot find user
-            //             return next();
-            //         }
-            //         req.body.users = [{ user: usr.user, displayName: usr.displayName }];
-            //         console.log('body now',req.body)
-            //         next();
-            //     })
-            // }
-        }
-    }
+            });
+        };
+    };
     router.post('/testRoute', this.findUserNames('derp'), (req, res, next) => {
-        console.log(req.body)
-        res.send('done!')
-    })
+        console.log(req.body);
+        res.send('done!');
+    });
     //login/acct creation
     router.post('/new', function (req, res, next) {
         passport.authenticate('local-signup', function (err, user, info) {
@@ -246,7 +216,7 @@ const routeExp = function (io, pp) {
                     return u;
                 });
             let aue = Date.now();
-            console.log('End time for AllUsrs route', aue + '. Elapsed time', aue - aus)
+            console.log('End time for AllUsrs route', aue + '. Elapsed time', aue - aus);
             res.send(usrSend);
         });
     });
@@ -261,7 +231,7 @@ const routeExp = function (io, pp) {
     router.put('/interests', this.authbit, (req, res, next) => {
         //upsert one or more interests
         //incoming format: array of interests like [{title:'JS',lvl:6,canTeach:bool}]
-        console.log('INCOMING INTERESTS ARR', req.body)
+        console.log('INCOMING INTERESTS ARR', req.body);
         if (!req.body || !req.body.length) {
             return res.status(400).send('err');
         }
@@ -271,7 +241,7 @@ const routeExp = function (io, pp) {
                 return false;
             }
             let alreadyHaz = req.user.interests.find(q => q.title == intr.title);
-            console.log('ALREADY HAZ?', alreadyHaz, 'ORIGINAL', intr)
+            console.log('ALREADY HAZ?', alreadyHaz, 'ORIGINAL', intr);
             if (!alreadyHaz) {
                 //interest does not already exists, so create it
                 //level CAN be zero, if the user is for example interested but has not actually learned about it.
@@ -279,7 +249,7 @@ const routeExp = function (io, pp) {
                     title: intr.title,
                     lvl: intr.lvl || 0,
                     canTeach: !!intr.canTeach
-                }
+                };
                 req.user.interests.push(alreadyHaz);
             } else {
                 //does already exists. update 
@@ -288,14 +258,14 @@ const routeExp = function (io, pp) {
             }
         });
         req.user.save((eu, esv) => {
-            io.emit('topicUpdate', {})
+            io.emit('topicUpdate', {});
             res.send('done');
-        })
+        });
     });
     router.get('/interests', this.authbit, (req, res, next) => {
         //get all interests
         res.send(req.user.interests);
-    })
+    });
     router.delete('/interests', this.authbit, (req, res, next) => {
         //remove interest(s)
         // console.log('WOULD ATTEMPT TO DELETE ',req.query.t)
@@ -304,9 +274,9 @@ const routeExp = function (io, pp) {
             return q.title != req.query.t;
         });
         req.user.save((eu, esv) => {
-            res.send('refresh')
-        })
-    })
+            res.send('refresh');
+        });
+    });
 
     //projs
     router.put('/projs', this.authbit, (req, res, next) => {
@@ -320,7 +290,7 @@ const routeExp = function (io, pp) {
                 return false;
             }
             let alreadyHaz = req.user.projects.find(q => q.name == proj.name);
-            console.log('ALREADY HAZ?', alreadyHaz, 'ORIGINAL', proj)
+            console.log('ALREADY HAZ?', alreadyHaz, 'ORIGINAL', proj);
             if (!alreadyHaz) {
                 //project does not already exists, so create it
                 //level CAN be zero, if the user is for example projected but has not actually learned about it.
@@ -328,7 +298,7 @@ const routeExp = function (io, pp) {
                     name: proj.name,
                     description: proj.description || null,
                     position: proj.position || null
-                }
+                };
                 req.user.projects.push(alreadyHaz);
             } else {
                 //does already exists. update 
@@ -337,34 +307,21 @@ const routeExp = function (io, pp) {
             }
         });
         req.user.save((eu, esv) => {
-            res.send('refresh')
-        })
+            res.send('refresh');
+        });
     });
     router.get('/projs', this.authbit, (req, res, next) => {
         //get all interests
         res.send(req.user.projects);
-    })
+    });
     router.delete('/projs', this.authbit, (req, res, next) => {
         //remove interest(s)
-        req.user.projects = req.user.projects.filter(q => {
-            q.name == req.body.name;
-        });
+        req.user.projects = req.user.projects.filter(q => q.name == req.body.name);
         req.user.save((eu, esv) => {
-            res.send('refresh')
-        })
-    })
+            res.send('refresh');
+        });
+    });
 
-    // router.get('/changeTz', this.authbit, (req, res, next) => {
-    //     mongoose.model('User').findOne({
-    //         _id: req.session.passport.user
-    //     }, function (err, usr) {
-    //         usr.tz = req.query.tz;
-    //         console.log('USER TIME ZONE NOW', usr);
-    //         usr.save((errsv, usrsv) => {
-    //             res.send(usrsv);
-    //         });
-    //     });
-    // });
     router.post('/changeOther', this.authbit, (req, res, next) => {
         //NEED TO IMPLEMENT
         // req.user.otherInfo = req.body.other;
@@ -373,29 +330,27 @@ const routeExp = function (io, pp) {
             //changed display name; we need to check if this name is okay
             mongoose.model('User').findOne({ $or: [{ user: req.body.displayName }, { displayName: req.body.displayName }] }, (err, usr) => {
                 if (usr && usr.user != req.user.user) {
-                    return res.status(400).send('dupDisplay')
+                    return res.status(400).send('dupDisplay');
                 }
                 ['company', 'projects', 'otherInfo', 'displayName', 'avatar', 'gitLink'].forEach(n => {
                     if (n == 'projects' && !req.body[n].length) {
                         return false;
                     }
 
-                    console.log('Old', n, 'was', req.user[n], 'new', req.body[n], 'replace?', !!req.body[n])
+                    console.log('Old', n, 'was', req.user[n], 'new', req.body[n], 'replace?', !!req.body[n]);
                     req.user[n] = req.body[n];
                 });
-
                 req.user.save((errsv, usrsv) => {
                     res.send('refresh');
                 });
-            })
+            });
         } else {
-
             ['company', 'projects', 'otherInfo', 'displayName', 'avatar', 'gitLink'].forEach(n => {
                 if (n == 'projects' && !req.body[n].length) {
                     return false;
                 }
 
-                console.log('Old', n, 'was', req.user[n], 'new', req.body[n], 'replace?', !!req.body[n])
+                console.log('Old', n, 'was', req.user[n], 'new', req.body[n], 'replace?', !!req.body[n]);
                 req.user[n] = req.body[n];
             });
 
@@ -495,7 +450,7 @@ const routeExp = function (io, pp) {
         console.log('SEND MSG', req.body);
         //first, let's push this into our outBox
         remark().use(strip).process(req.body.mdMsg, function (err, txt) {
-            const rawMsg = String(txt).replace(/($|\\)#/g, '').replace(/\n|\r/g, ' ')
+            const rawMsg = String(txt).replace(/($|\\)#/g, '').replace(/\n|\r/g, ' ');
             // console.log('TEXT IS',txtOut)
             const msgId = uuid.v4();
             req.user.outMsgs.push({
@@ -507,7 +462,7 @@ const routeExp = function (io, pp) {
                 msgId: msgId
             });
             req.user.save((ef, fu) => {
-                res.send('refresh')
+                res.send('refresh');
             });
             const nao = Date.now();
             req.body.users.forEach(tu => {
@@ -521,9 +476,9 @@ const routeExp = function (io, pp) {
                             from: { user: 'System', displayName: null },
                             date: nao,
                             msg: '<h3 class="content">Undeliverable Message</h3> The following user cannot be found:<br>' + tu
-                        })
+                        });
                         return req.user.save((ef, fu) => {
-                            io.emit('refresh', { user: req.user.user })
+                            io.emit('refresh', { user: req.user.user });
                         });
                     }
                     tousr.inMsgs.push({
@@ -535,27 +490,27 @@ const routeExp = function (io, pp) {
                         msgId: msgId
                     });
                     tousr.save((errt, svt) => {
-                        io.emit('refresh', { user: tu })
-                    })
+                        io.emit('refresh', { user: tu });
+                    });
                 });
             });
-        })
+        });
     });
     router.get('/delMsg', this.authbit, (req, res, next) => {
         //user deletes an old message sent TO them by user and id. this removes from inbox
         req.user.inMsgs = req.user.inMsgs.filter(q => q.msgId != req.query.msgId);
-        console.log('Ran route to delete Inbox msgs. msg id was', req.query.msgId, 'and msg list now', req.user.inMsgs)
+        console.log('Ran route to delete Inbox msgs. msg id was', req.query.msgId, 'and msg list now', req.user.inMsgs);
         req.user.save((a, b) => {
-            res.send('refresh')
-        })
+            res.send('refresh');
+        });
     });
     router.get('/delMyMsg', this.authbit, (req, res, next) => {
         //user deletes an old message sent FROM them by user and id. This removes from outMsgs
         req.user.outMsgs = req.user.outMsgs.filter(q => q.msgId != req.query.msgId);
-        console.log('Ran route to delete Outbox msgs. msg id was', req.query.msgId, 'and msg list now', req.user.outMsgs)
+        console.log('Ran route to delete Outbox msgs. msg id was', req.query.msgId, 'and msg list now', req.user.outMsgs);
         req.user.save((a, b) => {
-            res.send('refresh')
-        })
+            res.send('refresh');
+        });
     });
     router.post('/repMsg', this.authbit, (req, res, next) => {
         //report, not reply!
@@ -569,7 +524,7 @@ const routeExp = function (io, pp) {
         // console.log('REPORTING MESSAGE', req.body);
         req.user.save((errfrm, usrfrm) => {
             // console.log('Saved FROM report', usrfrm, errfrm, 'ORIGINAL USER REPORTING', usr, 'END USER REPING');
-            res.send('refresh')
+            res.send('refresh');
         });
         // throw new Error('err!')
 
@@ -588,7 +543,7 @@ const routeExp = function (io, pp) {
                     date: Date.now(),
                     msgId: req.body.msgId
                 });
-                io.emit('refresh', { user: mod.user })
+                io.emit('refresh', { user: mod.user });
                 mod.save();
             });
             //now find on the SENT (outMsgs) of sending user
@@ -599,7 +554,7 @@ const routeExp = function (io, pp) {
                 console.log(repd, fusr);
                 repd.isRep = true;
                 fusr.save((oerr, ousr) => {
-                    io.emit('refresh', { user: fusr.user })
+                    io.emit('refresh', { user: fusr.user });
                 });
             });
         });
@@ -735,12 +690,12 @@ const routeExp = function (io, pp) {
             if (err || !tc) {
                 return res.status(400).send('err');
             }
-            console.log('tch', tc)
+            console.log('tch', tc);
             const oldReview = tc.ratings.find(q => q.rateUsr && q.rateUsr.user == req.user.user);
-            res.send(oldReview)
-        })
+            res.send(oldReview);
+        });
         // res.send(false)
-    })
+    });
     router.put('/review', this.authbit, (req, res, next) => {
         //upsert review
         //note that rateNum, the number of stars, is from 0 to 5
@@ -760,7 +715,7 @@ const routeExp = function (io, pp) {
             }
             const hasLesson = tc.teaching.find(q => q.user.user == req.user.user);
 
-            console.log('TEACHING', tc.teaching, '. ATTEMPTED TO FIND LESSON FROM THIS USR:', hasLesson, req.user.user)
+            console.log('TEACHING', tc.teaching, '. ATTEMPTED TO FIND LESSON FROM THIS USR:', hasLesson, req.user.user);
             if (!hasLesson) {
                 //user has not taken any lessons with this teacher. Cannot rate a teacher you've not 'experienced'!
                 return res.status(400).send({
@@ -786,9 +741,9 @@ const routeExp = function (io, pp) {
             tc.save((err, usv) => {
                 io.emit('refresh', { user: tc.user });
                 res.send({ err: err, usv: usv });
-            })
-        })
-    })
+            });
+        });
+    });
     router.delete('/review', this.authbit, (req, res, next) => {
         //remove a rating
         if (!req.body || !req.body.tch) {
@@ -807,8 +762,8 @@ const routeExp = function (io, pp) {
                 io.emit('refresh', { user: tc.user });
                 res.send('done');
             });
-        })
-    })
+        });
+    });
     router.post('/reviews', this.authbit, (req, res, next) => {
         //get the ratings + calculated avg for this user
         if (!req.body || !req.body.tch) {
@@ -823,9 +778,9 @@ const routeExp = function (io, pp) {
                 msg: null,
                 ratings: [],
                 stars: null
-            }
+            };
             if (!ru.ratings.length) {
-                rateObj.msg = `No ratings have yet been submitted for this person! Please note that only active or previous students can rate!`
+                rateObj.msg = `No ratings have yet been submitted for this person! Please note that only active or previous students can rate!`;
                 rateObj.stars = null;
             } else {
                 rateObj.msg = 'Here are the following ratings for this person';
@@ -838,13 +793,13 @@ const routeExp = function (io, pp) {
                     rateCount = 0;
                 rateObj.ratings.forEach(roi => {
                     rateCount++;
-                    rateSum += roi.num
+                    rateSum += roi.num;
                 });
                 rateObj.stars = rateSum / rateCount;
             }
-            res.send(rateObj)
-        })
-    })
+            res.send(rateObj);
+        });
+    });
 
     //match stuff
     router.post('/topicSearch', this.authbit, (req, res, next) => {
@@ -852,15 +807,15 @@ const routeExp = function (io, pp) {
         mongoose.model('User').find({}, (err, usrs) => {
             const gudUsrs = usrs.filter(u => {
                 const usrCanTeach = u.interests.filter(a => !!a.canTeach);
-                console.log('LOOKING at user', u.user, 'WITH INTS', usrCanTeach, 'compared to', req.body, 'Not this user?', req.user.user != u.user)
+                console.log('LOOKING at user', u.user, 'WITH INTS', usrCanTeach, 'compared to', req.body, 'Not this user?', req.user.user != u.user);
                 // req.body.filter(srchTop=>{
                 //     return 
                 // })
                 return req.user.user != u.user && (!req.body.filter(srchTop => {
                     return !usrCanTeach.find(ut => {
-                        console.log('USER', u.user, 'TITLE', srchTop.value, 'TITLE MATCH', ut.title == srchTop.value, 'LVL MATCH', ut.lvl >= srchTop.min)
+                        console.log('USER', u.user, 'TITLE', srchTop.value, 'TITLE MATCH', ut.title == srchTop.value, 'LVL MATCH', ut.lvl >= srchTop.min);
                         return ut.title.toLowerCase() == srchTop.value.toLowerCase() && ut.lvl >= srchTop.min;
-                    })
+                    });
                     // return !simpUsrInts.includes(a);
                 }).length);
             }).map(q => {
@@ -872,14 +827,14 @@ const routeExp = function (io, pp) {
                     avatar: q.avatar,
                     displayName: q.displayName || null,
                     gitLink: q.gitLink || null,
-                    teaching:q.teaching,
-                    reviews:q.ratings,
+                    teaching: q.teaching,
+                    reviews: q.ratings,
                     isDemoUser: !!q.isDemoUser
-                }
-            })
-            res.send(gudUsrs)
-        })
-    })
+                };
+            });
+            res.send(gudUsrs);
+        });
+    });
     router.put('/connect', this.authbit, (req, res, next) => {
         if (!req.body || !req.body.user || !(req.body.topics && req.body.topics.length)) {
             return res.status(400).send('err');
@@ -919,33 +874,33 @@ const routeExp = function (io, pp) {
                 isConMsg: true,
                 topics: req.body.topics,
                 msgId: msgId
-            })
-            tu.save((errt,tsv)=>{
-                if(errt){
-                    console.log('ERROR WAS',errt)
+            });
+            tu.save((errt, tsv) => {
+                if (errt) {
+                    console.log('ERROR WAS', errt);
                 }
-                io.emit('refresh',{user:tu.user})
+                io.emit('refresh', { user: tu.user });
             });
             req.user.save((ef, uf) => {
-                res.send('refresh')
-            })
-        })
-    })
+                res.send('refresh');
+            });
+        });
+    });
     router.get('/activeLessons', this.authbit, (req, res, next) => {
         mongoose.model('User').find({}).exec((err, allUsrs) => {
             const hazLesson = allUsrs.map(q => {
                 // console.log('checking', q.user, 'vs', req.user.user)
                 let lsn = q.teaching.find(a => a.user.user == req.user.user);
                 if (q.user != req.user.user && lsn) {
-                    lsn = JSON.parse(JSON.stringify(lsn))
+                    lsn = JSON.parse(JSON.stringify(lsn));
                     // console.log('found a lesson by', q.user, 'for', req.user.user)
                     lsn.teacher = { user: q.user, displayName: q.displayName };
                 }
                 return lsn;
             }).filter(a => !!a);
-            res.send(hazLesson)
-        })
-    })
+            res.send(hazLesson);
+        });
+    });
     router.put('/teach', this.authbit, (req, res, next) => {
         mongoose.model('User').findOne({
             $or: [
@@ -956,7 +911,7 @@ const routeExp = function (io, pp) {
             ]
         }, (err, usr) => {
             if (err || !usr) {
-                return res.status(400).send('err')
+                return res.status(400).send('err');
             }
             req.user.teaching.push({
                 user: {
@@ -980,13 +935,13 @@ const routeExp = function (io, pp) {
             stuMsg.mdMsg = stuMsg.mdMsg.replace("If you're ready to teach, go ahead and click the Teach button below!", " You've already connected!");
             stuMsg.isConMsg = false;
             usr.save((a, b) => {
-                io.emit('refresh', { user: usr.user })
-            })
+                io.emit('refresh', { user: usr.user });
+            });
             req.user.save((erru, usv) => {
-                res.send('refresh')
-            })
-        })
-    })
+                res.send('refresh');
+            });
+        });
+    });
 
     //lesson request stuffs
     router.post('/lessonReq', this.authbit, (req, res, next) => {
@@ -1006,11 +961,11 @@ const routeExp = function (io, pp) {
                 user: req.user.user,
                 displayName: req.user.displayName || null
             }, function (err, nrl) {
-                io.emit('refReqLs', {})
-                res.send('refresh')
-            })
+                io.emit('refReqLs', {});
+                res.send('refresh');
+            });
         });
-    })
+    });
     router.get('/lessonReq', this.authbit, (req, res, next) => {
         mongoose.model('LessonRequest').find({}).exec((err, lsns) => {
             const unqUsrs = _.uniqBy(lsns, 'user').map(q => q.user);
@@ -1018,21 +973,21 @@ const routeExp = function (io, pp) {
                 //now we have all lessons and all users requesting those lessons
                 const lsnsWithNumbers = lsns.map(lsn => {
                     const theUsr = rlUsrs.find(a => a.user == lsn.user);
-                    console.log('USER FOR THIS TOPIC IS', theUsr.user)
+                    console.log('USER FOR THIS TOPIC IS', theUsr.user);
                     const topsWithNumbers = lsn.topics.map(ll => {
                         const theTopicOnUsr = theUsr.interests.find(q => q.title.toLowerCase() == ll.toLowerCase());//find the user instance of this topic, if it exists 
                         // return Math.random()
-                        console.log('This topic on user model is', theTopicOnUsr, 'Level is', (!!theTopicOnUsr && theTopicOnUsr.lvl) || 0)
+                        console.log('This topic on user model is', theTopicOnUsr, 'Level is', (!!theTopicOnUsr && theTopicOnUsr.lvl) || 0);
                         console.log('OBJ', {
                             title: ll,
                             lvl: (!!theTopicOnUsr && theTopicOnUsr.lvl) || 0
-                        })
+                        });
                         return {
                             title: ll,
                             lvl: (!!theTopicOnUsr && theTopicOnUsr.lvl) || 0
-                        }
+                        };
                     });
-                    console.log('lsn topics now', topsWithNumbers)
+                    console.log('lsn topics now', topsWithNumbers);
                     return {
                         user: lsn.user,
                         displayName: lsn.displayName,
@@ -1040,37 +995,37 @@ const routeExp = function (io, pp) {
                         topics: topsWithNumbers,
                         _id: lsn._id
                     };
-                })
-                res.send(lsnsWithNumbers)
-            })
+                });
+                res.send(lsnsWithNumbers);
+            });
             // console.log('UNIQ USERS',unqUsrs,'ALL LSNS',lsns)
 
-        })
-    })
+        });
+    });
     router.delete('/lessonReq', this.authbit, (req, res, next) => {
         mongoose.model('LessonRequest').findOneAndRemove({
             user: req.user.user,
             _id: req.query.id
         }, (err, data) => {
-            console.log('REMOVED! Lesson was', data)
-            res.send('done')
-        })
-    })
+            console.log('REMOVED! Lesson was', data);
+            res.send('done');
+        });
+    });
     router.post('/acceptLesson', this.authbit, (req, res, next) => {
         // console.log('TRYING TO ACCEPT', req.body)
         mongoose.model('LessonRequest').findOne({
             user: req.user.user,
             _id: req.body.id
         }, (erra, alsn) => {
-            console.log('ERR', erra, 'ALSN', alsn)
+            console.log('ERR', erra, 'ALSN', alsn);
             const htmlMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Student ${req.user.displayName || req.user.user} has accepted your offer to teach them the following skills: <ul>${alsn.topics.map(q => "<li>" + q + "</li>").join('')}</ul><br/>If you're ready to teach, go ahead and click the Teach button below!`,
                 mdMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Student ${req.user.displayName || req.user.user} has accepted your offer to teach them the following skills: ${alsn.topics.join(', ')}. If you're ready to teach, go ahead and click the Teach button below!`,
                 rawMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Student ${req.user.displayName || req.user.user} has accepted your offer to teach them the following skills: ${alsn.topics.map(q => " - " + q + "\n").join('')}\n If you're ready to teach, go ahead and click the Teach button below!`,
                 msgId = uuid.v4();
             mongoose.model('User').findOne({ user: req.body.teacher.user }, (errt, toUsr) => {
-                console.log('To User', toUsr && toUsr.user)
+                console.log('To User', toUsr && toUsr.user);
                 if (!toUsr) {
-                    return res.status(400).send('err')
+                    return res.status(400).send('err');
                 }
                 const nunc = Date.now();
                 toUsr.inMsgs.push({
@@ -1084,7 +1039,8 @@ const routeExp = function (io, pp) {
                     msgId: msgId
                 });
                 toUsr.save((errt, utsv) => {
-                })
+                    io.emit('refresh', { user: toUsr.user });
+                });
                 req.user.outMsgs.push({
                     to: [{ user: req.body.teacher.user, displayName: req.body.teacher.displayName }],
                     displayTo: req.body.displayName,
@@ -1095,23 +1051,23 @@ const routeExp = function (io, pp) {
                     isConMsg: true,
                     topics: alsn.topics,
                     msgId: msgId
-                })
+                });
                 req.user.save((errf, svf) => {
                     if (errt) {
-                        console.log('ERROR TO', errt)
+                        console.log('ERROR TO', errt);
                     }
                     mongoose.model('LessonRequest').findOneAndRemove({
                         user: req.user.user,
                         _id: req.body.id
                     }, (errr, rlsn) => {
                         io.emit('refresh', { user: toUsr.user });
-                        res.send('refresh')
-                    })
-                })
-            })
+                        res.send('refresh');
+                    });
+                });
+            });
 
-        })
-    })
+        });
+    });
     router.post('/teachLessonReq', this.authbit, (req, res, next) => {
         mongoose.model('LessonRequest').findOne({
             _id: req.body.id,
@@ -1119,18 +1075,18 @@ const routeExp = function (io, pp) {
             if (!lsn.answerers.find(q => q.user == req.user.user)) {
                 lsn.answerers.push({ user: req.user.user, displayName: req.user.displayName });
             } else {
-                lsn.answerers = lsn.answerers.filter(q => q.user != req.user.user)
+                lsn.answerers = lsn.answerers.filter(q => q.user != req.user.user);
             }
             lsn.save((errs, rs) => {
-                res.send('done')
-            })
-        })
+                res.send('done');
+            });
+        });
     });
 
     //dashboard lesson stuff: request lesson discussion, request lesson end, report lesson.
     router.post('/reqDiscussLesson', this.authbit, (req, res, next) => {
         if (!req.body || !req.body.user || !req.body.teacher) {
-            return res.status(400).send('err')
+            return res.status(400).send('err');
         }
         const topList = req.body.topics.length > 1 ? req.body.topics.slice(0, -1).join(', ') + ' and ' + req.body.topics.slice(-1) : req.body.topics[0],
             mdMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Your student ${req.body.user.displayName || req.body.user.user} wishes to discuss the lesson on \n${req.body.topics.map(q => ' - ' + q + '\n')} Go ahead and reply back to this message!`,
@@ -1146,7 +1102,7 @@ const routeExp = function (io, pp) {
             htmlMsg: htmlMsg,
             rawMsg: rawMsg,
             msgId: msgId,
-            date:nao
+            date: nao
         });
         mongoose.model('User').findOne({
             $or: [{ user: req.body.teacher.user },
@@ -1164,26 +1120,26 @@ const routeExp = function (io, pp) {
                 htmlMsg: htmlMsg,
                 rawMsg: rawMsg,
                 msgId: msgId,
-                date:nao
-            })
+                date: nao
+            });
             usr.save((a, b) => {
-                io.emit('refresh', { user: req.body.teacher.user })
-            })
+                io.emit('refresh', { user: req.body.teacher.user });
+            });
             req.user.save((a, b) => {
                 res.send('refresh');
-            })
-        })
-    })
+            });
+        });
+    });
 
     router.post('/reqEndLesson', this.authbit, (req, res, next) => {
         if (!req.body || !req.body.user || !req.body.teacher) {
-            return res.status(400).send('err')
+            return res.status(400).send('err');
         }
         const topList = req.body.topics.length > 1 ? req.body.topics.slice(0, -1).join(', ') + ' and ' + req.body.topics.slice(-1) : req.body.topics[0],
             mdMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Your student ${req.body.user.displayName || req.body.user.user} wants to end the lesson  \n${req.body.topics.map(q => ' - ' + q + '\n')} If you agree, head over to the Mentoring page and end this lesson.`,
             htmlMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Your student ${req.body.user.displayName || req.body.user.user} wants to end the lesson  <ul>${req.body.topics.map(q => '<li>' + q + '</li>')}</ul><br> If you agree, head over to the Mentoring page and end this lesson.`,
-            rawMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Your student ${req.body.user.displayName || req.body.user.user} wants to end the lesson  ${topList}. If you agree, head over to the Mentoring page and end this lesson.`
-        msgId = uuid.v4();
+            rawMsg = `Hi ${req.body.teacher.displayName || req.body.teacher.user}! Your student ${req.body.user.displayName || req.body.user.user} wants to end the lesson  ${topList}. If you agree, head over to the Mentoring page and end this lesson.`,
+            msgId = uuid.v4();
         req.user.outMsgs.push({
             to: [{
                 user: req.body.teacher.user,
@@ -1210,25 +1166,25 @@ const routeExp = function (io, pp) {
                 htmlMsg: htmlMsg,
                 rawMsg: rawMsg,
                 msgId: msgId
-            })
+            });
             usr.save((a, b) => {
-                io.emit('refresh', { user: req.body.teacher.user })
-            })
+                io.emit('refresh', { user: req.body.teacher.user });
+            });
             req.user.save((a, b) => {
                 res.send('refresh');
-            })
-        })
-    })
+            });
+        });
+    });
 
     router.post('/repLesson', this.authbit, (req, res, next) => {
         if (!req.body || !req.body.user || !req.body.teacher) {
-            return res.status(400).send('err')
+            return res.status(400).send('err');
         }
         const topList = req.body.topics.length > 1 ? req.body.topics.slice(0, -1).join(', ') + ' and ' + req.body.topics.slice(-1) : req.body.topics[0],
             mdMsg = `User ${req.user.displayName || req.user.user} reported a lesson by mentor ${req.body.teacher.displayName || req.body.teacher.user} on: \n${req.body.topics.map(q => ' - ' + q + '\n')} \nReport time: ${new Date().toLocaleString()}`,
             htmlMsg = `User ${req.user.displayName || req.user.user} reported a lesson by mentor ${req.body.teacher.displayName || req.body.teacher.user} on: <ul>${req.body.topics.map(q => '<li>' + q + '</li>')}</ul><br> Report time: ${new Date().toLocaleString()}`,
-            rawMsg = `User ${req.user.displayName || req.user.user} reported a lesson by mentor ${req.body.teacher.displayName || req.body.teacher.user} on: ${topList}. Report time: ${new Date().toLocaleString()}`
-        msgId = uuid.v4();
+            rawMsg = `User ${req.user.displayName || req.user.user} reported a lesson by mentor ${req.body.teacher.displayName || req.body.teacher.user} on: ${topList}. Report time: ${new Date().toLocaleString()}`,
+            msgId = uuid.v4();
         req.user.outMsgs.push({
             to: [{
                 user: '(mod team)',
@@ -1259,16 +1215,16 @@ const routeExp = function (io, pp) {
                     htmlMsg: htmlMsg,
                     rawMsg: rawMsg,
                     msgId: msgId
-                })
+                });
                 usr.save((a, b) => {
-                    io.emit('refresh', { user: usr.user })
-                })
-            })
+                    io.emit('refresh', { user: usr.user });
+                });
+            });
             req.user.save((a, b) => {
                 res.send('refresh');
-            })
-        })
-    })
+            });
+        });
+    });
 
     //mentor page routes (message student, toggle active, hide)
     router.post('/LCmsgStudent', this.authbit, (req, res, next) => {
@@ -1282,7 +1238,7 @@ const routeExp = function (io, pp) {
                 htmlMsg: htmlMsg,
                 rawMsg: rawMsg,
                 topics: req.body.topics
-            }
+            };
         mongoose.model('User').findOne({ user: req.body.user.user }, (err, tusr) => {
             if (err || !tusr) {
                 return res.status(400).send('err');
@@ -1293,11 +1249,11 @@ const routeExp = function (io, pp) {
             });
             tusr.inMsgs.push(fullMsg);
             tusr.save((a, b) => {
-                io.emit('refresh', { user: req.body.user.user })
-            })
-        })
+                io.emit('refresh', { user: req.body.user.user });
+            });
+        });
         //and to user
-    })
+    });
     router.get('/LCtoggleHide', this.authbit, (req, res, next) => {
         if (!req.query.id) {
             return res.status(400).send('err');
@@ -1310,8 +1266,8 @@ const routeExp = function (io, pp) {
         req.user.save((a, b) => {
             io.emit('refresh', { user: theLesson.user.user });
             res.send('refresh');
-        })
-    })
+        });
+    });
     router.get('/LCtoggleActive', this.authbit, (req, res, next) => {
         if (!req.query.id) {
             return res.status(400).send('err');
@@ -1324,16 +1280,16 @@ const routeExp = function (io, pp) {
         req.user.save((a, b) => {
             io.emit('refresh', { user: theLesson.user.user });
             res.send('refresh');
-        })
-    })
+        });
+    });
 
     //generate a demo user (mod only!)
     router.get('/genDemoUser', this.authbit, isMod, (req, res, next) => {
-        const user = `${demoNames.adjectives[Math.floor(Math.random() * demoNames.adjectives.length)]}-${demoNames.animals[Math.floor(Math.random() * demoNames.animals.length)]}-${Math.ceil(Math.random() * 99)}`
+        const user = `${demoNames.adjectives[Math.floor(Math.random() * demoNames.adjectives.length)]}-${demoNames.animals[Math.floor(Math.random() * demoNames.animals.length)]}-${Math.ceil(Math.random() * 99)}`;
         req.body = {
             user: user,
             pass: Math.floor(Math.random() * 9999999999).toString(32)
-        }
+        };
         passport.authenticate('local-signup', function (err, user, info) {
             // truncus('err', err, 'usr', user, 'inf', info)
             if (err) {
@@ -1349,14 +1305,14 @@ const routeExp = function (io, pp) {
                         title: q,
                         lvl: canTeach ? Math.ceil(Math.random() * 5) + 5 : Math.floor(Math.random() * 11),
                         canTeach: canTeach
-                    }
-                })
+                    };
+                });
                 user.save((err, dsv) => {
                     res.send(`Your demo user: ${req.body.user}, password: ${req.body.pass} . WRITE THIS DOWN!`);
-                })
-            })
+                });
+            });
         })(req, res, next);
-    })
+    });
     //TEMPORARY!
 
     // router.get('/ref', this.authbit, (req, res, next) => {
@@ -1376,10 +1332,11 @@ const routeExp = function (io, pp) {
                 u.inMsgs = [];
                 u.outMsgs = [];
                 u.save();
-            })
+            });
             res.send('DONE');
-        })
-    })
+        });
+    });
+
     return router;
 };
 

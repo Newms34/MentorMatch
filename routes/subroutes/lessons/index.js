@@ -74,24 +74,24 @@ const routeExp = function (io) {
             //next, let's make sure that this lesson is not already created
             const alreadyTeaching = req.user.teaching.find(q => {
                 return q.user == lu.user && q.topics.sort().join().toString().toLowerCase() == req.body.topics.join().toString().toLowerCase();
-            })
+            });
             if (alreadyTeaching) {
                 return res.status(400).send({
                     status: 'alreadyTeaching',
                     t: req.user.teaching
-                })
+                });
             }
             //everything should be ok. Add to user model and save
             req.user.teaching.push({ user: lu.user, topics: req.body.topics });
             req.user.save((err, usv) => {
-                res.send(usv)
-            })
-        })
-    })
+                res.send(usv);
+            });
+        });
+    });
     router.delete('/lesson', this.authbit, (req, res, next) => {
         //remove a lesson. Confirm is on FE.
         if (!req.body.id) {
-            res.status(400).send('err')
+            res.status(400).send('err');
         }
         const theLesson = req.user.teaching.find(q => q._id == req.body.id);
         if (!theLesson) {
@@ -103,7 +103,7 @@ const routeExp = function (io) {
         //note that for the sake of rating, lessons are never actually deleted
         req.user.save((err, usv) => {
             res.send('done');
-        })
+        });
     });
     router.get('/connectLearner', this.authbit, (req, res, next) => {
         //learner wants to connect: find by teacher
@@ -112,28 +112,28 @@ const routeExp = function (io) {
         }
         mongoose.model('user').find({ user: req.query.teacher }, (err, tc) => {
             if(err||!tc){
-                return res.status(400).send('noUsr')
+                return res.status(400).send('noUsr');
             }
             const hasLesson = !!tc.teaching.filter(q => q.user == req.user.user).length;
             if (!hasLesson) {
-                return res.status(400).send({ status: 'noLesson' })
+                return res.status(400).send({ status: 'noLesson' });
             }
             req.user.outMsgs.push({
                 to:req.query.teacher,
                 msg:`Hi, ${req.query.teacher}! Student ${req.user.user} wants to connect about one of the lessons you're teaching!`,
                 date:Date.now()
-            })
+            });
             tc.inMsgs.push({
                 from:req.query.teacher,
                 msg:`Hi, ${req.query.teacher}! Student ${req.user.user} wants to connect about one of the lessons you're teaching!`,
                 date:Date.now()
-            })
+            });
             tc.save();
             req.user.save((err,usv)=>{
                 res.send(usv);
-            })
-        })
-    })
+            });
+        });
+    });
     router.get('/connectTeacher', this.authbit, (req, res, next) => {
         //teacher wants to connect: find by student
         if (!req.query || !req.query.learner) {
@@ -141,28 +141,28 @@ const routeExp = function (io) {
         }
         mongoose.model('user').find({ user: req.query.learner }, (err, lrn) => {
             if(err||!lrn){
-                return res.status(400).send('noUsr')
+                return res.status(400).send('noUsr');
             }
             const hasLesson = !!req.user.teaching.filter(q => q.user == req.query.learner).length;
             if (!hasLesson) {
-                return res.status(400).send({ status: 'noLesson' })
+                return res.status(400).send({ status: 'noLesson' });
             }
             req.user.outMsgs.push({
                 to:req.query.learner,
                 msg:`Hi, ${req.query.learner}! Teacher ${req.user.user} wants to connect about one of the lessons you're teaching!`,
                 date:Date.now()
-            })
+            });
             lrn.inMsgs.push({
                 from:req.query.learner,
                 msg:`Hi, ${req.query.learner}! Teacher ${req.user.user} wants to connect about one of the lessons you're teaching!`,
                 date:Date.now()
-            })
+            });
             lrn.save();
             req.user.save((err,usv)=>{
                 res.send(usv);
-            })
-        })
-    })
+            });
+        });
+    });
     router.get('/toggleFinished', this.authbit, (req, res, next) => {
         //switch the lesson from ongoing ('active==true') to done ('active==false')
         const theLesson = req.user.teaching.filter(q => q._id == req.query.id);
@@ -172,8 +172,8 @@ const routeExp = function (io) {
         theLesson.active = !theLesson.active;
         res.user.save((err, usv) => {
             res.send(usv);
-        })
-    })
+        });
+    });
     return router;
 };
 

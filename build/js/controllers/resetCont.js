@@ -1,16 +1,15 @@
 resetApp.controller('reset-contr',function($scope,$http,$location, $log){
     $scope.key = window.location.search.slice(5);
-    console.log(window.location.href)
     $scope.isRf = window.location.href.includes('rf');
     if(!$scope.key && !$scope.isRf){
-        window.location.href='/rf'
+        window.location.href='/rf';
     }
     $http.get('/user/resetUsr?key='+$scope.key).then(function(u){
         $log.debug('getting reset user status?',u);
         $scope.user=u.data;
     }).catch(e=>{
         if(e.data=='noUsr' && !$scope.isRf){
-            window.location.href='/rf'
+            window.location.href='/rf';
         }
     });
     $scope.doReset = function(){

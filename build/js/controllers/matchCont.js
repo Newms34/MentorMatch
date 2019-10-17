@@ -1,6 +1,6 @@
 
-app.controller('match-cont', function ($scope, $http, $q) {
-    console.log("matcher ctrl registered")
+app.controller('match-cont', function ($scope, $http, $q, $log) {
+    $log.debug("matcher ctrl registered");
     // $scope.searchTerm = '';
     // $scope.topics = [];
     // $scope.searchTimer = null;
@@ -9,13 +9,13 @@ app.controller('match-cont', function ($scope, $http, $q) {
     //         clearTimeout($scope.searchTimer);
     //     }
     //     $scope.searchTimer = setTimeout(function(){
-    //         // console.log('Searching for:',$scope.searchTerm,'http module is',$http)
+    //         // $log.debug('Searching for:',$scope.searchTerm,'http module is',$http)
     //         $http.get('/topic/search?q='+$scope.searchTerm)
     //             .then(r=>{
     //                 $scope.topics = r.data;
     //             })
     //             .catch(e=>{
-    //                 console.log(e)
+    //                 $log.debug(e)
     //             })
     //     },500)
     // }
@@ -24,26 +24,26 @@ app.controller('match-cont', function ($scope, $http, $q) {
     $scope.regetTopics = () => {
         $http.get('/topic/topic').then(r => {
             $scope.topicObjsAll = r.data.map(q => {
-                return { value: q.title.toLowerCase(), display: q.title, desc: q.desc }
-            })
-            $scope.topicObjs = angular.copy($scope.topicObjsAll)
-        })
-    }
+                return { value: q.title.toLowerCase(), display: q.title, desc: q.desc };
+            });
+            $scope.topicObjs = angular.copy($scope.topicObjsAll);
+        });
+    };
     $scope.regetTopics();
     $scope.filterMe = (query) => {
         const lowercaseQuery = query.toLowerCase();
-        // console.log('picked topics map', $scope.pickedTopics.map(q => q.value))
+        // $log.debug('picked topics map', $scope.pickedTopics.map(q => q.value))
         let tops = $scope.topicObjs.filter(topic => {
             return (topic.value.indexOf(lowercaseQuery) > -1);
         });
-        // console.log('tops', tops)
+        // $log.debug('tops', tops)
         return tops;
-    }
+    };
     $scope.newTopic = {
         title: null,
         desc: null,
         show: false
-    }
+    };
     $scope.toggleNewTopicDia = () => {
         if (!$scope.newTopic.show) {
             $scope.newTopic.title = $scope.topicToAdd;
@@ -62,7 +62,7 @@ app.controller('match-cont', function ($scope, $http, $q) {
             waitingForTopic = false;
             $scope.regetTopics();
         }
-    }
+    };
     let waitingForTopic = false;
     socket.on('topicUpdate', u => {
         if (!!$scope.newTopic.show) {
@@ -71,7 +71,7 @@ app.controller('match-cont', function ($scope, $http, $q) {
         } else {
             $scope.regetTopics();
         }
-    })
+    });
     $scope.addNewTopic = () => {
         $http.post('/topic/topic', $scope.newTopic)
             .then(r => {
@@ -82,39 +82,38 @@ app.controller('match-cont', function ($scope, $http, $q) {
                 if (e.data == 'duplicate') {
                     bulmabox.alert('Duplicate Topic', `Hey! That topic already exists!`);
                 }
-            })
-    }
+            });
+    };
     $scope.pickedTopics = [];
     $scope.addTopicBtn = () => {
-        // console.log( $scope.pickedTopics.length,$scope.topicObjs.length)
+        // $log.debug( $scope.pickedTopics.length,$scope.topicObjs.length)
         const simpPT = $scope.pickedTopics.map(a => a.value).sort().join(''),
             simpTO = $scope.topicObjs ? $scope.topicObjs.map(b => b.value).sort().join('') : '';
-        // console.log("simple data",simpPT,simpTO)
+        // $log.debug("simple data",simpPT,simpTO)
         if ($scope.topicToAdd && simpPT != simpTO) {
-            return 'Click to add your selected skill!'
+            return 'Click to add your selected skill!';
         } else if (simpPT != simpTO) {
-            return `You need to select a skill before you can add it!`
+            return `You need to select a skill before you can add it!`;
         } else {
-            return `You've added all possible skills. Create a new one if you want!`
-
+            return `You've added all possible skills. Create a new one if you want!`;
         }
-    }
+    };
     $scope.changeTopList = () => {
-        // console.log('simpTops', tl, 'all', $scope.topicObjsAll)
-        const tl = $scope.pickedTopics.map(s => s.value.toLowerCase())
+        // $log.debug('simpTops', tl, 'all', $scope.topicObjsAll)
+        const tl = $scope.pickedTopics.map(s => s.value.toLowerCase());
         //remove this from our list of available topics to add
         $scope.topicObjs = $scope.topicObjsAll.filter(tf => !tl.includes(tf.value));
         $http.post('/user/topicSearch', $scope.pickedTopics).then(r => {
             $scope.availTeachs = r.data;
-            // console.log('TEACHERS',$scope.availTeachs)
-        })
-    }
+            // $log.debug('TEACHERS',$scope.availTeachs)
+        });
+    };
     $scope.addSearchTopic = (q) => {
-        console.log('topic', q)
+        $log.debug('topic', q);
         if ($scope.pickedTopics.map(a => a.value.toLowerCase()).includes(q.value)) {
-            // console.log('Duplicate!',q)
+            // $log.debug('Duplicate!',q)
             $scope.topicToAdd = '';
-            return bulmabox.alert(`Already Added`, `You've already added this topic!`)
+            return bulmabox.alert(`Already Added`, `You've already added this topic!`);
         }
         const topicPush = angular.copy(q);
         topicPush.min = 1;
@@ -123,11 +122,11 @@ app.controller('match-cont', function ($scope, $http, $q) {
         // $scope.filterMe('')
         // $scope.topicObjs = $scope.topicObjsAll.filter(q => !.includes(q));
         $scope.topicToAdd = '';
-    }
+    };
     $scope.removeTopic = t => {
         $scope.pickedTopics = $scope.pickedTopics.filter(q => q.value != t.value);
         $scope.changeTopList();
-    }
+    };
     $scope.mentCon = {
         topics: [],
         user: null,
@@ -146,12 +145,11 @@ app.controller('match-cont', function ($scope, $http, $q) {
         return {
             label: tl,
             num: i
-        }
-    })
-    $scope.lvls = ['None', 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    $scope.lvls = new Array(10).fill(1).map((q, i) => ({ lbl: i > 1 ? i : 'None', num: i }))
+        };
+    });
+    // $scope.lvls = ['None', 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    $scope.lvls = new Array(10).fill(1).map((q, i) => ({ lbl: i > 1 ? i : 'None', num: i }));
     $scope.conv = new showdown.Converter();
-    console.log('TIMES', $scope.times)
     $scope.doConnect = u => {
         //set up the dialog box for connecting w/ mentor
         $scope.mentCon.user = u.user;
@@ -161,25 +159,25 @@ app.controller('match-cont', function ($scope, $http, $q) {
         $scope.mentCon.plusHtmlMsg = null;
         $scope.mentCon.tz = { from: null, to: null };
         $scope.mentCon.show = true;
-        $scope.mentCon.topics = $scope.pickedTopics.map(q=>q.display);
-        // console.log('original incoming object to doConnect was',u)
+        $scope.mentCon.topics = $scope.pickedTopics.map(q => q.display);
+        // $log.debug('original incoming object to doConnect was',u)
         // $scope.$apply();
-    }
+    };
     $scope.sendConnectMsg = t => {
-        // console.log('would send', $scope.mentCon)
+        // $log.debug('would send', $scope.mentCon)
         $scope.mentCon.plusHtmlMsg = $scope.conv.makeHtml($scope.mentCon.plusMdMsg);
         // return false;
         $http.put('/user/connect', $scope.mentCon).then(r => {
-            $scope.mentCon.show=false;
-            bulmabox.alert('Connect Request Sent', `User ${$scope.mentCon.displayName||$scope.mentCon.user} has been notified that you'd like them as a mentor!`);
+            $scope.mentCon.show = false;
+            bulmabox.alert('Connect Request Sent', `User ${$scope.mentCon.displayName || $scope.mentCon.user} has been notified that you'd like them as a mentor!`);
         });
     };
     //lesson request stuff
     $scope.reqLess = () => {
-        console.log('User', $scope.$parent.user, 'wants lesosn on topics', $scope.pickedTopics);
+        $log.debug('User', $scope.$parent.user, 'wants lesosn on topics', $scope.pickedTopics);
         //now we need to prepare an object to send to our lessonReq model
         const lro = $scope.pickedTopics.map(q => q.display);
-        console.log('Final LRO:', lro);
+        $log.debug('Final LRO:', lro);
         $http.post('/user/lessonReq', lro).then(r => {
             bulmabox.alert('Lesson Request Sent', `Your lesson request has been sent! You can head on over to the "View Requested Lessons" tab if you wanna view or delete it.`);
         }).catch(e => {
@@ -206,60 +204,59 @@ app.controller('match-cont', function ($scope, $http, $q) {
             if (!!r && r != null) {
                 $http.post('/user/teachLessonReq', {
                     id: rl._id
-                }).then(r=>{
-                    bulmabox.alert('Teach Offer Sent', `This student has been notified that you wish to teach this lesson. You'll be notified when they respond to your request.`)
+                }).then(r => {
+                    bulmabox.alert('Teach Offer Sent', `This student has been notified that you wish to teach this lesson. You'll be notified when they respond to your request.`);
                     $scope.regetReqLsns();
-                })
+                });
             }
-        })
-    }
-    $scope.noAnswerRl = o =>{
-        bulmabox.confirm("Cancel Teaching Offer",`Are you sure you wish to rescind your offer to teach these skills to ${o.displayName||o.user}?`,r=>{
-            if(!!r && r!=null){
-                $http.post('/user/teachLessonReq',{
-                    id:o._id
-                }).then(r=>{
+        });
+    };
+    $scope.noAnswerRl = o => {
+        bulmabox.confirm("Cancel Teaching Offer", `Are you sure you wish to rescind your offer to teach these skills to ${o.displayName || o.user}?`, r => {
+            if (!!r && r != null) {
+                $http.post('/user/teachLessonReq', {
+                    id: o._id
+                }).then(r => {
                     $scope.regetReqLsns();
-                })
+                });
             }
-        })
-    }
+        });
+    };
     $scope.deleteRl = (o) => {
-        console.log('WANNA DELETE LESSON', o)
+        $log.debug('WANNA DELETE LESSON', o);
         bulmabox.confirm('Delete Lesson Request', `Are you sure you wish to delete this lesson request?<br/>You'll need to make a new one if you wanna learn these skills!`, r => {
-            if (!!r && r!= null) {
-                $http.delete('/user/lessonReq?id='+o._id).then(r=>{
+            if (!!r && r != null) {
+                $http.delete('/user/lessonReq?id=' + o._id).then(r => {
                     $scope.regetReqLsns();
-                })
+                });
             }
-        })
-    }
-    $scope.acceptMentor = (tchr,lsn)=>{
+        });
+    };
+    $scope.acceptMentor = (tchr, lsn) => {
         bulmabox.confirm('Accept Mentor', `Are you sure you wish to accept this mentor? This will remove the lesson from the list of Requested Lessons and send a message to both of you to connect.`, r => {
-            if (!!r && r!= null) {
-                $http.post('/user/acceptLesson',{id:lsn._id,teacher:tchr}).then(r=>{
+            if (!!r && r != null) {
+                $http.post('/user/acceptLesson', { id: lsn._id, teacher: tchr }).then(r => {
                     $scope.regetReqLsns();
-                })
+                });
             }
-        })
-    }
+        });
+    };
     $scope.regetReqLsns = () => {
         $http.get('/user/lessonReq').then(r => {
             $scope.requestedLessons = r.data;
-        })
-    }
+        });
+    };
     $scope.tchrInfo = {
-        teacher:null,
-        show:false
-    }
-    $scope.showTchrInfo = t=>{
-        console.log("Would show teacher info for ",t)
+        teacher: null,
+        show: false
+    };
+    $scope.showTchrInfo = t => {
+        // $log.debug("Would show teacher info for ",t)
         $scope.tchrInfo.tchr = t;
-        $scope.tchrInfo.show=true;
-     }
-     
+        $scope.tchrInfo.show = true;
+    };
     $scope.totalStars = [0, 1, 2, 3, 4];
     socket.on('refReqLs', o => {
         $scope.regetReqLsns();
     });
-})
+});

@@ -8,13 +8,13 @@ app.controller('main-cont', function ($scope, $http, $state, userFact, $log) {
         userFact.getUser().then(r => {
             $scope.user = r.data;            
         }); 
-    }
+    };
     $scope.refUsr();
     socket.on('refresh',u=>{
         if($scope.user && u.user==$scope.user.user){
             $scope.refUsr();
         }
-    })
+    });
     $scope.isActive=true;
     $scope.pokeTimer = null;
     $scope.faceOpen = false;

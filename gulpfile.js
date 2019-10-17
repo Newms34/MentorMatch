@@ -20,10 +20,50 @@ const jshint = require('gulp-jshint'),
     ngAnnotate = require('gulp-ng-annotate');
 let sassStart = 0,
     jsStart = 0;
+const reporterFn = function (results, data, opts = {}) {
+    const errLen = results.filter(q => q.error.code[0] == 'E').length,
+        warnLen = results.filter(q => q.error.code[0] == 'W').length;
+    let str = '',
+        prevfile;
 
+    // opts = opts || {};
+
+    results.forEach(function (result) {
+        var file = result.file;
+        var error = result.error;
+
+        if (prevfile && prevfile !== file) {
+            str += "\n";
+        }
+        prevfile = file;
+        if (error.code[0] == 'E') {
+            str += chalk.red('ERR: ');
+        } else if (error.code[0] == 'W' && error.reason != 'Missing semicolon.') {
+            str += chalk.yellow('WARN: ');
+        } else if (error.code[0] == 'W' && error.reason == 'Missing semicolon.') {
+            str += chalk.rgb(128, 128, 0)('Semicolon: ');
+        }
+        // str += error.code[0]=='E'?chalk.red('ERR:'):chalk.yellow("WARN:")
+        str += `${file}: line ${error.line}, col ${error.character} - ${error.reason}`;
+        // str += file + ': line ' + error.line + ', col ' + error.character + ', ' + error.reason + 'FULL ERR:' + JSON.stringify(error);
+
+        if (opts.verbose) {
+            str += ' (' + error.code + ')';
+        }
+
+        str += '\n';
+    });
+
+    if (str) {
+        console.log(`${str}\n ${errLen} ${chalk.red("error" + (errLen === 1 ? '' : 's'))},  ${warnLen} ${chalk.yellow("warning" + (warnLen === 1 ? '' : 's'))}`)
+        // console.log(str + "\n" + len + ' error' + ((len === 1) ? '' : 's'));
+    }
+    // console.log('NOT SURE WHERE THIS GOES!')
+}
 // Lint Task
 gulp.task('lint', function () {
-    let alreadyRan = false;
+    let alreadyRan = false,
+        semisDone = false;
     return gulp.src(['build/js/*.js', 'build/js/**/*.js'])
         .pipe(th2.obj((file, enc, cb) => {
             if (!alreadyRan) {
@@ -34,9 +74,9 @@ gulp.task('lint', function () {
             return cb(null, file);
         }))
         .pipe(jshint({
-            esversion: 6
+            esversion: 8
         }))
-        .pipe(jshint.reporter('default'));
+        .pipe(jshint.reporter(reporterFn));
 });
 
 gulp.task('lintBE', function () {
@@ -52,9 +92,9 @@ gulp.task('lintBE', function () {
             return cb(null, file);
         }))
         .pipe(jshint({
-            esversion: 6
+            esversion: 8
         }))
-        .pipe(jshint.reporter('default'));
+        .pipe(jshint.reporter(reporterFn));
 });
 
 
@@ -110,9 +150,24 @@ gulp.task('scripts', function () {
         .pipe(iife())
         .pipe(gulp.dest('public/js'))
         .pipe(babel({
-            presets: ['es2015'],
-            plugins:['angularjs-annotate']
+            presets: [
+                [
+                    "@babel/preset-env",
+                    {
+                        useBuiltIns: "usage",
+                        corejs: 2,
+                        targets: {
+                            firefox: "64", // or whatever target to choose .    
+                        },
+                      }
+                ]
+            ],
+
+            plugins: ['angularjs-annotate']
         }))
+        /* ,["transform-runtime", {
+                "regenerator": true
+              }] */
         // .pipe(ngAnnotate())
         .pipe(terser())
         // .pipe(uglify({warnings:true}).on('error', gutil.log))
@@ -188,15 +243,13 @@ const drawTitle = (t, w) => {
             back = (dif + 1) / 2;
         }
         // console.log('dif', dif)
-        console.log(chalk['bg' + colorBgs[currColInd]]((' '.repeat(front)) + t + (' '.repeat(back))))
+        console.log(chalk.bgHsl(currColInd,100,50).black((' '.repeat(front)) + t + (' '.repeat(back))))
     }
-    currColInd++;
-    currColInd = currColInd % colorBgs.length;
+    currColInd+=40;
+    currColInd = currColInd % 360;
     if (w) {
         //draw caution bars
         let wt = wid % 2 === 0 ? wid : wid - 1;
-
         console.log((chalk.bgYellowBright(' ') + chalk.bgBlack(' ')).repeat(wt / 2))
     }
-},
-    colorBgs = ['Red', 'Green', 'Yellow', 'Blue', 'Magenta', 'Cyan'];
+};

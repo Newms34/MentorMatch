@@ -40,15 +40,15 @@ const routeExp = function (io) {
     router.get('/topic',this.authbit,(req,res,next)=>{
         mongoose.model('topic').find({},(err,tps)=>{
             res.send(tps);
-        })
+        });
         // res.send('not implemented! searched for '+req.query.q);
-    })
+    });
     router.post('/topic',this.authbit,(req,res,next)=>{
         // console.log('triggered topic add route')
         if(!req.body||!req.body.title){
-            return res.status(400).send('err')
+            return res.status(400).send('err');
         }
-        const ciTi = new RegExp(req.body.title,'i')
+        const ciTi = new RegExp(req.body.title,'i');
         mongoose.model('topic').find({title:ciTi},function(err,ae){
             if(err||ae.length){
                 return res.status(400).send('duplicate');
@@ -57,12 +57,12 @@ const routeExp = function (io) {
                 title:req.body.title,
                 desc:req.body.desc||null
             },function(err,resp){
-                console.log('Done!',resp)
-                res.send('done')
+                console.log('Done!',resp);
+                res.send('done');
             });
-        })
+        });
         // res.send('DONE')
-    })
+    });
     return router;
 };
 
