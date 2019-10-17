@@ -1,6 +1,5 @@
 app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) {
     $scope.noWarn = false;
-    $scope.derp()
     $scope.nameOkay = true;
     delete localStorage.geoUsr;
     $scope.checkTimer = false;
