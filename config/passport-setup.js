@@ -6,11 +6,11 @@ const passport = require('passport'),
     User = require('../models/users'),
     mongoose = require('mongoose');
 if (!!fs.existsSync('./config/keys.json')) {
-    console.log('loading keys from local file')
+    // console.log('loading keys from local file')
     keys = JSON.parse(fs.readFileSync('./config/keys.json', 'utf-8'));
     console.log(keys)
 } else {
-    console.log('loading keys from environment vars')
+    // console.log('loading keys from environment vars')
     keys = {
         google:{
             clientID:process.env.googleId,

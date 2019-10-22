@@ -30,8 +30,8 @@ const router = express.Router(),
 // const oldUsers = JSON.parse(fs.readFileSync('oldUsers.json', 'utf-8'))
 let sgApi;
 mongoose.Promise = Promise;
-if (fs.existsSync('./config/sparky.json')) {
-    sparkyConf = JSON.parse(fs.readFileSync('./config/sparky.json', 'utf-8'));
+if (fs.existsSync('./config/keys.json')) {
+    sparkyConf = JSON.parse(fs.readFileSync('./config/keys.json', 'utf-8')).keys;
 } else {
     sparkyConf = {
         SPARKPOST_API_KEY: process.env.SPARKPOST_API_KEY,

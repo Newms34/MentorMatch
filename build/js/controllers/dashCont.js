@@ -200,7 +200,15 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
                 };
             });
     };
-    $scope.deleteProj = (t) => {
+    $scope.projView = {
+        proj:null,
+        show:false
+    };
+    $scope.viewEditProj = p =>{
+        $scope.projView.proj=p;
+        $scope.show=true;
+    };
+    $scope.deleteProj = t => {
         bulmabox.confirm('Remove Project', `Are you sure you wish to remove the project ${t}?`, r => {
             if (!!r) {
                 $http.delete('/user/projs', { name: t })

@@ -7,13 +7,13 @@
                     <li ng-class="{'is-active':!viewReqLessons}">
                         <a ng-click='viewReqLessons=false'>
                             <span class="icon is-small"><i class="fa fa-handshake-o" aria-hidden="true"></i></span>
-                            <span>Match With Teacher</span>
+                            <span class='is-hidden-mobile'>Match With Teacher</span>
                         </a>
                     </li>
                     <li ng-class="{'is-active':viewReqLessons}">
                         <a ng-click='regetReqLsns();viewReqLessons=true;'>
                             <span class="icon is-small"><i class="fa fa-graduation-cap" aria-hidden="true"></i></span>
-                            <span>View Requested Lessons</span>
+                            <span class='is-hidden-mobile'>View Requested Lessons</span>
                         </a>
                     </li>
 
@@ -56,7 +56,7 @@
                                     some skills above or create your own!</div>
                                 <div class="is-fullwidth columns is-multiline" ng-show='pickedTopics.length'>
 
-                                    <div class="column is-one-tenth notification is-dark btn-pad-right" ng-repeat='t in pickedTopics' title='{{t.desc}}'>
+                                    <div class="column is-one-fifth-desktop is-full-mobile notification is-dark btn-pad-right" ng-repeat='t in pickedTopics' title='{{t.desc}}'>
                                         <div class="is-fullwidth">
                                             <strong>Skill</strong>:&nbsp;{{t.display}}
                                         </div>

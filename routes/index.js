@@ -23,21 +23,3 @@ module.exports = function(io, pp) {
     });
     return router;
 };
-
-//helper stuff
-Array.prototype.findOne = function(p, v) {
-    let i = 0;
-    if (typeof p !== 'string' || !this.length) {
-        return false;
-    }
-    for (i; i < this.length; i++) {
-        if (this[i][p] && this[i][p] == v) {
-            return i;
-        }
-    }
-    return false;
-};
-
-Array.prototype.removeOne = function(n) {
-    this.splice(this.indexOf(n), 1);
-};

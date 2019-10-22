@@ -1,35 +1,35 @@
 <nav class="navbar is-dark is-fixed-top" role="navigation" aria-label="main navigation" ng-controller='nav-cont'>
     <div class="navbar-brand">
-        <a role="button" class="navbar-burger" ng-class='{"is-active":mobActive}' aria-label="menu"
+        <a role="button" class="navbar-burger has-text-white" ng-class='{"is-active":mobActive}' aria-label="menu"
             aria-expanded="false" ng-click='mobActive=!mobActive'>
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
         </a>
     </div>
-    <div class="navbar-menu" ng-class='{"is-active":mobActive}' ng-click='mobActive=false'>
+    <div class="navbar-menu has-background-grey-darker" ng-class='{"is-active":mobActive}' ng-click='mobActive=false'>
         <div class="navbar-start">
-            <a class="navbar-item" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.dash'>
+            <a class="navbar-item has-text-white" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.dash'>
                 <h3><i class="fa fa-user-circle"></i>&nbsp;Profile</h3>
             </a>
-            <a class="navbar-item" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.match'>
+            <a class="navbar-item has-text-white" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.match'>
                 <h3><i class="fa fa-users"></i>&nbsp;Match</h3>
             </a>
-            <a class="navbar-item" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.mentor'>
+            <a class="navbar-item has-text-white" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.mentor'>
                     <h3><i class="fa fa-graduation-cap"></i>&nbsp;Mentoring</h3>
                 </a>
-            <a class="navbar-item" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.mail'>
+            <a class="navbar-item has-text-white" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.mail'>
                 <h3><i class="fa fa-envelope"></i>&nbsp;Mailbox</h3>
             </a>
-            <a class="navbar-item" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.help'>
+            <a class="navbar-item has-text-white" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.help'>
                 <h3><i class="fa fa-question-circle"></i>&nbsp;Help</h3>
             </a>
         </div>
-        <div class='is-italic is-size-5' style='line-height:3.25rem'>
+        <div class='is-italic is-size-5 has-background-grey-darker' style='line-height:3.25rem'>
             Welcome, {{$parent.user.displayName||$parent.user.user}}
         </div>
         <div class="navbar-end">
-            <a class="navbar-item is-pulled-right" ng-click='logout()'>
+            <a class="navbar-item has-text-white is-pulled-right" ng-click='logout()'>
                 <h3><i class="fa fa-sign-out"></i>&nbsp;Logout</h3>
             </a>
         </div>

@@ -47,8 +47,8 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
                 }
             })
             .catch(e => {
-                bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Error', "There's been some sort of error logging in. This is <i>probably</i> not an issue necessarily with your credentials. Blame Dave!");
-                // $log.debug(e);
+                bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Error', "There's been some sort of error logging in. This is <i>probably</i> not an issue with your credentials. Blame the devs!");
+                $log.debug(e);
             });
     };
     $scope.checkUser = () => {

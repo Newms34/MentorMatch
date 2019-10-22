@@ -14,7 +14,9 @@ const express = require('express'),
 app.use(compression());
 
 const sesh = session({
-    secret: 'ea augusta est et carissima'
+    secret: 'ea augusta est et carissima',
+    resave:false,
+    saveUninitialized:false
 });
 const usrModel = require('./models/users')
 app.use(sesh);

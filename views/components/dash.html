@@ -50,20 +50,19 @@
                                         <thead>
                                             <tr>
                                                 <th>Project Name</th>
-                                                <th>Project Description</th>
-                                                <th>Your Position</th>
-                                                <th>Remove Project</th>
+                                                <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr ng-repeat='prj in $parent.user.projects'>
-                                                <td><input type="text" class="input" ng-model='prj.name'></td>
-                                                <td><input type="text" class="input" ng-model='prj.description' placeholder='(None given)'></td>
-                                                <td><input type="text" class="input" ng-model='prj.position'></td>
-                                                <td><button class="button is-small is-danger" ng-click='deleteProj(prj.name)'><i class="fa fa-trash"></i></button></td>
+                                                <td>{{prj.name}}</td>
+                                                <td>
+                                                    <button class="button is-small is-info" title='View/Edit project information' ng-click='modProjDial(prj)'><i class="fa fa-cog"></i></button>
+                                                    <button class="button is-small is-danger" ng-click='deleteProj(prj.name)'><i class="fa fa-trash"></i></button>
+                                                </td>
                                             </tr>
                                             <tr ng-if='!$parent.user.projects || !$parent.user.projects.length'>
-                                                <td colspan='3' class='is-italic'>You have not added any projects yet! </td>
+                                                <td colspan='2' class='is-italic'>You have not added any projects yet! </td>
                                             </tr>
                                         </tbody>
                                     </table> <button class="button is-info is-large" ng-click='modProjDial()'><i class="fa fa-plus"></i>&nbsp; Add New Project</button>
@@ -99,16 +98,18 @@
                             <table class="table is-fullwidth">
                                 <thead>
                                     <tr>
-                                        <th>Skill Name</th>
-                                        <th>Level (1-10)</th>
+                                        <th>Skill Name<span class='is-hidden-desktop'>/Level</span></th>
+                                        <th class='is-hidden-mobile'>Level (1-10)</th>
                                         <th>Can Teach?</th>
                                         <th>Remove Skill</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr ng-repeat='sk in $parent.user.interests'>
-                                        <td>{{sk.title}}</td> <!-- ng-keyup='updateTopics($event)' ng-click -->
-                                        <td><input type="number" ng-model='sk.lvl' class="number" change-re-focus change-fn='updateTopics()' min='0' max='10'></td>
+                                        <td>{{sk.title}} <div class="is-hidden-desktop">
+                                                <input type="number" ng-model='sk.lvl' class="number" change-re-focus change-fn='updateTopics()' min='0' max='10'>
+                                        </div></td>
+                                        <td class='is-hidden-mobile'><input type="number" ng-model='sk.lvl' class="number" change-re-focus change-fn='updateTopics()' min='0' max='10'></td>
                                         <td>
                                             <!-- ng-click='sk.canTeach=!sk.cantTeach;' --> <input type='checkbox' ng-model='sk.canTeach' change-re-focus change-fn='updateTopics()' id='skCanTeach-{{$index}}'> <label for="skCanTeach-{{$index}}">{{sk.canTeach?'Yes':'No'}}</label> </td>
                                         <td> <button class="button is-info" ng-click='removeSkill(sk.title)'><i class="fa fa-trash"></i>&nbsp;Remove</button> </td>

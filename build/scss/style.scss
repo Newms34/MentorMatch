@@ -1,5 +1,5 @@
 @import "./components/bulma";
-@import "./components/chat";
+// @import "./components/chat";
 @import "./components/fonts.scss";
 html,
 body {
@@ -7,9 +7,6 @@ body {
   margin: 0;
   height: 100%; // padding-top: 40px;
   background: #ddd;
-  // background-repeat: no-repeat;
-  // background-size: cover;
-  // background-attachment: fixed;
 }
 
 #main-box {
@@ -21,6 +18,7 @@ body {
 .is-fullwidth {
   width: 100% !important;
 }
+
 .is-wide-btn {
   width: 33%;
 }
@@ -144,4 +142,10 @@ $tenNames: two, three, four, five, six, seven, eight, nine;
 }
 .no-poke{
   cursor:default!important;
+}
+@media screen and (max-width: 768px) {
+  .is-fullwidth-btn-mobile{
+    width:100%!important;
+    margin-bottom:2px;
+  }
 }
