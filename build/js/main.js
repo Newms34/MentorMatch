@@ -168,7 +168,7 @@ app
         };
     }])
     //the following are for file uploading and markdown conversion. I don't THINK we'll need em, but... eh
-    .directive("fileread", [function () {
+    .directive("fileread", ['$log',function ($log) {
         return {
             scope: {
                 fileread: "="

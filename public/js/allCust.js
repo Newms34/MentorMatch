@@ -171,7 +171,7 @@ app
         };
     }])
     //the following are for file uploading and markdown conversion. I don't THINK we'll need em, but... eh
-    .directive("fileread", [function () {
+    .directive("fileread", ['$log',function ($log) {
         return {
             scope: {
                 fileread: "="
@@ -316,61 +316,6 @@ function postrenderAction($timeout) {
         }, 0);
     }
 }
-app.factory('socketFac', function ($rootScope) {
-  var socket = io.connect();
-  return {
-    on: function (eventName, callback) {
-      socket.on(eventName, function () { 
-        var args = arguments;
-        $rootScope.$apply(function () {
-          callback.apply(socket, args);
-        });
-      });
-    },
-    emit: function (eventName, data, callback) {
-      socket.emit(eventName, data, function () {
-        var args = arguments;
-        $rootScope.$apply(function () {
-          if (callback) {
-            callback.apply(socket, args);
-          }
-        });
-      });
-    }
-  };
-});
-app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q', 'userFact', '$log', function ($rootScope, $state, $stateParams, $transitions, $q, userFact, $log) {
-    $transitions.onBefore({ to: 'app.**' }, function (trans) {
-        let def = $q.defer();
-        $log.debug('TRANS', trans);
-        const usrCheck = trans.injector().get('userFact');
-        usrCheck.getUser().then(function (r) {
-            $log.debug('response from login chck', r);
-            if (r.data) {
-                def.resolve(true);
-            } else {
-                // User isn't authenticated. Redirect to a new Target State
-                def.resolve($state.target('appSimp.login', undefined, { location: true }));
-            }
-        }).catch(e => {
-            def.resolve($state.target('appSimp.login', undefined, { location: true }));
-        });
-        return def.promise;
-    });
-    $transitions.onFinish({ to: 'app.**' }, function () {
-        document.body.scrollTop = document.documentElement.scrollTop = 0;
-    });
-}]);
-app.factory('userFact', function($http,$log) {
-    return {
-        getUser: function() {
-            return $http.get('/user/usrData').then(function(s) {
-                $log.debug('getUser in fac says:', s);
-                return s;
-            });
-        }
-    };
-});
 app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
     // $log.debug("Dashboard ctrl registered")
     $scope.refUsr = $scope.$parent.refUsr;
@@ -1685,4 +1630,59 @@ const timezoneList = [
       "text": "(GMT +12:00) Auckland, Wellington, Fiji, Kamchatka"
    }
 ];
+app.factory('socketFac', function ($rootScope) {
+  var socket = io.connect();
+  return {
+    on: function (eventName, callback) {
+      socket.on(eventName, function () { 
+        var args = arguments;
+        $rootScope.$apply(function () {
+          callback.apply(socket, args);
+        });
+      });
+    },
+    emit: function (eventName, data, callback) {
+      socket.emit(eventName, data, function () {
+        var args = arguments;
+        $rootScope.$apply(function () {
+          if (callback) {
+            callback.apply(socket, args);
+          }
+        });
+      });
+    }
+  };
+});
+app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q', 'userFact', '$log', function ($rootScope, $state, $stateParams, $transitions, $q, userFact, $log) {
+    $transitions.onBefore({ to: 'app.**' }, function (trans) {
+        let def = $q.defer();
+        $log.debug('TRANS', trans);
+        const usrCheck = trans.injector().get('userFact');
+        usrCheck.getUser().then(function (r) {
+            $log.debug('response from login chck', r);
+            if (r.data) {
+                def.resolve(true);
+            } else {
+                // User isn't authenticated. Redirect to a new Target State
+                def.resolve($state.target('appSimp.login', undefined, { location: true }));
+            }
+        }).catch(e => {
+            def.resolve($state.target('appSimp.login', undefined, { location: true }));
+        });
+        return def.promise;
+    });
+    $transitions.onFinish({ to: 'app.**' }, function () {
+        document.body.scrollTop = document.documentElement.scrollTop = 0;
+    });
+}]);
+app.factory('userFact', function($http,$log) {
+    return {
+        getUser: function() {
+            return $http.get('/user/usrData').then(function(s) {
+                $log.debug('getUser in fac says:', s);
+                return s;
+            });
+        }
+    };
+});
 }());

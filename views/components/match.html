@@ -94,7 +94,7 @@
                                 <hr>
                                 <div class="columns is-fullwidth is-multiline">
 
-                                    <div class="column is-one-third message" ng-repeat='mt in availTeachs'>
+                                    <div class="column is-one-half message" ng-repeat='mt in availTeachs'>
                                         <!-- single mentor 'card' -->
                                         <div class="message-body has-background-info blocky is-fullwidth">
                                             <div class="columns is-fullwidth is-multiline">
@@ -113,12 +113,12 @@
 
                                                         </div>
                                                         <div class="column is-full has-bottom-border" ng-show='mt.interests.length'>
-                                                            <table class="table">
+                                                            <table class="table is-striped is-fullwidth">
                                                                 <thead>
                                                                     <tr>
                                                                         <th>Skill</th>
-                                                                        <th>Experience (1-10)</th>
-                                                                        <th>Teaching?</th>
+                                                                        <th>Level</th>
+                                                                        <th><span class="is-hidden-desktop"><i class="fa fa-graduation-cap"></i></span><span class="is-hidden-touch">Teaching</span>?</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
