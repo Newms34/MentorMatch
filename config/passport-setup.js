@@ -8,7 +8,7 @@ const passport = require('passport'),
 if (!!fs.existsSync('./config/keys.json')) {
     // console.log('loading keys from local file')
     keys = JSON.parse(fs.readFileSync('./config/keys.json', 'utf-8'));
-    console.log(keys)
+    console.log("keys loaded from file! (No, you can't see them >:(  )")
 } else {
     // console.log('loading keys from environment vars')
     keys = {
