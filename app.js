@@ -9,14 +9,28 @@ const express = require('express'),
     helmet = require('helmet'),
     bodyParser = require('body-parser'),
     session = require('express-session'),
+    mangoStore = require('connect-mongodb-session')(session),
     passport = require('passport'),
-    compression = require('compression');
+    compression = require('compression'),
+    store = new mangoStore({
+        uri: process.env.NODE_ENV && process.env.NODE_ENV=='production'?process.env.MONGODB_URI:'mongodb://localhost:27017/codementormatch',
+        collection: 'cmmSeshes'
+    });
+// Catch errors
+store.on('error', function (error) {
+    console.log(error);
+});;
 app.use(compression());
+
 
 const sesh = session({
     secret: 'ea augusta est et carissima',
-    resave:false,
-    saveUninitialized:false
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
+    },
+    store: store,
+    resave: false,
+    saveUninitialized: false
 });
 const usrModel = require('./models/users')
 app.use(sesh);
@@ -37,29 +51,29 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'views')));
 app.use('/', routes);
 let names = [];
-let isFirstCon=true;
-io.on('connection', function(socket) {
-    socket.on('testFn',function(d){
-        socket.emit('testOut',d);
+let isFirstCon = true;
+io.on('connection', function (socket) {
+    socket.on('testFn', function (d) {
+        socket.emit('testOut', d);
     })
 });
 server.listen(process.env.PORT || 8080);
-server.on('error', function(err) {
+server.on('error', function (err) {
     console.log('Oh no! Err:', err)
 });
-server.on('listening', function(lst) {
+server.on('listening', function (lst) {
     console.log('Server is listening!')
 });
-server.on('request', function(req) {
+server.on('request', function (req) {
     // console.log(req.url);
 })
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     const err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     console.log('Client (probly) err:', err)
     res.send('Error!' + err)
