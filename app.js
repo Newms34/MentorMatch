@@ -1,6 +1,6 @@
 const express = require('express'),
     app = express(),
-    http = process.env.NODE_ENV=='production'? require('https'):require('http'),
+    http = require('http'),
     server = http.Server(app),
     io = require('socket.io')(server),
     path = require('path'),
