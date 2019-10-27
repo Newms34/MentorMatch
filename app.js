@@ -26,7 +26,7 @@ app.use(compression());
 const sesh = session({
     secret: 'ea augusta est et carissima',
     cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
+        sameSite:'strict'
     },
     store: store,
     resave: false,

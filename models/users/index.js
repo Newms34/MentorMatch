@@ -120,7 +120,7 @@ const generateSalt = function () {
 },
     encryptPassword = function (txt, salt) {
         const plainText = txt.toString();
-        console.log('PASSWORD', plainText, salt);
+        // console.log('PASSWORD', plainText, salt);
         const hash = crypto.createHash('sha1');
         hash.update(plainText);
         hash.update(salt);
@@ -129,7 +129,7 @@ const generateSalt = function () {
 usrSchema.statics.generateSalt = generateSalt;
 usrSchema.statics.encryptPassword = encryptPassword;
 usrSchema.methods.correctPassword = function (candidatePassword) {
-    console.log('slt', this.salt, 'and their pwd:', this.pass);
+    // console.log('slt', this.salt, 'and their pwd:', this.pass);
     return encryptPassword(candidatePassword, this.salt) === this.pass;
 };
 
