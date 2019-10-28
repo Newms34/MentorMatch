@@ -99,8 +99,8 @@
                         <div class="field is-fullwidth columns is-multiline">
                             <div class='column is-one-tenth has-text-weight-bold has-text-centered'>To:&nbsp;</div>
                             <div class="column is-nine-tenths is-fullwidth-btn-mobile notification has-background-grey columns is-multiline" style='min-height:3.5em'>
-                                <input type="text" class="input is-pulled-right is-hidden-desktop is-fullwidth column is-full" ng-model='newMsg.possUsr' placeholder='Add recipient -(M)' ng-keyup='newMsgAdd($event);' style='margin-bottom:2px;'>
-                                <input type="text" class="input is-pulled-left is-hidden-touch column is-one-fifth" ng-model='newMsg.possUsr' placeholder='Add recipient -(D)' ng-keyup='newMsgAdd($event);'>
+                                <input type="text" class="input is-pulled-right is-hidden-desktop is-fullwidth column is-full" ng-model='newMsg.possUsr' placeholder='Add recipient' ng-keyup='newMsgAdd($event);' style='margin-bottom:2px;'>
+                                <input type="text" class="input is-pulled-left is-hidden-touch column is-one-fifth" ng-model='newMsg.possUsr' placeholder='Add recipient' ng-keyup='newMsgAdd($event);'>
                                 <div class="tag is-light btn-pad-right is-half-btn-mobile user-to-tag" data-name='{{u}}' ng-repeat='u in newMsg.to'>{{u.displayName||u.user}}
                                     <button title='Remove this user' class="delete" ng-click='newMsgRem(u)'></button>
                                 </div>
