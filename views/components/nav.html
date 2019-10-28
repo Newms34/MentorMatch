@@ -1,5 +1,8 @@
 <nav class="navbar is-dark is-fixed-top" role="navigation" aria-label="main navigation" ng-controller='nav-cont'>
     <div class="navbar-brand">
+            <div class='is-italic is-size-5 has-background-grey-darker is-fullwidth has-text-centered is-hidden-desktop' style='line-height:3.25rem'>
+                    Welcome, {{$parent.user.displayName||$parent.user.user}}
+                </div>
         <a role="button" class="navbar-burger has-text-white" ng-class='{"is-active":mobActive}' aria-label="menu"
             aria-expanded="false" ng-click='mobActive=!mobActive'>
             <span aria-hidden="true"></span>
@@ -25,7 +28,7 @@
                 <h3><i class="fa fa-question-circle"></i>&nbsp;Help</h3>
             </a>
         </div>
-        <div class='is-italic is-size-5 has-background-grey-darker' style='line-height:3.25rem'>
+        <div class='is-italic is-size-5 has-background-grey-darker is-hidden-touch' style='line-height:3.25rem'>
             Welcome, {{$parent.user.displayName||$parent.user.user}}
         </div>
         <div class="navbar-end">

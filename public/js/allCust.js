@@ -850,6 +850,7 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
         $scope.newMsg.show = true;
         $scope.newMsg.to = [m.from||m.other];
         $scope.newMsg.isReply = m;
+        //we also reset Mailview so that we don't have two dialogs open.
         $scope.mailView = {
             title: 'No Message Selected',
             htmlMsg: '',
@@ -860,6 +861,7 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
             date: 12345,
             other:false
         };
+        $log.debug('newMsg now',$scope.newMsg)
     };
     $scope.cancelSend = () => {
         if ($scope.newMsg.mdMsg && $scope.newMsg.mdMsg.length) {

@@ -336,8 +336,6 @@ const routeExp = function (io, pp) {
                     if (n == 'projects' && !req.body[n].length) {
                         return false;
                     }
-
-                    console.log('Old', n, 'was', req.user[n], 'new', req.body[n], 'replace?', !!req.body[n]);
                     req.user[n] = req.body[n];
                 });
                 req.user.save((errsv, usrsv) => {
@@ -349,8 +347,6 @@ const routeExp = function (io, pp) {
                 if (n == 'projects' && !req.body[n].length) {
                     return false;
                 }
-
-                console.log('Old', n, 'was', req.user[n], 'new', req.body[n], 'replace?', !!req.body[n]);
                 req.user[n] = req.body[n];
             });
 
