@@ -75,6 +75,10 @@ const usrSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     }, //mods can ban/unban
+    superMod:{
+        type:Boolean,
+        default:false,
+    },
     //the following is simply a list of interests this user has. It is NOT their current lessons. It also has their experience (1-10) in each topic
     //also has optional "canTeach" param
     interests: [{

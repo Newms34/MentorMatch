@@ -22,6 +22,17 @@ const router = express.Router(),
             }
         });
     },
+    isSuperMod = (req, res, next) => {
+        mongoose.model('User').findOne({
+            _id: req.session.passport.user
+        }, function (err, usr) {
+            if (!err && usr.superMod) {
+                next();
+            } else {
+                res.status(403).send('err');
+            }
+        });
+    }
     demoNames = {
         animals: ['dog', 'fish', 'cat', 'horse', 'bird', 'lizard', 'turtle', 'spider', 'mouse', 'hamster', 'frog'],
         adjectives: ['lumpy', 'large', 'small', 'ferocious', 'tiny', 'friendly', 'dignified', 'superior', 'humble']
@@ -1278,9 +1289,10 @@ const routeExp = function (io, pp) {
             res.send('refresh');
         });
     });
+    
+    //Supermod routes
 
-    //generate a demo user (mod only!)
-    router.get('/genDemoUser', this.authbit, isMod, (req, res, next) => {
+    router.get('/genDemoUser', this.authbit, isSuperMod, (req, res, next) => {
         const user = `${demoNames.adjectives[Math.floor(Math.random() * demoNames.adjectives.length)]}-${demoNames.animals[Math.floor(Math.random() * demoNames.animals.length)]}-${Math.ceil(Math.random() * 99)}`;
         req.body = {
             user: user,
@@ -1309,20 +1321,7 @@ const routeExp = function (io, pp) {
             });
         })(req, res, next);
     });
-    //TEMPORARY!
-
-    // router.get('/ref', this.authbit, (req, res, next) => {
-    //     res.send('refresh');
-    // })
-    // router.get('/tempAddTeachTop', this.authbit, (req, res, next) => {
-    //     req.user.teachTopics.push({ title: req.query.t, lvl: Math.ceil(Math.random() * 10) })
-    //     req.user.save();
-    //     res.send('done');
-    // })
-    // router.get('/temp',(req,res,next)=>{
-    //     res.send('Random number: '+Math.floor(Math.random()*100));
-    // })
-    router.get('/wipeMail', this.authbit, isMod, (req, res, next) => {
+    router.get('/wipeMail', this.authbit, isSuperMod, (req, res, next) => {
         mongoose.model('User').find({}, (err, usrs) => {
             usrs.forEach(u => {
                 u.inMsgs = [];
