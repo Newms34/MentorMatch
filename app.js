@@ -50,8 +50,6 @@ const routes = require('./routes')(io);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'views')));
 app.use('/', routes);
-let names = [];
-let isFirstCon = true;
 io.on('connection', function (socket) {
     socket.on('testFn', function (d) {
         socket.emit('testOut', d);

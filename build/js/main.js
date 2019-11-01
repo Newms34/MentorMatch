@@ -79,6 +79,10 @@ app
                 url: '/mail',
                 templateUrl: 'components/mail.html'
             })
+            .state('app.vote', {
+                url: '/vote',
+                templateUrl: 'components/voting.html'
+            })
             //SIMPLE (unauth'd: login, register, forgot, 404, 500,reset)
             .state('appSimp', {
                 abstract: true,

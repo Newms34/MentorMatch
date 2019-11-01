@@ -32,7 +32,7 @@ const router = express.Router(),
                 res.status(403).send('err');
             }
         });
-    }
+    },
     demoNames = {
         animals: ['dog', 'fish', 'cat', 'horse', 'bird', 'lizard', 'turtle', 'spider', 'mouse', 'hamster', 'frog'],
         adjectives: ['lumpy', 'large', 'small', 'ferocious', 'tiny', 'friendly', 'dignified', 'superior', 'humble']
@@ -1331,7 +1331,20 @@ const routeExp = function (io, pp) {
             res.send('DONE');
         });
     });
-
+    router.get('/acceptAllTopics', this.authbit, isSuperMod, (req, res, next) => {
+        mongoose.model('topic').find({}, (err, tps) => {
+            tps.forEach(t => {
+               t.votes.status=1;
+               t.creator = t.creator || req.user.user;//just in case we somehow do not have a yoozr
+               t.save((terr,tsv)=>{
+                   if(terr){
+                       console.log('ERR for',t,'IS',terr);
+                   }
+               });
+            });
+            res.send('DONE');
+        });
+    });
     return router;
 };
 
