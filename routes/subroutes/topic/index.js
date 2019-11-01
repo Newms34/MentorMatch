@@ -102,6 +102,7 @@ const routeExp = function (io) {
                 }
             }
             tp.save((errt, svt) => {
+                io.emit('voteRef', {})
                 io.emit('topicRef', {})
                 res.send('refresh')
             })

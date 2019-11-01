@@ -29,6 +29,13 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
             $scope.topicObjs = angular.copy($scope.topicObjsAll);
         });
     };
+    socket.on('topicRef',function(o){
+        bulmabox.confirm('Topic Refresh',`One or more topics have been update. Would you like to refresh the page to make these new topics available?`,r=>{
+            if(!!r){
+                return window.location.reload(true);
+            }
+        })
+    })
     $scope.regetTopics();
     $scope.filterMe = (query) => {
         const lowercaseQuery = query.toLowerCase();

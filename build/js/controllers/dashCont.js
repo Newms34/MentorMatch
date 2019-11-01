@@ -71,7 +71,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
         show: false
     };
     $scope.refTopObjs = (cb) => {
-        $http.get('/topic/topic').then(r => {
+        $http.get('/topic/topic',{headers:{'Cache-Control': 'no-cache'}}).then(r => {
             $scope.topicObjsAll = r.data.map(q => {
                 return { value: q.title.toLowerCase(), display: q.title, desc: q.desc };
             });
@@ -128,6 +128,13 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             canTeach: false,
         };
     };
+    socket.on('topicRef',function(o){
+        bulmabox.confirm('Topic Refresh',`One or more topics have been update. Would you like to refresh the page to make these new topics available?`,r=>{
+            if(!!r){
+                return $scope.refTopObjs();
+            }
+        })
+    })
     let alreadyAdded = false;
     $scope.saveSkills = () => {
         if (!$scope.topicToAdd) {
