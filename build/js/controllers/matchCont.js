@@ -29,9 +29,9 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
             $scope.topicObjs = angular.copy($scope.topicObjsAll);
         });
     };
-    socket.on('topicRef',function(o){
-        bulmabox.confirm('Topic Refresh',`One or more topics have been update. Would you like to refresh the page to make these new topics available?`,r=>{
-            if(!!r){
+    socket.on('topicRef', function (o) {
+        bulmabox.confirm('Topic Refresh', `One or more topics have been update. Would you like to refresh the page to make these new topics available?`, r => {
+            if (!!r) {
                 return window.location.reload(true);
             }
         })
@@ -52,17 +52,13 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
         show: false
     };
     $scope.toggleNewTopicDia = () => {
+        document.dispatchEvent(new Event('click'));
+        $scope.newTopic.title = !$scope.newTopic.show ? $scope.topicToAdd : null;
+        const nfCtrl = document.querySelector('.md-standard-list-container.md-autocomplete-suggestions-container');
         if (!$scope.newTopic.show) {
-            $scope.newTopic.title = $scope.topicToAdd;
-            const menuShow = document.querySelector('.md-menu-showing'),
-                mdVirt = document.querySelector('md-virtual-repeat-container');
-            if (menuShow) {
-                menuShow.classList.remove('md-menu-showing');
-            }
-            if (mdVirt) {
-                mdVirt.classList.add('ng-hide');
-            }
-
+            nfCtrl.className += ' ng-hide';
+        }else{
+            // nfCtrl.className = nfCtrl.className.replace(' ng-hide','')
         }
         $scope.newTopic.show = !$scope.newTopic.show;
         if (!$scope.newTopic.show && waitingForTopic) {

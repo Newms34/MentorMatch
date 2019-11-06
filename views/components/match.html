@@ -24,18 +24,17 @@
                     <div class="column is-full">
                         <div class="message">
                             <div class="message-header" id='at-head'>Available Skills</div>
-                            <div class="message-body has-text-centered">
+                            <div class="message-body has-text-centered" id='avail-skills'>
                                 <md-content class='md-padding'>
                                     <form>
                                         <div id="addTopicLabel" class='is-fullwidth has-text-left'>Add a skill</div>
-                                        <md-autocomplete md-selected-item="selectedTopic" md-search-text="topicToAdd" md-items="topic in filterMe(topicToAdd)" md-no-cache='true' md-item-text="topic.display" md-min-length="0" placeholder="Ex. JavaScript" input-aria-labelledby="addTopicLabel" md-mode='standard'>
+                                        <md-autocomplete id='add-top-sug' md-selected-item="selectedTopic" md-search-text="topicToAdd" md-items="topic in filterMe(topicToAdd)" md-no-cache='true' md-item-text="topic.display" md-min-length="0" placeholder="Ex. JavaScript" input-aria-labelledby="addTopicLabel" md-mode='standard'>
                                             <md-item-template>
                                                 <span md-highlight-text="topicToAdd" md-highlight-flags="^i">{{topic.display}}</span>
                                             </md-item-template>
-                                            <md-not-found>
+                                            <md-not-found ng-if='!newTopic.show'>
                                                 No skills matching "{{topicToAdd}}" were found.
                                                 <a ng-click='toggleNewTopicDia()'>Create a new skill!</a>
-                                                <!-- <a ng-click="ctrl.newState(topicToAdd)">Create a new one!</a> -->
                                             </md-not-found>
                                     </form>
                                     </md-autocomplete>
@@ -226,16 +225,23 @@
                     </div>
                     <br>
                     <div class="notification notif-spaced">
-                        You can also give us a description for your topic if you want (it's optional!).
+                        You can also give us a description for your topic if you want (optional!).
                         <textarea ng-model='newTopic.desc' class='textarea'></textarea>
                     </div>
                     <div class="is-fullwidth has-text-centered">
+                        <div class="notification is-alert"><em>Note:</em> While you can use your new skill immediately, please be aware that
+                            <ol>
+                                <li>It's gonna be pretty unlikely that any teachers actually <em>have</em> this skill in their list of taught skills, so you'll probably need to use the "Request Lesson" button.</li>
+                                <li>It won't be included immediately in the list of globally-available skills, and will need to be voted in. This is a safety measure to prevent people from adding really awful skills like "Puppy-kicking" or "Talking on a cell-phone in a theater".</li>
+                            </ol>
+                        </div>
                         <button class="button is-link" ng-click='addNewTopic()'>Add it!</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     <div class="modal" ng-class='{"is-active":mentCon.show==true}'>
         <div class="modal-background" ng-click='mentCon.show=false'></div>
         <div class="modal-content modal-wide">

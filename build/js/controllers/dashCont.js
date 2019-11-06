@@ -25,7 +25,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
     $scope.saveGeneral = () => {
         //general save thing for pretty much everything BUT topics
         const dispName = $scope.user.displayName;
-        $http.post('/user/changeOther', $scope.user).catch(r => {
+        $http.put('/user/profile', $scope.user).catch(r => {
             //do nuffin
             if (r.data == 'dupDisplay') {
                 bulmabox.alert('Duplicate Name', `Sorry, but the name ${dispName} is already in use. Please use another name.`);

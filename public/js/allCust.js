@@ -49,9 +49,10 @@ const dcRedirect = ['$location', '$q', '$injector', function ($location, $q, $in
 }];
 app
     .constant('IsDevelopment', window.location.hostname === 'localhost')
-    .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider', '$compileProvider', '$logProvider','IsDevelopment', function ($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider, $compileProvider, $logProvider, IsDevelopment) {
+    .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider', '$compileProvider', '$logProvider','IsDevelopment','$mdGestureProvider', function ($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider, $compileProvider, $logProvider, IsDevelopment,$mdGestureProvider) {
         $locationProvider.html5Mode(true);
         $urlRouterProvider.otherwise('/404');
+        $mdGestureProvider.skipClickHijack();
         $compileProvider.debugInfoEnabled(IsDevelopment);
         $logProvider.debugEnabled(IsDevelopment);
         if(IsDevelopment) console.log('-------------------------\nDebug mode enabled \n-------------------------');
@@ -347,7 +348,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
     $scope.saveGeneral = () => {
         //general save thing for pretty much everything BUT topics
         const dispName = $scope.user.displayName;
-        $http.post('/user/changeOther', $scope.user).catch(r => {
+        $http.put('/user/profile', $scope.user).catch(r => {
             //do nuffin
             if (r.data == 'dupDisplay') {
                 bulmabox.alert('Duplicate Name', `Sorry, but the name ${dispName} is already in use. Please use another name.`);
@@ -1195,9 +1196,9 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
             $scope.topicObjs = angular.copy($scope.topicObjsAll);
         });
     };
-    socket.on('topicRef',function(o){
-        bulmabox.confirm('Topic Refresh',`One or more topics have been update. Would you like to refresh the page to make these new topics available?`,r=>{
-            if(!!r){
+    socket.on('topicRef', function (o) {
+        bulmabox.confirm('Topic Refresh', `One or more topics have been update. Would you like to refresh the page to make these new topics available?`, r => {
+            if (!!r) {
                 return window.location.reload(true);
             }
         })
@@ -1218,17 +1219,13 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
         show: false
     };
     $scope.toggleNewTopicDia = () => {
+        document.dispatchEvent(new Event('click'));
+        $scope.newTopic.title = !$scope.newTopic.show ? $scope.topicToAdd : null;
+        const nfCtrl = document.querySelector('.md-standard-list-container.md-autocomplete-suggestions-container');
         if (!$scope.newTopic.show) {
-            $scope.newTopic.title = $scope.topicToAdd;
-            const menuShow = document.querySelector('.md-menu-showing'),
-                mdVirt = document.querySelector('md-virtual-repeat-container');
-            if (menuShow) {
-                menuShow.classList.remove('md-menu-showing');
-            }
-            if (mdVirt) {
-                mdVirt.classList.add('ng-hide');
-            }
-
+            nfCtrl.className += ' ng-hide';
+        }else{
+            // nfCtrl.className = nfCtrl.className.replace(' ng-hide','')
         }
         $scope.newTopic.show = !$scope.newTopic.show;
         if (!$scope.newTopic.show && waitingForTopic) {

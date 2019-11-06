@@ -50,6 +50,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.6.3",
     "babel-plugin-transform-runtime": "^6.23.0",
+    "chai": "^4.2.0",
     "gulp": "^4.0.2",
     "gulp-clean-css": "^3.10.0",
     "gulp-concat": "^2.6.1",
@@ -59,13 +60,15 @@
     "gulp-sass": "^4.0.2",
     "gulp-uglify": "^3.0.2",
     "gulp-util": "^3.0.8",
+    "jest": "^24.9.0",
     "jshint": "^2.10.2",
     "prompt": "^1.0.0",
-    "ps-node": "^0.1.6"
+    "ps-node": "^0.1.6",
+    "supertest": "^4.0.2"
   },
   "scripts": {
     "start": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --testTimeout=20000",
     "build": "npm install"
   },
   "author": "David Newman",

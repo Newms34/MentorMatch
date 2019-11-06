@@ -55,13 +55,15 @@ io.on('connection', function (socket) {
         socket.emit('testOut', d);
     })
 });
-server.listen(process.env.PORT || 8080);
+server.listen(process.env.PORT || 8080,function(){
+    console.log('Server is listening!')
+    app.emit('app_running')
+
+});
 server.on('error', function (err) {
     console.log('Oh no! Err:', err)
-});
-server.on('listening', function (lst) {
-    console.log('Server is listening!')
-});
+}); 
+
 server.on('request', function (req) {
     // console.log(req.url);
 })
@@ -76,3 +78,4 @@ app.use(function (err, req, res, next) {
     console.log('Client (probly) err:', err)
     res.send('Error!' + err)
 });
+module.exports = app;

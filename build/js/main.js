@@ -46,9 +46,10 @@ const dcRedirect = ['$location', '$q', '$injector', function ($location, $q, $in
 }];
 app
     .constant('IsDevelopment', window.location.hostname === 'localhost')
-    .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider', '$compileProvider', '$logProvider','IsDevelopment', function ($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider, $compileProvider, $logProvider, IsDevelopment) {
+    .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider', '$compileProvider', '$logProvider','IsDevelopment','$mdGestureProvider', function ($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider, $compileProvider, $logProvider, IsDevelopment,$mdGestureProvider) {
         $locationProvider.html5Mode(true);
         $urlRouterProvider.otherwise('/404');
+        $mdGestureProvider.skipClickHijack();
         $compileProvider.debugInfoEnabled(IsDevelopment);
         $logProvider.debugEnabled(IsDevelopment);
         if(IsDevelopment) console.log('-------------------------\nDebug mode enabled \n-------------------------');

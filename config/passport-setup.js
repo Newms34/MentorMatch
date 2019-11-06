@@ -104,11 +104,11 @@ passport.use('local-login', new LocalStrategy({
         passReqToCallback: true // allows us to pass back the entire request to the callback
     },
     function (req, user, pass, done) { // callback with email and password from our form
-        // console.log('DATA:', user, pass)
+        // console.log('DATA:', user, pass,'\nUSER MODEL',User.findOne)
         User.findOne({
             'user': user
         }, function (err, usrFnd) {
-            // console.log(usrFnd)
+            console.log('Result of findone',err,usrFnd)
             // if there are any errors, return the error before anything else
             if (err) {
                 return done(err, false, false);
@@ -116,7 +116,7 @@ passport.use('local-login', new LocalStrategy({
             // login problems!
             //note that these both return the wrong "combo" msg (i.e., wrong pwd+un combo)
             if (!usrFnd) {
-                // console.log('User not found!', req.body)
+                console.log('User not found!', req.body)
                 return done(null, false, false);
             } else if (!usrFnd.correctPassword(pass)) {
                 usrFnd.wrongAttempts++;

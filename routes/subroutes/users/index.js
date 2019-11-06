@@ -124,11 +124,18 @@ const routeExp = function (io, pp) {
         })(req, res, next);
     });
     router.post('/login', function (req, res, next) {
+        console.log('body',req.body)
+        const logStart = Date.now()
         if (!req.body || !req.body.pass || !req.body.user) {
-            return res.send(false);
+            console.log('Missing info!')
+            return res.status(400).send(false);
         }
+        // else{
+        //     return res.send(`user tried to login with ${req.body.user} and ${req.body.pass}`)
+        // }
         passport.authenticate('local-login', function (err, uObj, info) {
             let usr = uObj.u;
+            // console.log('USER',usr,'ERR',err,'INFO',info)
             if (!info) {
                 //wrong un/pwd combo
                 mongoose.model('User').findOne({
@@ -164,6 +171,7 @@ const routeExp = function (io, pp) {
                     const clUsr = JSON.parse(JSON.stringify(usr));
                     delete clUsr.pass;
                     delete clUsr.salt;
+                    console.log('TIME FOR LOGIN ROUTE',Date.now()-logStart);
                     res.send({
                         usr: clUsr,
                         news: news,
@@ -233,7 +241,7 @@ const routeExp = function (io, pp) {
     });
     router.get('/nameOkay', function (req, res, next) {
         mongoose.model('User').find({ $or: [{ user: req.query.name }, { displayName: req.query.name }] }, function (err, user) {
-            console.log('USER CHECK', user);
+            // console.log('USER CHECK', user);
             res.send(!user.length);
         });
     });
@@ -333,10 +341,7 @@ const routeExp = function (io, pp) {
         });
     });
 
-    router.post('/changeOther', this.authbit, (req, res, next) => {
-        //NEED TO IMPLEMENT
-        // req.user.otherInfo = req.body.other;
-        // console.log('INCOMING USER',req.body)
+    router.put('/profile', this.authbit, (req, res, next) => {
         if (req.body.displayName && req.body.displayName != req.user.displayName) {
             //changed display name; we need to check if this name is okay
             mongoose.model('User').findOne({ $or: [{ user: req.body.displayName }, { displayName: req.body.displayName }] }, (err, usr) => {
@@ -367,7 +372,7 @@ const routeExp = function (io, pp) {
         }
 
     });
-    router.post('/changeAva', this.authbit, (req, res, next) => {
+    router.put('/ava', this.authbit, (req, res, next) => {
         req.user.avatar = req.body.img;
         // console.log('USER NOW', req.body, usr);
         req.user.save((errsv, usrsv) => {
@@ -391,7 +396,7 @@ const routeExp = function (io, pp) {
         });
     });
     //mod stuff
-    router.get('/makeMod', this.authbit, isMod, (req, res, next) => {
+    router.put('/makeMod', this.authbit, isMod, (req, res, next) => {
         mongoose.model('User').findOneAndUpdate({
             user: req.query.user
         }, {
@@ -1345,6 +1350,9 @@ const routeExp = function (io, pp) {
             res.send('DONE');
         });
     });
+    router.post('/jestTest',(req,res,next)=>{
+        res.send(req.body.name.toUpperCase());
+    })
     return router;
 };
 
