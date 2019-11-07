@@ -12,6 +12,7 @@ app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q', 'userFact
                 def.resolve($state.target('appSimp.login', undefined, { location: true }));
             }
         }).catch(e => {
+            $log.debug('TRANSITION BLOCKED! Error was',e)
             def.resolve($state.target('appSimp.login', undefined, { location: true }));
         });
         return def.promise;

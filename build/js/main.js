@@ -68,6 +68,10 @@ app
                 url: '/mentor',
                 templateUrl: 'components/mentor.html'
             })
+            .state('app.mod', {
+                url: '/mod',
+                templateUrl: 'components/mod.html'
+            })
             .state('app.help', {
                 url: '/help',
                 templateUrl: 'components/help/help.html'

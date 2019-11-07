@@ -54,6 +54,9 @@ $tenNames: two, three, four, five, six, seven, eight, nine;
 }
 .check-list {
   list-style-type: none !important;
+  & li::before{
+    content:'✓ '
+  }
 }
 .prof-pic {
   max-width: 300px;

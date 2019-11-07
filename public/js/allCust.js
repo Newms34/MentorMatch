@@ -71,6 +71,10 @@ app
                 url: '/mentor',
                 templateUrl: 'components/mentor.html'
             })
+            .state('app.mod', {
+                url: '/mod',
+                templateUrl: 'components/mod.html'
+            })
             .state('app.help', {
                 url: '/help',
                 templateUrl: 'components/help/help.html'
@@ -736,6 +740,9 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
                 }
             })
             .catch(e => {
+                if (e.data == 'banned') {
+                    return bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Banned', "You've been banned!");
+                }
                 bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Error', "There's been some sort of error logging in. This is <i>probably</i> not an issue with your credentials. Blame the devs!");
                 $log.debug(e);
             });
@@ -1466,6 +1473,44 @@ app.controller('mentor-cont', ($scope, $http, $q, userFact, $log) => {
     };
 });
 
+app.controller('mod-cont',function($scope,$http,$state, $log){
+    setInterval(function(){
+        if((!$scope.$parent || !$scope.$parent.user || !$scope.$parent.user.mod) && $state.current.name=='app.mod'){
+            console.log('User not mod')
+            $state.go('app.dash')
+        }
+    },1);
+    console.log('current state',$state.current)
+    $scope.getAllUsers = ()=>{
+        $http.get('/user/users').then(us=>{
+            // console.log('ALL USERS IS',us)
+            $scope.allUsrs = us && us.data;
+        }).catch(e=>{
+            if(e.data && e.data=='noUsrs'){
+                return bulmabox.alert('No Users!',`Something's gone wrong, and we can't find any users.`)
+            }
+        })
+    }
+    $scope.getAllUsers();
+    $scope.toggleBan=u=>{
+        //toggle ban for a user
+        if(u.user === $scope.$parent.user.user){
+            return bulmabox.alert(`Cannot Ban Self`,`You can't ban yourself!`)
+        }
+        const t = u.isBanned?'Unban User':'Ban User',
+        m = u.isBanned?`Are you sure you wish to unban ${u.displayName||u.user}? This will restore their access to CodeMentorMatch.`:`Are you sure you wish to ban ${u.displayName||u.user}? This will revoke their access to CodeMentorMatch.`;
+        bulmabox.alert(t,m,r=>{
+            if(!!r){
+                $http.put('/user/toggleBan',{
+                    user:u.user,
+                })
+                .then(r=>{
+                    $scope.getAllUsers()
+                })
+            }
+        })
+    }
+});
 app.controller('nav-cont',function($scope,$http,$state, $log){
     $scope.currState = 'dash';
 	$scope.logout = function() {
@@ -1482,31 +1527,43 @@ app.controller('nav-cont',function($scope,$http,$state, $log){
             }
         });
     };
+    console.log('USER ON NAVBAR',$scope.$parent && $scope.$parent.user)
     $scope.navEls = [{
         st:'dash',
         icon:'user-circle',
+        protected:false,
         text:'Profile'
     },{
         st:'match',
         icon:'users',
+        protected:false,
         text:'Match'
     },{
         st:'mentor',
         icon:'graduation-cap',
+        protected:false,
         text:'Mentoring'
     },{
         st:'vote',
         icon:'check-square',
+        protected:false,
         text:'Voting'
     },{
         st:'mail',
         icon:'envelope',
+        protected:false,
         text:'Mailbox'
+    },{
+        st:'mod',
+        icon:'cogs',
+        protected:true,
+        text:'Mod Controls'
     },{
         st:'help',
         icon:'question-circle',
+        protected:true,
         text:'Help'
-    },]
+    }]
     $scope.goState = s =>{
         $scope.currState = s;
         $state.go('app.'+s)
@@ -1753,6 +1810,7 @@ app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q', 'userFact
                 def.resolve($state.target('appSimp.login', undefined, { location: true }));
             }
         }).catch(e => {
+            $log.debug('TRANSITION BLOCKED! Error was',e)
             def.resolve($state.target('appSimp.login', undefined, { location: true }));
         });
         return def.promise;

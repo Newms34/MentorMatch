@@ -124,7 +124,7 @@ const routeExp = function (io, pp) {
         })(req, res, next);
     });
     router.post('/login', function (req, res, next) {
-        console.log('body',req.body)
+        console.log('body', req.body)
         const logStart = Date.now()
         if (!req.body || !req.body.pass || !req.body.user) {
             console.log('Missing info!')
@@ -171,7 +171,7 @@ const routeExp = function (io, pp) {
                     const clUsr = JSON.parse(JSON.stringify(usr));
                     delete clUsr.pass;
                     delete clUsr.salt;
-                    console.log('TIME FOR LOGIN ROUTE',Date.now()-logStart);
+                    console.log('TIME FOR LOGIN ROUTE', Date.now() - logStart);
                     res.send({
                         usr: clUsr,
                         news: news,
@@ -380,7 +380,6 @@ const routeExp = function (io, pp) {
         });
     });
     router.get('/setEmail', authbit, (req, res, next) => {
-        ///(\w+\.*)+@(\w+\.)+\w+/g
         ///(\w+\.*)+@(\w*)(\.\w+)+/g
         if (!req.query.email || !req.query.email.match(/(\w+\.*)+@(\w+\.)+\w+/g) || (req.query.email.match(/(\w+\.*)+@(\w+\.)+\w+/g)[0].length !== req.query.email.length)) {
             res.send('err');
@@ -418,11 +417,34 @@ const routeExp = function (io, pp) {
             });
         });
     });
-    router.get('/toggleBan', this.authbit, isMod, (req, res, next) => {
+    router.get('/users', this.authbit, isMod, (req, res, next) => {
+        mongoose.model('User').find({}).lean().exec(function (err, usrs) {
+            if (err || !usrs || !usrs.length) {
+                return res.status(400).send('noUsrs');
+            }
+            console.log('filtering out',req.user.user)
+            const safeUsrs = usrs.filter(uf => {
+                // return Math.random()>0.5
+                return uf.user !== req.user.user
+            }).map(q => {
+                return {
+                    user: q.user,
+                    displayName: q.displayName,
+                    demo: q.isDemoUser,
+                    interests: q.interests,
+                    teaching: q.teaching,
+                    mod: q.mod,
+                    isBanned:q.isBanned
+                }
+            })
+            res.send(safeUsrs);
+        })
+    })
+    router.put('/toggleBan', this.authbit, isMod, (req, res, next) => {
         mongoose.model('User').findOne({
-            user: req.query.user
+            user: req.body.user
         }, function (err, usr) {
-            console.log('BANNING', req.query.user, usr);
+            console.log('CHANGING BAN STATUS OF', req.body.user, 'WHO IS', usr.user);
             usr.isBanned = !usr.isBanned;
             usr.save(function (err, resp) {
                 mongoose.model('User').find({}, function (err, usrs) {
@@ -1294,7 +1316,7 @@ const routeExp = function (io, pp) {
             res.send('refresh');
         });
     });
-    
+
     //Supermod routes
 
     router.get('/genDemoUser', this.authbit, isSuperMod, (req, res, next) => {
@@ -1339,18 +1361,18 @@ const routeExp = function (io, pp) {
     router.get('/acceptAllTopics', this.authbit, isSuperMod, (req, res, next) => {
         mongoose.model('topic').find({}, (err, tps) => {
             tps.forEach(t => {
-               t.votes.status=1;
-               t.creator = t.creator || req.user.user;//just in case we somehow do not have a yoozr
-               t.save((terr,tsv)=>{
-                   if(terr){
-                       console.log('ERR for',t,'IS',terr);
-                   }
-               });
+                t.votes.status = 1;
+                t.creator = t.creator || req.user.user;//just in case we somehow do not have a yoozr
+                t.save((terr, tsv) => {
+                    if (terr) {
+                        console.log('ERR for', t, 'IS', terr);
+                    }
+                });
             });
             res.send('DONE');
         });
     });
-    router.post('/jestTest',(req,res,next)=>{
+    router.post('/jestTest', (req, res, next) => {
         res.send(req.body.name.toUpperCase());
     })
     return router;
