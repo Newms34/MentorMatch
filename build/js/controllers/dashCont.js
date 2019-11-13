@@ -133,8 +133,8 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             if(!!r){
                 return $scope.refTopObjs();
             }
-        })
-    })
+        });
+    });
     let alreadyAdded = false;
     $scope.saveSkills = () => {
         if (!$scope.topicToAdd) {

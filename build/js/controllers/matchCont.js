@@ -34,8 +34,8 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
             if (!!r) {
                 return window.location.reload(true);
             }
-        })
-    })
+        });
+    });
     $scope.regetTopics();
     $scope.filterMe = (query) => {
         const lowercaseQuery = query.toLowerCase();

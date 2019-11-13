@@ -37,7 +37,7 @@ const routeExp = function (io) {
         }
     };
     router.get('/topic', this.authbit, (req, res, next) => {
-        console.log(req.user)
+        console.log(req.user);
         mongoose.model('topic').find({ $or: [{ 'votes.status': 1 }, { user: req.user.user }] }, (err, tps) => {
             // send all topics that are either in voting 
             res.send(tps);
@@ -45,7 +45,7 @@ const routeExp = function (io) {
         // res.send('not implemented! searched for '+req.query.q);
     });
     router.post('/topic', this.authbit, (req, res, next) => {
-        console.log('triggered topic add route', req.body)
+        console.log('triggered topic add route', req.body);
         if (!req.body || !req.body.title) {
             return res.status(400).send('err');
         }
@@ -72,15 +72,15 @@ const routeExp = function (io) {
         mongoose.model('topic').find({ 'votes.status': 0 }, (errv, resv) => {
             //all skills currently in voting
             res.send(resv);
-        })
-    })
+        });
+    });
     router.put('/vote', this.authbit, (req, res, next) => {
         if (!req.body.id || (!req.body.mode)) {
             return res.status(400).send('noData');//cannot vote without 1) topic id, and 2) voteMode (up or down == 1 or -1);
         }
         mongoose.model('topic').findOne({ _id: req.body.id, 'votes.status': 0 }, (err, tp) => {
             //topic must have the required id AND be in voting (status==0)
-            console.log('trying to vote on topic', tp)
+            console.log('trying to vote on topic', tp);
             if (!tp || err) {
                 return res.status(400).send('err');//cannot find topic!
             }
@@ -102,12 +102,12 @@ const routeExp = function (io) {
                 }
             }
             tp.save((errt, svt) => {
-                io.emit('voteRef', {})
-                io.emit('topicRef', {})
-                res.send('refresh')
-            })
-        })
-    })
+                io.emit('voteRef', {});
+                io.emit('topicRef', {});
+                res.send('refresh');
+            });
+        });
+    });
     return router;
 };
 const halfDay = 1000 * 3600 * 12,
@@ -116,7 +116,7 @@ const halfDay = 1000 * 3600 * 12,
     voteExpireFake = 1000 * 30,
     voteTimer = setInterval(function () {
         //check every half day to "expire" old votes;
-        const nunc = Date.now()
+        const nunc = Date.now();
         mongoose.model('topic').find({ 'votes.status': 0 }, (errv, resv) => {
             // console.log('VOTES UP',resv);
             const votesToCheck = resv.filter(q => nunc - q.votes.date > voteExpire);
@@ -132,9 +132,9 @@ const halfDay = 1000 * 3600 * 12,
                     v.votes.status=2;
                 }
                 v.save((errvr,svvr)=>{
-                    io.emit('voteRef',{})
+                    io.emit('voteRef',{});
                 });
-            })
-        })
-    }, halfDay)
+            });
+        });
+    }, halfDay);
 module.exports = routeExp;

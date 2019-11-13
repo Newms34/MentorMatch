@@ -47,8 +47,8 @@ const usrSchema = new mongoose.Schema({
     isDemoUser: { type: Boolean, default: false },
     gitLink: { type: String, default: null },
     isBanned: {
-        type: Boolean,
-        default: false
+        type: String,
+        default: null
     },
     locked: {
         type: Boolean,

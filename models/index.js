@@ -5,7 +5,7 @@ require('./lessonReq/');
 require('./topics/');
 console.log('Node Environment:', process.env.NODE_ENV || '(unknown)');
 if(!process.argv.find(q=>q.includes('jest.js'))){
-    console.log('connecting to regular DB (prod/dev mode, not test)')
+    console.log('connecting to regular DB (prod/dev mode, not test)');
     mongoose.connect(process.env.NODE_ENV && process.env.NODE_ENV == 'production' ? process.env.MONGODB_URI : 'mongodb://localhost:27017/codementormatch', {
         useNewUrlParser: true,
         useUnifiedTopology: true

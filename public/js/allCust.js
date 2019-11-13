@@ -460,8 +460,8 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             if(!!r){
                 return $scope.refTopObjs();
             }
-        })
-    })
+        });
+    });
     let alreadyAdded = false;
     $scope.saveSkills = () => {
         if (!$scope.topicToAdd) {
@@ -740,8 +740,8 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
                 }
             })
             .catch(e => {
-                if (e.data == 'banned') {
-                    return bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Banned', "You've been banned!");
+                if (e.data.status == 'banned') {
+                    return bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Banned', `You've been banned by moderator ${e.data.usr}!`);
                 }
                 bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Error', "There's been some sort of error logging in. This is <i>probably</i> not an issue with your credentials. Blame the devs!");
                 $log.debug(e);
@@ -880,7 +880,7 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
             date: 12345,
             other:false
         };
-        $log.debug('newMsg now',$scope.newMsg)
+        $log.debug('newMsg now',$scope.newMsg);
     };
     $scope.cancelSend = () => {
         if ($scope.newMsg.mdMsg && $scope.newMsg.mdMsg.length) {
@@ -1208,8 +1208,8 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
             if (!!r) {
                 return window.location.reload(true);
             }
-        })
-    })
+        });
+    });
     $scope.regetTopics();
     $scope.filterMe = (query) => {
         const lowercaseQuery = query.toLowerCase();
@@ -1473,43 +1473,76 @@ app.controller('mentor-cont', ($scope, $http, $q, userFact, $log) => {
     };
 });
 
-app.controller('mod-cont',function($scope,$http,$state, $log){
-    setInterval(function(){
-        if((!$scope.$parent || !$scope.$parent.user || !$scope.$parent.user.mod) && $state.current.name=='app.mod'){
-            console.log('User not mod')
-            $state.go('app.dash')
+app.controller('mod-cont', function ($scope, $http, $state, $log) {
+    setInterval(function () {
+        if ((!$scope.$parent || !$scope.$parent.user || !$scope.$parent.user.mod) && $state.current.name == 'app.mod') {
+            console.log('User not mod');
+            $state.go('app.dash');
         }
-    },1);
-    console.log('current state',$state.current)
-    $scope.getAllUsers = ()=>{
-        $http.get('/user/users').then(us=>{
+    }, 1);
+    console.log('current state', $state.current);
+    $scope.getAllUsers = () => {
+        $http.get('/user/users').then(us => {
             // console.log('ALL USERS IS',us)
             $scope.allUsrs = us && us.data;
-        }).catch(e=>{
-            if(e.data && e.data=='noUsrs'){
-                return bulmabox.alert('No Users!',`Something's gone wrong, and we can't find any users.`)
+        }).catch(e => {
+            if (e.data && e.data == 'noUsrs') {
+                return bulmabox.alert('No Users!', `Something's gone wrong, and we can't find any users.`);
             }
-        })
-    }
+        });
+    };
     $scope.getAllUsers();
-    $scope.toggleBan=u=>{
+    $scope.toggleBan = u => {
         //toggle ban for a user
-        if(u.user === $scope.$parent.user.user){
-            return bulmabox.alert(`Cannot Ban Self`,`You can't ban yourself!`)
+        if (u.user === $scope.$parent.user.user) {
+            return bulmabox.alert(`Cannot Ban Self`, `You can't ban yourself!`);
         }
-        const t = u.isBanned?'Unban User':'Ban User',
-        m = u.isBanned?`Are you sure you wish to unban ${u.displayName||u.user}? This will restore their access to CodeMentorMatch.`:`Are you sure you wish to ban ${u.displayName||u.user}? This will revoke their access to CodeMentorMatch.`;
-        bulmabox.alert(t,m,r=>{
-            if(!!r){
-                $http.put('/user/toggleBan',{
-                    user:u.user,
+        const t = u.isBanned ? 'Unban User' : 'Ban User',
+            m = u.isBanned ? `Are you sure you wish to unban ${u.displayName || u.user}? This will restore their access to CodeMentorMatch.` : `Are you sure you wish to ban ${u.displayName || u.user}? This will revoke their access to CodeMentorMatch.`;
+        bulmabox.alert(t, m, r => {
+            if (!!r) {
+                $http.put('/user/toggleBan', {
+                    user: u.user,
                 })
-                .then(r=>{
-                    $scope.getAllUsers()
-                })
+                    .then(r => {
+                        $scope.getAllUsers();
+                    });
             }
-        })
-    }
+        });
+    };
+    $scope.showMsgDial = u => {
+        $scope.newMsg = {
+            user: u.user,
+            displayName: u.displayName,
+            msg: null,
+            show: true
+        };
+    };
+    $scope.cancelMsg = () => {
+        $scope.newMsg = {
+            user: null,
+            displayName: null,
+            msg: null,
+            show: false
+        };
+    };
+    $scope.newMsg = {
+        user: null,
+        displayName: null,
+        mdMsg: null,
+        show: false
+    };
+    $scope.sendMsg = () => {
+        if (!$scope.newMsg.mdMsg || $scope.newMsg.mdMsg.trim().length) {
+            return bulmabox.alert('No Message', `Please enter a message to send!`);
+        }
+        const conv = new showdown.Converter();
+        $scope.newMsg.htmlMsg = conv.makeHtml($scope.newMsg.mdMsg);
+        $http.post('/user/sendMsg', $scope.newMsg)
+            .then(r => {
+                bulmabox.alert('Message Sent!', `Your message is on its way!`);
+            });
+    };
 });
 app.controller('nav-cont',function($scope,$http,$state, $log){
     $scope.currState = 'dash';
@@ -1527,7 +1560,7 @@ app.controller('nav-cont',function($scope,$http,$state, $log){
             }
         });
     };
-    console.log('USER ON NAVBAR',$scope.$parent && $scope.$parent.user)
+    console.log('USER ON NAVBAR',$scope.$parent && $scope.$parent.user);
     $scope.navEls = [{
         st:'dash',
         icon:'user-circle',
@@ -1563,29 +1596,13 @@ app.controller('nav-cont',function($scope,$http,$state, $log){
         icon:'question-circle',
         protected:true,
         text:'Help'
-    }]
+    }];
     $scope.goState = s =>{
         $scope.currState = s;
-        $state.go('app.'+s)
-    }
+        $state.go('app.'+s);
+    };
     $scope.mobActive=false;
 });
-
-/* <a class="navbar-item has-text-white" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.dash'>
-                <h3><i class="fa fa-user-circle"></i>&nbsp;Profile</h3>
-            </a>
-            <a class="navbar-item has-text-white" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.match'>
-                <h3><i class="fa fa-users"></i>&nbsp;Match</h3>
-            </a>
-            <a class="navbar-item has-text-white" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.mentor'>
-                    <h3><i class="fa fa-graduation-cap"></i>&nbsp;Mentoring</h3>
-                </a>
-            <a class="navbar-item has-text-white" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.mail'>
-                <h3><i class="fa fa-envelope"></i>&nbsp;Mailbox</h3>
-            </a>
-            <a class="navbar-item has-text-white" href='#' ui-sref-active='has-background-grey-dark no-poke' ui-sref='app.help'>
-                <h3><i class="fa fa-question-circle"></i>&nbsp;Help</h3>
-            </a> */
 resetApp.controller('reset-contr',function($scope,$http,$location, $log){
     $scope.key = window.location.search.slice(5);
     $scope.isRf = window.location.href.includes('rf');
@@ -1754,10 +1771,10 @@ app.controller('vote-cont',function($scope,$http,$state, $log){
     $scope.voteItems = [];
     $scope.regetVotes = ()=>{
         $http.get('/topic/vote').then(r=>{
-            console.log('topics for voting are',r)
+            console.log('topics for voting are',r);
             $scope.voteItems = (r && r.data)||[];
-        })
-    }
+        });
+    };
     $scope.regetVotes();
     
     $scope.submitVote=(m,t)=>{
@@ -1765,13 +1782,13 @@ app.controller('vote-cont',function($scope,$http,$state, $log){
         $http.put('/topic/vote',{id:t._id,mode:m}).then(r=>{
             $scope.regetVotes();
         }); 
-    }
+    };
     $scope.getScore=v=>{
         return v.votes.votesUp.length-v.votes.votesDown.length;
-    }
+    };
     socket.on('voteRef',function(o){
         $scope.regetVotes();
-    })
+    });
 });
 app.factory('socketFac', function ($rootScope) {
   var socket = io.connect();
@@ -1810,7 +1827,7 @@ app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q', 'userFact
                 def.resolve($state.target('appSimp.login', undefined, { location: true }));
             }
         }).catch(e => {
-            $log.debug('TRANSITION BLOCKED! Error was',e)
+            $log.debug('TRANSITION BLOCKED! Error was',e);
             def.resolve($state.target('appSimp.login', undefined, { location: true }));
         });
         return def.promise;

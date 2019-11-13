@@ -124,10 +124,10 @@ const routeExp = function (io, pp) {
         })(req, res, next);
     });
     router.post('/login', function (req, res, next) {
-        console.log('body', req.body)
-        const logStart = Date.now()
+        console.log('body', req.body);
+        const logStart = Date.now();
         if (!req.body || !req.body.pass || !req.body.user) {
-            console.log('Missing info!')
+            console.log('Missing info!');
             return res.status(400).send(false);
         }
         // else{
@@ -148,7 +148,7 @@ const routeExp = function (io, pp) {
                     usrwc.locked = true; //too many incorrect attempts; lock account & wait for teacher;
                     refStu();
                     usrwc.save((_erru, _svu) => {
-                        return res.status(403).send('banned');
+                        return res.status(403).send({status:'locked'});
                     });
                 });
             } else {
@@ -178,12 +178,24 @@ const routeExp = function (io, pp) {
                     });
                 }
                 if (usr.isBanned) {
-                    return res.status(403).send('banned');
+                    mongoose.model('User').findOne({user:usr.isBanned},(errm,md)=>{
+
+                        return res.status(403).send({status:'banned',usr:md.displayName||md.user});
+                    });
                 } else if (usr.locked) {
-                    return res.status(403).send('locked');
+                    return res.status(403).send({status:'locked'});
                 }
             }
         })(req, res, next);
+    });
+    router.get('/unban',(req,res,next)=>{
+        mongoose.model('User').find({},(err,usrs)=>{
+            usrs.forEach(u=>{
+                u.isBanned=null;
+                u.save();
+            });
+            res.send('probly done');
+        });
     });
     router.get('/logout', function (req, res, next) {
         /*this function logs out the user. It has no confirmation stuff because
@@ -422,10 +434,10 @@ const routeExp = function (io, pp) {
             if (err || !usrs || !usrs.length) {
                 return res.status(400).send('noUsrs');
             }
-            console.log('filtering out',req.user.user)
+            console.log('filtering out',req.user.user);
             const safeUsrs = usrs.filter(uf => {
                 // return Math.random()>0.5
-                return uf.user !== req.user.user
+                return uf.user !== req.user.user;
             }).map(q => {
                 return {
                     user: q.user,
@@ -435,17 +447,21 @@ const routeExp = function (io, pp) {
                     teaching: q.teaching,
                     mod: q.mod,
                     isBanned:q.isBanned
-                }
-            })
+                };
+            });
             res.send(safeUsrs);
-        })
-    })
+        });
+    });
     router.put('/toggleBan', this.authbit, isMod, (req, res, next) => {
         mongoose.model('User').findOne({
             user: req.body.user
         }, function (err, usr) {
             console.log('CHANGING BAN STATUS OF', req.body.user, 'WHO IS', usr.user);
-            usr.isBanned = !usr.isBanned;
+            if(!!usr.isBanned){
+                usr.isBanned=null;
+            }else{
+                usr.isBanned = req.user.user;
+            }
             usr.save(function (err, resp) {
                 mongoose.model('User').find({}, function (err, usrs) {
                     const badStuff = ['msgs', 'salt', 'googleId', 'pass'];
@@ -1374,7 +1390,7 @@ const routeExp = function (io, pp) {
     });
     router.post('/jestTest', (req, res, next) => {
         res.send(req.body.name.toUpperCase());
-    })
+    });
     return router;
 };
 

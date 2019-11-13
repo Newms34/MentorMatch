@@ -65,7 +65,7 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
             date: 12345,
             other:false
         };
-        $log.debug('newMsg now',$scope.newMsg)
+        $log.debug('newMsg now',$scope.newMsg);
     };
     $scope.cancelSend = () => {
         if ($scope.newMsg.mdMsg && $scope.newMsg.mdMsg.length) {
