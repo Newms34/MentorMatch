@@ -87,32 +87,52 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
     $scope.checkPwdDup = () => {
         $scope.pwdNoDup = !$scope.pwd || !$scope.pwdDup || $scope.pwdDup !== $scope.pwd;
     }
-    $scope.pwdStrStars = [0,1,2,3,4];
+    $scope.pwdStrStars = [0,1,2,3,4,];
+    $scope.badPwds = ['password','pass','1234','123','admin','abc','abcd','pwd'];
+    $scope.pwdStr = {recs:[],score:0,maxScore:5,show:false}
     $scope.checkPwdStr = () => {
+        
         if(!$scope.pwd){
             return false;
         }
         const reqs = [{
-            desc: 'At least one uppercase letter',
+            desc: 'Using at least one uppercase letter',
             reg: '[A-Z]'
         }, {
-            desc: 'At least one lowercase letter',
+            desc: 'Using at least one lowercase letter',
             reg: '[a-z]'
         }, {
-            desc: 'At least one number',
+            desc: 'Using at least one number',
             reg: '[0-9]'
         }, {
-            desc: 'At least one "special" character (@, !, $, etc.)',
+            desc: 'Using at least one "special" character (@, !, $, etc.)',
             reg: '[@!\$\^_\*&]'
+        },{
+            desc:'Using at least 12 characters',
+            reg:'[\\w]{12}'
+        },{
+            desc:'Not using a bad password',
+            negate:true,
+            reg:['password','pass','1234','123','admin','abc','abcd','pwd'].map(q=>`(${q})`).join('|')
         }],
             badStuff = reqs.filter(re => { //stuff we're MISSINg
                 const reg = new RegExp(re.reg);
+                if(re.negate){
+                    return !!reg.test($scope.pwd);
+                }
                 return !reg.test($scope.pwd);
             });
-        if($scope.pwd.length<12){
-            badStuff.push({desc:'A length of at least 12 characters'})
-        }
-        $scope.pwdStr = {recs:badStuff,score:reqs.length-badStuff.length+1,maxScore:5}
+        // if($scope.pwd.length<12){
+        //     badStuff.push({desc:'Using at least 12 characters'})
+        // }
+        // if($scope.badPwds.filter(q=>$scope.pwd && $scope.pwd.toLowerCase().includes(q.toLowerCase())).length){
+        //     //password contains a "bad word" (i.e., overuse)
+        //     badStuff.push({desc:'Not using a common word (like "password" or "1234")'})
+        // }else{
+
+        // }
+        console.log('BAD STUFF',badStuff,'PWD',$scope.pwd)
+        $scope.pwdStr = {recs:badStuff,score:reqs.length-badStuff.length,maxScore:5,show:$scope.pwdStr.show}
     }
     $scope.register = () => {
         if (!$scope.pwd || !$scope.pwdDup || !$scope.user) {

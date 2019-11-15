@@ -49,7 +49,7 @@
                         Password Strength: <span title='{{pwdStr.score}} out of 5 points'><i class="fa fa-star{{$index<pwdStr.score?'':'-o'}}" ng-repeat='st in pwdStrStars'></i></span>.
                         <button class="button is-small is-somewhat-dangerous"><i class="fa fa-{{pwdStr.show?'times':'question-circle'}}" ng-click='pwdStr.show=!pwdStr.show'></i></button>
                         <div ng-show='pwdStr.show'>
-                            <br>For a strong password, consider using:
+                            <br>For a strong password, consider:
                             <ul>
                                 <li ng-repeat='rec in pwdStr.recs'>{{rec.desc}}</li>
                             </ul>
