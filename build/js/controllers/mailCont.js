@@ -1,4 +1,4 @@
-app.controller('mail-cont', ($scope, $http, $q, $log) => {
+app.controller('mail-cont', ($scope, $http, $q, $log, userFact) => {
     $log.debug("Mailbox ctrl registered");
     $scope.outMode = false;
     $scope.mailView = {
@@ -8,19 +8,19 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
         show: false,
         toMode: false,
         date: 12345,
-        other:false
+        other: false
     };
     $scope.viewMsg = d => {
-        $log.debug('incoming msg object is',d);
-        $scope.mailView.title = d.to ? `Message to ${$scope.getUserList(d.to)}` : `Message from ${d.from.displayName||d.from.user}`;
+        $log.debug('incoming msg object is', d);
+        $scope.mailView.title = d.to ? `Message to ${$scope.getUserList(d.to)}` : `Message from ${d.from.displayName || d.from.user}`;
         $scope.mailView.htmlMsg = d.htmlMsg;
-        $scope.mailView.isConMsg= !!d.isConMsg;
+        $scope.mailView.isConMsg = !!d.isConMsg;
         $scope.mailView.date = d.date;
         $scope.mailView.toMode = !!d.to;
-        $scope.mailView.other= d.to||d.from;
+        $scope.mailView.other = d.to || d.from;
         $scope.mailView.topics = d.topics;
         $scope.mailView._id = d._id;
-        $scope.mailView.msgId = d.msgId||0;
+        $scope.mailView.msgId = d.msgId || 0;
         $scope.mailView.show = true;
         $scope.mailView.isRep = !!d.isRep;
     };
@@ -40,32 +40,32 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
             }
         });
     };
-    $scope.startTeach = () =>{
-        $http.put('/user/teach',$scope.mailView).then(r=>{
+    $scope.startTeach = () => {
+        $http.put('/user/teach', $scope.mailView).then(r => {
             //do nuffin
-            $scope.mailView.show=false;
+            $scope.mailView.show = false;
         });
     };
-    $scope.explStartTeach =()=>{
+    $scope.explStartTeach = () => {
         bulmabox.alert('Start Teaching', `Clicking the "Teach" button will allow the student to leave reviews for you. <br>While there's nothing explicitly preventing you from connecting on your own, we'd still recommend you click this button, as well-written reviews are always helpful!`);
     };
     $scope.replyMsg = m => {
         $log.debug('attempting to setup reply to msg', m);
         $scope.newMsg.show = true;
-        $scope.newMsg.to = [m.from||m.other];
+        $scope.newMsg.to = [m.from || m.other];
         $scope.newMsg.isReply = m;
         //we also reset Mailview so that we don't have two dialogs open.
         $scope.mailView = {
             title: 'No Message Selected',
             htmlMsg: '',
             mdMsg: '',
-            rawMsg:'',
+            rawMsg: '',
             show: false,
             toMode: false,
             date: 12345,
-            other:false
+            other: false
         };
-        $log.debug('newMsg now',$scope.newMsg);
+        $log.debug('newMsg now', $scope.newMsg);
     };
     $scope.cancelSend = () => {
         if ($scope.newMsg.mdMsg && $scope.newMsg.mdMsg.length) {
@@ -107,7 +107,7 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
             $scope.newMsg.mdMsg = `${$scope.newMsg.isReply.mdMsg}\n---\n${$scope.newMsg.mdMsg}`;
         }
         // return $log.debug('WOULD SEND:', $scope.newMsg)
-        $http.post('/user/sendMsg', {
+        userFact.sendMsg({
             to: $scope.newMsg.to,
             htmlMsg: $scope.newMsg.htmlMsg,
             mdMsg: $scope.newMsg.mdMsg
@@ -118,7 +118,7 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
                 isReply: false,
                 show: false,
             };
-            bulmabox.alert('Message Sent!','Your message is on its way!');
+            bulmabox.alert('Message Sent!', 'Your message is on its way!');
         });
     };
     $scope.newMsgAdd = e => {
@@ -165,7 +165,7 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
             }
         });
     };
-    $scope.getUserList = (o)=>{
-        return o.map(q=>q.displayName||q.user).join(', ');
+    $scope.getUserList = (o) => {
+        return o.map(q => q.displayName || q.user).join(', ');
     };
 });

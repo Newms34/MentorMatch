@@ -57,7 +57,7 @@ passport.use('google-signup',
                     avatar: profile.photos[0] && profile.photos[0].value || null,
                     ints: [0, 0, 0, 0, 0, 0]
                 }).save().then((newUser) => {
-                    console.log('created new user: ', newUser);
+                    // console.log('created new user: ', newUser);
                     done(null, newUser);
                 });
             }
@@ -108,7 +108,7 @@ passport.use('local-login', new LocalStrategy({
         User.findOne({
             'user': user
         }, function (err, usrFnd) {
-            console.log('Result of findone',err,usrFnd)
+            // console.log('Result of findone',err,usrFnd)
             // if there are any errors, return the error before anything else
             if (err) {
                 return done(err, false, false);

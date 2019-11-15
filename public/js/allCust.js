@@ -710,7 +710,7 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
             bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Forgot Password', 'To recieve a password reset email, please enter your username!');
             return;
         }
-        $http.post('/user/forgot', { user: $scope.user }).then(function (r) {
+        userFact.forgot({ user: $scope.user }).then(function (r) {
             $log.debug('forgot route response', r);
             if (r.data == 'err') {
                 bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Forgot Password Error', "It looks like that account either doesn't exist, or doesn't have an email registered with it! Contact a mod for further help.");
@@ -721,7 +721,7 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
     };
     $scope.signin = () => {
         $log.debug('trying to login with', $scope.user, $scope.pwd);
-        $http.post('/user/login', { user: $scope.user, pass: $scope.pwd })
+        userFact.login({ user: $scope.user, pass: $scope.pwd })
             .then((r) => {
                 $log.debug(r);
                 if (r.data == 'authErr' || !r.data) {
@@ -752,7 +752,7 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
             clearTimeout($scope.checkTimer);
         }
         $scope.checkTimer = setTimeout(function () {
-            $http.get('/user/nameOkay?name=' + $scope.user)
+            userFact.nameCheck($scope.user)
                 .then((r) => {
                     $scope.nameOkay = r.data;
                 });
@@ -773,13 +773,13 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
                 if (!resp || resp == null) {
                     return false;
                 }
-                $http.post('/user/new', {
+                userFact.newUser({
                     user: $scope.user,
                     pass: $scope.pwd,
                     email: $scope.email
                 })
                     .then((r) => {
-                        $http.post('/user/login', { user: $scope.user, pass: $scope.pwd })
+                        userFact.login({ user: $scope.user, pass: $scope.pwd })
                             .then(() => {
                                 $state.go('app.dash');
                             }).catch(e => {
@@ -795,13 +795,13 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
             });
         } else {
             $log.debug('running register with user', $scope.user, 'and pwd', $scope.pwd);
-            $http.post('/user/new', {
+            userFact.newUser({
                 user: $scope.user,
                 pass: $scope.pwd,
                 email: $scope.email
             })
                 .then((r) => {
-                    $http.post('/user/login', { user: $scope.user, pass: $scope.pwd })
+                    userFact.login({ user: $scope.user, pass: $scope.pwd })
                         .then(() => {
                             $state.go('app.dash');
                         });
@@ -813,7 +813,7 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
         }
     };
 });
-app.controller('mail-cont', ($scope, $http, $q, $log) => {
+app.controller('mail-cont', ($scope, $http, $q, $log, userFact) => {
     $log.debug("Mailbox ctrl registered");
     $scope.outMode = false;
     $scope.mailView = {
@@ -823,19 +823,19 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
         show: false,
         toMode: false,
         date: 12345,
-        other:false
+        other: false
     };
     $scope.viewMsg = d => {
-        $log.debug('incoming msg object is',d);
-        $scope.mailView.title = d.to ? `Message to ${$scope.getUserList(d.to)}` : `Message from ${d.from.displayName||d.from.user}`;
+        $log.debug('incoming msg object is', d);
+        $scope.mailView.title = d.to ? `Message to ${$scope.getUserList(d.to)}` : `Message from ${d.from.displayName || d.from.user}`;
         $scope.mailView.htmlMsg = d.htmlMsg;
-        $scope.mailView.isConMsg= !!d.isConMsg;
+        $scope.mailView.isConMsg = !!d.isConMsg;
         $scope.mailView.date = d.date;
         $scope.mailView.toMode = !!d.to;
-        $scope.mailView.other= d.to||d.from;
+        $scope.mailView.other = d.to || d.from;
         $scope.mailView.topics = d.topics;
         $scope.mailView._id = d._id;
-        $scope.mailView.msgId = d.msgId||0;
+        $scope.mailView.msgId = d.msgId || 0;
         $scope.mailView.show = true;
         $scope.mailView.isRep = !!d.isRep;
     };
@@ -855,32 +855,32 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
             }
         });
     };
-    $scope.startTeach = () =>{
-        $http.put('/user/teach',$scope.mailView).then(r=>{
+    $scope.startTeach = () => {
+        $http.put('/user/teach', $scope.mailView).then(r => {
             //do nuffin
-            $scope.mailView.show=false;
+            $scope.mailView.show = false;
         });
     };
-    $scope.explStartTeach =()=>{
+    $scope.explStartTeach = () => {
         bulmabox.alert('Start Teaching', `Clicking the "Teach" button will allow the student to leave reviews for you. <br>While there's nothing explicitly preventing you from connecting on your own, we'd still recommend you click this button, as well-written reviews are always helpful!`);
     };
     $scope.replyMsg = m => {
         $log.debug('attempting to setup reply to msg', m);
         $scope.newMsg.show = true;
-        $scope.newMsg.to = [m.from||m.other];
+        $scope.newMsg.to = [m.from || m.other];
         $scope.newMsg.isReply = m;
         //we also reset Mailview so that we don't have two dialogs open.
         $scope.mailView = {
             title: 'No Message Selected',
             htmlMsg: '',
             mdMsg: '',
-            rawMsg:'',
+            rawMsg: '',
             show: false,
             toMode: false,
             date: 12345,
-            other:false
+            other: false
         };
-        $log.debug('newMsg now',$scope.newMsg);
+        $log.debug('newMsg now', $scope.newMsg);
     };
     $scope.cancelSend = () => {
         if ($scope.newMsg.mdMsg && $scope.newMsg.mdMsg.length) {
@@ -922,7 +922,7 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
             $scope.newMsg.mdMsg = `${$scope.newMsg.isReply.mdMsg}\n---\n${$scope.newMsg.mdMsg}`;
         }
         // return $log.debug('WOULD SEND:', $scope.newMsg)
-        $http.post('/user/sendMsg', {
+        userFact.sendMsg({
             to: $scope.newMsg.to,
             htmlMsg: $scope.newMsg.htmlMsg,
             mdMsg: $scope.newMsg.mdMsg
@@ -933,7 +933,7 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
                 isReply: false,
                 show: false,
             };
-            bulmabox.alert('Message Sent!','Your message is on its way!');
+            bulmabox.alert('Message Sent!', 'Your message is on its way!');
         });
     };
     $scope.newMsgAdd = e => {
@@ -980,8 +980,8 @@ app.controller('mail-cont', ($scope, $http, $q, $log) => {
             }
         });
     };
-    $scope.getUserList = (o)=>{
-        return o.map(q=>q.displayName||q.user).join(', ');
+    $scope.getUserList = (o) => {
+        return o.map(q => q.displayName || q.user).join(', ');
     };
 });
 String.prototype.capMe = function () {
@@ -1473,7 +1473,7 @@ app.controller('mentor-cont', ($scope, $http, $q, userFact, $log) => {
     };
 });
 
-app.controller('mod-cont', function ($scope, $http, $state, $log) {
+app.controller('mod-cont', function ($scope, $http, $state, $log, userFact) {
     setInterval(function () {
         if ((!$scope.$parent || !$scope.$parent.user || !$scope.$parent.user.mod) && $state.current.name == 'app.mod') {
             console.log('User not mod');
@@ -1538,20 +1538,20 @@ app.controller('mod-cont', function ($scope, $http, $state, $log) {
         }
         const conv = new showdown.Converter();
         $scope.newMsg.htmlMsg = conv.makeHtml($scope.newMsg.mdMsg);
-        $http.post('/user/sendMsg', $scope.newMsg)
+        userFact.sendMsg($scope.newMsg)
             .then(r => {
                 bulmabox.alert('Message Sent!', `Your message is on its way!`);
             });
     };
 });
-app.controller('nav-cont',function($scope,$http,$state, $log){
+app.controller('nav-cont',function($scope,$http,$state, $log, userFact){
     $scope.currState = 'dash';
 	$scope.logout = function() {
         bulmabox.confirm('Logout','Are you sure you wish to logout?', function(resp) {
             if (!resp || resp == null) {
                 return true;
             } else {
-                $http.get('/user/logout').then(function(r) {
+               userFact.logout().then(function(r) {
                     $log.debug('b4 logout usr removl, parent scope is',$scope.$parent.user);
                     $scope.$parent.user=null;
                     $log.debug('and now its',$scope.$parent.user);
@@ -1560,7 +1560,7 @@ app.controller('nav-cont',function($scope,$http,$state, $log){
             }
         });
     };
-    console.log('USER ON NAVBAR',$scope.$parent && $scope.$parent.user);
+    $log.debug('USER ON NAVBAR',$scope.$parent && $scope.$parent.user);
     $scope.navEls = [{
         st:'dash',
         icon:'user-circle',
@@ -1603,13 +1603,13 @@ app.controller('nav-cont',function($scope,$http,$state, $log){
     };
     $scope.mobActive=false;
 });
-resetApp.controller('reset-contr',function($scope,$http,$location, $log){
+resetApp.controller('reset-contr',function($scope,$http,$location, $log,userFact){
     $scope.key = window.location.search.slice(5);
     $scope.isRf = window.location.href.includes('rf');
     if(!$scope.key && !$scope.isRf){
         window.location.href='/rf';
     }
-    $http.get('/user/resetUsr?key='+$scope.key).then(function(u){
+    userFact.resetKey($scope.key).then(function(u){
         $log.debug('getting reset user status?',u);
         $scope.user=u.data;
     }).catch(e=>{
@@ -1621,7 +1621,7 @@ resetApp.controller('reset-contr',function($scope,$http,$location, $log){
         if(!$scope.user || !$scope.pwd || !$scope.pwdDup || $scope.pwdDup!=$scope.pwd ||!$scope.key){
             bulmabox.alert('Error: Missing data','Make sure you&rsquo;ve reached this page from a password reset link, and that you have entered the same password in both fields!');
         }else{
-            $http.post('/user/resetPwd',{
+            userFact.resetPwd({
                 acct:$scope.user.user,
                 pwd:$scope.pwd,
                 pwdDup:$scope.pwdDup,
@@ -1843,6 +1843,46 @@ app.factory('userFact', function($http,$log) {
                 $log.debug('getUser in fac says:', s);
                 return s;
             });
+        },
+        newUser:function(o){
+            return $http.post('/user/new',o).then(function(r){
+                return r;
+            })
+        },
+        login:function(o){
+            return $http.put('/user/login',o).then(function(r){
+                return r;
+            })
+        },
+        logout:function(){
+            return $http.get('/user/logout').then(function(r){
+                return r;
+            })
+        },
+        sendMsg:function(o){
+            return $http.put('/user/sendMsg',o).then(function(r){
+                return r;
+            })
+        },
+        forgot:function(o){
+            return $http.put('/user/forgot',o).then(function(r){
+                return r;
+            })
+        },
+        resetKey:function(k){
+            return $http.get('/user/resetUsr?key='+o).then(function(r){
+                return r;
+            })
+        },
+        resetPwd:function(k){
+            return $http.put('/user/resetPwd',o).then(function(r){
+                return r;
+            })
+        },
+        nameCheck:function(n){
+            return $http.get('/user/nameOkay?name='+n).then(function(r){
+                return r;
+            })
         }
     };
 });

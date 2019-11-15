@@ -1,10 +1,10 @@
-resetApp.controller('reset-contr',function($scope,$http,$location, $log){
+resetApp.controller('reset-contr',function($scope,$http,$location, $log,userFact){
     $scope.key = window.location.search.slice(5);
     $scope.isRf = window.location.href.includes('rf');
     if(!$scope.key && !$scope.isRf){
         window.location.href='/rf';
     }
-    $http.get('/user/resetUsr?key='+$scope.key).then(function(u){
+    userFact.resetKey($scope.key).then(function(u){
         $log.debug('getting reset user status?',u);
         $scope.user=u.data;
     }).catch(e=>{
@@ -16,7 +16,7 @@ resetApp.controller('reset-contr',function($scope,$http,$location, $log){
         if(!$scope.user || !$scope.pwd || !$scope.pwdDup || $scope.pwdDup!=$scope.pwd ||!$scope.key){
             bulmabox.alert('Error: Missing data','Make sure you&rsquo;ve reached this page from a password reset link, and that you have entered the same password in both fields!');
         }else{
-            $http.post('/user/resetPwd',{
+            userFact.resetPwd({
                 acct:$scope.user.user,
                 pwd:$scope.pwd,
                 pwdDup:$scope.pwdDup,

@@ -1,4 +1,4 @@
-app.controller('mod-cont', function ($scope, $http, $state, $log) {
+app.controller('mod-cont', function ($scope, $http, $state, $log, userFact) {
     setInterval(function () {
         if ((!$scope.$parent || !$scope.$parent.user || !$scope.$parent.user.mod) && $state.current.name == 'app.mod') {
             console.log('User not mod');
@@ -63,7 +63,7 @@ app.controller('mod-cont', function ($scope, $http, $state, $log) {
         }
         const conv = new showdown.Converter();
         $scope.newMsg.htmlMsg = conv.makeHtml($scope.newMsg.mdMsg);
-        $http.post('/user/sendMsg', $scope.newMsg)
+        userFact.sendMsg($scope.newMsg)
             .then(r => {
                 bulmabox.alert('Message Sent!', `Your message is on its way!`);
             });

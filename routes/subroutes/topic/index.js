@@ -3,7 +3,7 @@ const router = express.Router(),
     _ = require('lodash'),
     mongoose = require('mongoose'),
     isMod = (req, res, next) => {
-        console.log('passport', req.session.passport);
+        // console.log('passport', req.session.passport);
         mongoose.model('User').findOne({
             _id: req.session.passport.user
         }, function (err, usr) {
@@ -37,7 +37,7 @@ const routeExp = function (io) {
         }
     };
     router.get('/topic', this.authbit, (req, res, next) => {
-        console.log(req.user);
+        // console.log(req.user);
         mongoose.model('topic').find({ $or: [{ 'votes.status': 1 }, { user: req.user.user }] }, (err, tps) => {
             // send all topics that are either in voting 
             res.send(tps);
@@ -45,7 +45,7 @@ const routeExp = function (io) {
         // res.send('not implemented! searched for '+req.query.q);
     });
     router.post('/topic', this.authbit, (req, res, next) => {
-        console.log('triggered topic add route', req.body);
+        // console.log('triggered topic add route', req.body);
         if (!req.body || !req.body.title) {
             return res.status(400).send('err');
         }
@@ -62,7 +62,7 @@ const routeExp = function (io) {
                     votesUp: [req.user.user]//this user is automatically added as an upvote
                 }
             }, function (err, resp) {
-                console.log('Done!', resp);
+                // console.log('Done!', resp);
                 res.send('done');
             });
         });
@@ -80,7 +80,7 @@ const routeExp = function (io) {
         }
         mongoose.model('topic').findOne({ _id: req.body.id, 'votes.status': 0 }, (err, tp) => {
             //topic must have the required id AND be in voting (status==0)
-            console.log('trying to vote on topic', tp);
+            // console.log('trying to vote on topic', tp);
             if (!tp || err) {
                 return res.status(400).send('err');//cannot find topic!
             }
@@ -120,7 +120,7 @@ const halfDay = 1000 * 3600 * 12,
         mongoose.model('topic').find({ 'votes.status': 0 }, (errv, resv) => {
             // console.log('VOTES UP',resv);
             const votesToCheck = resv.filter(q => nunc - q.votes.date > voteExpire);
-            console.log('VOTES TO CHECK', (votesToCheck.length && votesToCheck) ||'None!');
+            // console.log('VOTES TO CHECK', (votesToCheck.length && votesToCheck) ||'None!');
             votesToCheck.forEach(v => {
                 const voteUpTotal = v.votes.votesUp.length,
                     vPerc = v.votes.votesUp.length / (v.votes.votesUp.length + v.votes.votesDown.length);

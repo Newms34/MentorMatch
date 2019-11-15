@@ -17,7 +17,7 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
             bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Forgot Password', 'To recieve a password reset email, please enter your username!');
             return;
         }
-        $http.post('/user/forgot', { user: $scope.user }).then(function (r) {
+        userFact.forgot({ user: $scope.user }).then(function (r) {
             $log.debug('forgot route response', r);
             if (r.data == 'err') {
                 bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Forgot Password Error', "It looks like that account either doesn't exist, or doesn't have an email registered with it! Contact a mod for further help.");
@@ -28,7 +28,7 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
     };
     $scope.signin = () => {
         $log.debug('trying to login with', $scope.user, $scope.pwd);
-        $http.post('/user/login', { user: $scope.user, pass: $scope.pwd })
+        userFact.login({ user: $scope.user, pass: $scope.pwd })
             .then((r) => {
                 $log.debug(r);
                 if (r.data == 'authErr' || !r.data) {
@@ -59,7 +59,7 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
             clearTimeout($scope.checkTimer);
         }
         $scope.checkTimer = setTimeout(function () {
-            $http.get('/user/nameOkay?name=' + $scope.user)
+            userFact.nameCheck($scope.user)
                 .then((r) => {
                     $scope.nameOkay = r.data;
                 });
@@ -80,13 +80,13 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
                 if (!resp || resp == null) {
                     return false;
                 }
-                $http.post('/user/new', {
+                userFact.newUser({
                     user: $scope.user,
                     pass: $scope.pwd,
                     email: $scope.email
                 })
                     .then((r) => {
-                        $http.post('/user/login', { user: $scope.user, pass: $scope.pwd })
+                        userFact.login({ user: $scope.user, pass: $scope.pwd })
                             .then(() => {
                                 $state.go('app.dash');
                             }).catch(e => {
@@ -102,13 +102,13 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
             });
         } else {
             $log.debug('running register with user', $scope.user, 'and pwd', $scope.pwd);
-            $http.post('/user/new', {
+            userFact.newUser({
                 user: $scope.user,
                 pass: $scope.pwd,
                 email: $scope.email
             })
                 .then((r) => {
-                    $http.post('/user/login', { user: $scope.user, pass: $scope.pwd })
+                    userFact.login({ user: $scope.user, pass: $scope.pwd })
                         .then(() => {
                             $state.go('app.dash');
                         });
