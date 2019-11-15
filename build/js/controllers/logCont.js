@@ -2,6 +2,11 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
     $scope.noWarn = false;
     $scope.nameOkay = true;
     delete localStorage.geoUsr;
+    $scope.acceptNoSecure = () => {
+        localStorage.CMMNoSecure = true;
+        $scope.cmmNoSecure = true;
+    }
+    $scope.cmmNoSecure = !!localStorage.CMMNoSecure;
     $scope.checkTimer = false;
     $scope.goReg = () => {
         $state.go('appSimp.register');
@@ -66,9 +71,49 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
         }, 500);
     };
     $scope.emailBad = false;
+    // const emailRegex = new RegExp("[A-Za-z0-9]{3}@",'g')
     $scope.checkEmail = () => {
-        $scope.emailBad = $scope.email && $scope.email.length && !$scope.email.match(/(\w+\.*)+@(\w+\.)+\w+/g);
+        // console.log('document active el',document.activeElement)
+        // console.log('comparing',$scope.regForm.email.$viewValue,'onlyIfInv',onlyIfInv,'emailBad curr val',$scope.emailBad)
+        // if(!$scope.emailBad){
+        $scope.emailBad = $scope.regForm.email && $scope.regForm.email.$viewValue.length && !$scope.regForm.email.$valid;
+        // }
+        // else if(!$scope.regForm.email.$viewValue || $scope.regForm.email.$viewValue.length){
+        //     $scope.emailBad=false;
+        // }
+        // $scope.emailBad = $scope.email && $scope.email.length && !$scope.email.search(/([^][()<>@,;:\\". \x00-\x1F\x7F]+|"(\n|(\\\r)*([^"\\\r\n]|\\[^\r]))*(\\\r)*")(\.([^][()<>@,;:\\". \x00-\x1F\x7F]+|"(\n|(\\\r)*([^"\\\r\n]|\\[^\r]))*(\\\r)*"))*@([^][()<>@,;:\\". \x00-\x1F\x7F]+|\[(\n|(\\\r)*([^][\\\r\n]|\\[^\r]))*(\\\r)*])(\.([^][()<>@,;:\\". \x00-\x1F\x7F]+|\[(\n|(\\\r)*([^][\\\r\n]|\\[^\r]))*(\\\r)*]))*/g);
     };
+    $scope.pwdNoDup = false;
+    $scope.checkPwdDup = () => {
+        $scope.pwdNoDup = !$scope.pwd || !$scope.pwdDup || $scope.pwdDup !== $scope.pwd;
+    }
+    $scope.pwdStrStars = [0,1,2,3,4];
+    $scope.checkPwdStr = () => {
+        if(!$scope.pwd){
+            return false;
+        }
+        const reqs = [{
+            desc: 'At least one uppercase letter',
+            reg: '[A-Z]'
+        }, {
+            desc: 'At least one lowercase letter',
+            reg: '[a-z]'
+        }, {
+            desc: 'At least one number',
+            reg: '[0-9]'
+        }, {
+            desc: 'At least one "special" character (@, !, $, etc.)',
+            reg: '[@!\$\^_\*&]'
+        }],
+            badStuff = reqs.filter(re => { //stuff we're MISSINg
+                const reg = new RegExp(re.reg);
+                return !reg.test($scope.pwd);
+            });
+        if($scope.pwd.length<12){
+            badStuff.push({desc:'A length of at least 12 characters'})
+        }
+        $scope.pwdStr = {recs:badStuff,score:reqs.length-badStuff.length+1,maxScore:5}
+    }
     $scope.register = () => {
         if (!$scope.pwd || !$scope.pwdDup || !$scope.user) {
             bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Missing Information', 'Please enter a username, and a password (twice).');

@@ -173,9 +173,8 @@ const routeExp = function (io, pp) {
                         news: news,
                     });
                 }
-                if (usr.isBanned) {
+                if (!!usr.isBanned) {
                     mongoose.model('User').findOne({user:usr.isBanned},(errm,md)=>{
-
                         return res.status(403).send({status:'banned',usr:md.displayName||md.user});
                     });
                 } else if (usr.locked) {

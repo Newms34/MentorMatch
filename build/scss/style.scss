@@ -14,7 +14,7 @@ body {
   padding-top: 60px;
   height: 140vh;
   // color: #fff;
-  background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('https://cdn.pixabay.com/photo/2017/07/03/11/02/timetable-2467247_960_720.jpg');
+  // background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('https://cdn.pixabay.com/photo/2017/07/03/11/02/timetable-2467247_960_720.jpg');
   background-attachment:fixed;
   background-size:cover;
   background-repeat:no-repeat;
@@ -166,7 +166,13 @@ $tenNames: two, three, four, five, six, seven, eight, nine;
   background:#942138;
   border-color: transparent;
   color:#fff;
+  &:hover{
+    color:#fff;
+  }
 }
 .md-scroll-mask{
   display:none;
+}
+input[type=email]:invalid{
+  background-color:#fcc;
 }
