@@ -122,16 +122,6 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
                 }
                 return !reg.test($scope.pwd);
             });
-        // if($scope.pwd.length<12){
-        //     badStuff.push({desc:'Using at least 12 characters'})
-        // }
-        // if($scope.badPwds.filter(q=>$scope.pwd && $scope.pwd.toLowerCase().includes(q.toLowerCase())).length){
-        //     //password contains a "bad word" (i.e., overuse)
-        //     badStuff.push({desc:'Not using a common word (like "password" or "1234")'})
-        // }else{
-
-        // }
-        console.log('BAD STUFF',badStuff,'PWD',$scope.pwd)
         $scope.pwdStr = {recs:badStuff,score:reqs.length-badStuff.length,maxScore:5,show:$scope.pwdStr.show}
     }
     $scope.register = () => {
