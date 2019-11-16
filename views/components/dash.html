@@ -186,8 +186,8 @@
                                     <div id="addTopicLabel" class='is-fullwidth has-text-left'>Add a skill</div>
                                     <md-autocomplete md-selected-item="selectedTopic" md-search-text="topicToAdd" md-items="topic in filterMe(topicToAdd)" md-no-cache='true' md-item-text="topic.display" md-min-length="0" placeholder="Ex. JavaScript" input-aria-labelledby="addTopicLabel" md-mode='standard'>
                                         <md-item-template> <span md-highlight-text="topicToAdd" md-highlight-flags="^i">{{topic.display}}</span> </md-item-template>
+                                    </md-autocomplete>
                                 </form>
-                                </md-autocomplete>
                             </md-content>
                         </div>
                         <div class="column is-full">
