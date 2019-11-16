@@ -342,7 +342,8 @@ const routeExp = function (io, pp) {
     });
     router.delete('/projs', this.authbit, (req, res, next) => {
         //remove interest(s)
-        req.user.projects = req.user.projects.filter(q => q.name == req.body.name);
+        req.user.projects = req.user.projects.filter(q => q.name !== req.body.name);
+        // console.log('TRIED TO REMOVE',req.body.name,'PROJS NOW',req.user.projects)
         req.user.save((eu, esv) => {
             res.send('refresh');
         });

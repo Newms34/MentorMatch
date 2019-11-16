@@ -7,8 +7,15 @@ app.controller('main-cont', function ($scope, $http, $state, userFact, $log) {
     $scope.refUsr = ()=>{
         userFact.getUser().then(r => {
             $scope.user = r.data;            
+            // $scope.$apply();
         }); 
     };
+    socket.on('refreshById',u=>{
+        userFact.getUser().then(r => {
+            $scope.user = r.data;            
+            $scope.$apply();
+        }); 
+    });
     $scope.refUsr();
     socket.on('refresh',u=>{
         if($scope.user && u.user==$scope.user.user){

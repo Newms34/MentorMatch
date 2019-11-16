@@ -54,6 +54,10 @@ io.on('connection', function (socket) {
     socket.on('testFn', function (d) {
         socket.emit('testOut', d);
     })
+    socket.on('requestRefresh',function(o){
+        console.log('REQUESTED REFRESH',o,io.to)
+        io.to(o.id).emit('refreshById')
+    })
 });
 server.listen(process.env.PORT || 8080,function(){
     console.log('Server is listening!')

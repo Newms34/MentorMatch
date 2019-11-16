@@ -133,15 +133,8 @@ app
                     // do something on success
                     // $log.debug('RESPONSE INTERCEPTOR', response && response.data)
                     if (response && response.data && response.data == 'refresh') {
-                        fetch('/user/usrData').then(r => {
-                            return r.json();
-                        }).then(r => {
-                            // $log.debug('triggered refresh and got data back',r)
-                            const scp = angular.element(document.querySelector('#full-win')).scope();
-                            scp.user = r;
-                            // $log.debug('MAIN SCOPE',scp,'TIME DIF',scp.user.lastAction-oldTime);
-                            scp.$digest();
-                        });
+                        // console.log('need to refresh',socket,socket.to)
+                        socket.emit('requestRefresh',{id:socket.id})
                     }
                     return response;
                 },

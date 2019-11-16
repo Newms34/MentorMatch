@@ -5,12 +5,15 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
     $scope.refUsr();
     $scope.updateTopics = () => {
         // $log.debug('Would updoot topics here! Val we passed was',e)
-        return $http.put('/user/interests', $scope.$parent.user.interests);
+        $http.put('/user/interests', $scope.$parent.user.interests)
+        .then(r=>{
+            // $scope.$parent.$refUsr();
+        });
     };
     $scope.removeSkill = skt => {
         // $log.debug('USER WISHES TO REMOVE',skt)
         $http.delete('/user/interests?t=' + skt).then(r => {
-            //do nothing 
+            // $scope.$parent.$refUsr();
         });
     };
     $scope.debounceTimer = null;
@@ -29,7 +32,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             //do nuffin
             if (r.data == 'dupDisplay') {
                 bulmabox.alert('Duplicate Name', `Sorry, but the name ${dispName} is already in use. Please use another name.`);
-                $scope.$parent.refUsr();
+                // $scope.$parent.refUsr();
             }
         });
     };
@@ -160,13 +163,13 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             $scope.topicToAdd = '';
             $http.put('/user/interests', skList)
                 .then(r => {
-                    //do nothing
                     $scope.addInt = {
                         title: null,
                         show: false,
                         lvl: 0,
                         canTeach: false,
                     };
+                    // $scope.$parent.$refUsr();
                 });
         }
     };
@@ -199,12 +202,12 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
         }
         $http.put('/user/projs', projArr)
             .then(r => {
-                //do nothing
                 $scope.modProj = {
                     show: false,
                     proj: null,
                     editMode: false
                 };
+                // $scope.$parent.$refUsr();
             });
     };
     $scope.projView = {
@@ -218,9 +221,9 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
     $scope.deleteProj = t => {
         bulmabox.confirm('Remove Project', `Are you sure you wish to remove the project ${t}?`, r => {
             if (!!r) {
-                $http.delete('/user/projs', { name: t })
+                $http.delete('/user/projs', {data:{ name: t },headers:{'Content-Type': 'application/json;charset=utf-8'}})
                     .then(r => {
-
+                        // $scope.$parent.$refUsr();
                     });
             }
         });
@@ -235,6 +238,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             $http.post('/user/reqDiscussLesson?id=', l)
                 .then(r => {
                     bulmabox.alert('Message Sent', `Your mentor has been notified that you wish to discuss this lesson.`);
+                    // $scope.$parent.$refUsr();
                 });
         });
     };
@@ -246,6 +250,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             $http.post('/user/reqEndLesson?id=', l)
                 .then(r => {
                     bulmabox.alert('Lesson End Requested', `Your mentor has been notified that you wish to end this lesson. <br>Please note that it is still up to them to end the lesson.`);
+                    // $scope.$parent.$refUsr();
                 });
         });
     };
@@ -256,6 +261,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             }
             $http.post('/usr/repLesson', l).then(r => {
                 bulmabox.alert('Lesson Reported', `This lesson has been reported to the moderator team. In addition, the lesson has automatically been stopped, and a message has been sent to the lesson's mentor.`);
+                // $scope.$parent.$refUsr();
             });
         });
     };
@@ -347,6 +353,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
                 },
                 msg: null
             };
+            // $scope.$parent.$refUsr();
         });
     };
 });

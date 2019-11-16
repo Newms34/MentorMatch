@@ -136,15 +136,8 @@ app
                     // do something on success
                     // $log.debug('RESPONSE INTERCEPTOR', response && response.data)
                     if (response && response.data && response.data == 'refresh') {
-                        fetch('/user/usrData').then(r => {
-                            return r.json();
-                        }).then(r => {
-                            // $log.debug('triggered refresh and got data back',r)
-                            const scp = angular.element(document.querySelector('#full-win')).scope();
-                            scp.user = r;
-                            // $log.debug('MAIN SCOPE',scp,'TIME DIF',scp.user.lastAction-oldTime);
-                            scp.$digest();
-                        });
+                        // console.log('need to refresh',socket,socket.to)
+                        socket.emit('requestRefresh',{id:socket.id})
                     }
                     return response;
                 },
@@ -325,6 +318,102 @@ function postrenderAction($timeout) {
         }, 0);
     }
 }
+app.factory('socketFac', function ($rootScope) {
+  var socket = io.connect();
+  return {
+    on: function (eventName, callback) {
+      socket.on(eventName, function () { 
+        var args = arguments;
+        $rootScope.$apply(function () {
+          callback.apply(socket, args);
+        });
+      });
+    },
+    emit: function (eventName, data, callback) {
+      socket.emit(eventName, data, function () {
+        var args = arguments;
+        $rootScope.$apply(function () {
+          if (callback) {
+            callback.apply(socket, args);
+          }
+        });
+      });
+    }
+  };
+});
+app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q', 'userFact', '$log', function ($rootScope, $state, $stateParams, $transitions, $q, userFact, $log) {
+    $transitions.onBefore({ to: 'app.**' }, function (trans) {
+        let def = $q.defer();
+        $log.debug('TRANS', trans);
+        const usrCheck = trans.injector().get('userFact');
+        usrCheck.getUser().then(function (r) {
+            $log.debug('response from login chck', r);
+            if (r.data) {
+                def.resolve(true);
+            } else {
+                // User isn't authenticated. Redirect to a new Target State
+                def.resolve($state.target('appSimp.login', undefined, { location: true }));
+            }
+        }).catch(e => {
+            $log.debug('TRANSITION BLOCKED! Error was',e);
+            def.resolve($state.target('appSimp.login', undefined, { location: true }));
+        });
+        return def.promise;
+    });
+    $transitions.onFinish({ to: 'app.**' }, function () {
+        document.body.scrollTop = document.documentElement.scrollTop = 0;
+    });
+}]);
+app.factory('userFact', function($http,$log) {
+    return {
+        getUser: function() {
+            return $http.get('/user/usrData').then(function(s) {
+                $log.debug('getUser in fac says:', s);
+                return s;
+            });
+        },
+        newUser:function(o){
+            return $http.post('/user/new',o).then(function(r){
+                return r;
+            })
+        },
+        login:function(o){
+            return $http.put('/user/login',o).then(function(r){
+                return r;
+            })
+        },
+        logout:function(){
+            return $http.get('/user/logout').then(function(r){
+                return r;
+            })
+        },
+        sendMsg:function(o){
+            return $http.put('/user/sendMsg',o).then(function(r){
+                return r;
+            })
+        },
+        forgot:function(o){
+            return $http.put('/user/forgot',o).then(function(r){
+                return r;
+            })
+        },
+        resetKey:function(k){
+            return $http.get('/user/resetUsr?key='+o).then(function(r){
+                return r;
+            })
+        },
+        resetPwd:function(k){
+            return $http.put('/user/resetPwd',o).then(function(r){
+                return r;
+            })
+        },
+        nameCheck:function(n){
+            return $http.get('/user/nameOkay?name='+n).then(function(r){
+                return r;
+            })
+        }
+    };
+});
 app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
     // $log.debug("Dashboard ctrl registered")
     $scope.refUsr = $scope.$parent.refUsr;
@@ -332,12 +421,15 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
     $scope.refUsr();
     $scope.updateTopics = () => {
         // $log.debug('Would updoot topics here! Val we passed was',e)
-        return $http.put('/user/interests', $scope.$parent.user.interests);
+        $http.put('/user/interests', $scope.$parent.user.interests)
+        .then(r=>{
+            // $scope.$parent.$refUsr();
+        });
     };
     $scope.removeSkill = skt => {
         // $log.debug('USER WISHES TO REMOVE',skt)
         $http.delete('/user/interests?t=' + skt).then(r => {
-            //do nothing 
+            // $scope.$parent.$refUsr();
         });
     };
     $scope.debounceTimer = null;
@@ -356,7 +448,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             //do nuffin
             if (r.data == 'dupDisplay') {
                 bulmabox.alert('Duplicate Name', `Sorry, but the name ${dispName} is already in use. Please use another name.`);
-                $scope.$parent.refUsr();
+                // $scope.$parent.refUsr();
             }
         });
     };
@@ -487,13 +579,13 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             $scope.topicToAdd = '';
             $http.put('/user/interests', skList)
                 .then(r => {
-                    //do nothing
                     $scope.addInt = {
                         title: null,
                         show: false,
                         lvl: 0,
                         canTeach: false,
                     };
+                    // $scope.$parent.$refUsr();
                 });
         }
     };
@@ -526,12 +618,12 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
         }
         $http.put('/user/projs', projArr)
             .then(r => {
-                //do nothing
                 $scope.modProj = {
                     show: false,
                     proj: null,
                     editMode: false
                 };
+                // $scope.$parent.$refUsr();
             });
     };
     $scope.projView = {
@@ -545,9 +637,9 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
     $scope.deleteProj = t => {
         bulmabox.confirm('Remove Project', `Are you sure you wish to remove the project ${t}?`, r => {
             if (!!r) {
-                $http.delete('/user/projs', { name: t })
+                $http.delete('/user/projs', {data:{ name: t },headers:{'Content-Type': 'application/json;charset=utf-8'}})
                     .then(r => {
-
+                        // $scope.$parent.$refUsr();
                     });
             }
         });
@@ -562,6 +654,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             $http.post('/user/reqDiscussLesson?id=', l)
                 .then(r => {
                     bulmabox.alert('Message Sent', `Your mentor has been notified that you wish to discuss this lesson.`);
+                    // $scope.$parent.$refUsr();
                 });
         });
     };
@@ -573,6 +666,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             $http.post('/user/reqEndLesson?id=', l)
                 .then(r => {
                     bulmabox.alert('Lesson End Requested', `Your mentor has been notified that you wish to end this lesson. <br>Please note that it is still up to them to end the lesson.`);
+                    // $scope.$parent.$refUsr();
                 });
         });
     };
@@ -583,6 +677,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             }
             $http.post('/usr/repLesson', l).then(r => {
                 bulmabox.alert('Lesson Reported', `This lesson has been reported to the moderator team. In addition, the lesson has automatically been stopped, and a message has been sent to the lesson's mentor.`);
+                // $scope.$parent.$refUsr();
             });
         });
     };
@@ -674,6 +769,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
                 },
                 msg: null
             };
+            // $scope.$parent.$refUsr();
         });
     };
 });
@@ -1048,8 +1144,15 @@ app.controller('main-cont', function ($scope, $http, $state, userFact, $log) {
     $scope.refUsr = ()=>{
         userFact.getUser().then(r => {
             $scope.user = r.data;            
+            // $scope.$apply();
         }); 
     };
+    socket.on('refreshById',u=>{
+        userFact.getUser().then(r => {
+            $scope.user = r.data;            
+            $scope.$apply();
+        }); 
+    });
     $scope.refUsr();
     socket.on('refresh',u=>{
         if($scope.user && u.user==$scope.user.user){
@@ -1853,101 +1956,5 @@ app.controller('vote-cont',function($scope,$http,$state, $log){
     socket.on('voteRef',function(o){
         $scope.regetVotes();
     });
-});
-app.factory('socketFac', function ($rootScope) {
-  var socket = io.connect();
-  return {
-    on: function (eventName, callback) {
-      socket.on(eventName, function () { 
-        var args = arguments;
-        $rootScope.$apply(function () {
-          callback.apply(socket, args);
-        });
-      });
-    },
-    emit: function (eventName, data, callback) {
-      socket.emit(eventName, data, function () {
-        var args = arguments;
-        $rootScope.$apply(function () {
-          if (callback) {
-            callback.apply(socket, args);
-          }
-        });
-      });
-    }
-  };
-});
-app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q', 'userFact', '$log', function ($rootScope, $state, $stateParams, $transitions, $q, userFact, $log) {
-    $transitions.onBefore({ to: 'app.**' }, function (trans) {
-        let def = $q.defer();
-        $log.debug('TRANS', trans);
-        const usrCheck = trans.injector().get('userFact');
-        usrCheck.getUser().then(function (r) {
-            $log.debug('response from login chck', r);
-            if (r.data) {
-                def.resolve(true);
-            } else {
-                // User isn't authenticated. Redirect to a new Target State
-                def.resolve($state.target('appSimp.login', undefined, { location: true }));
-            }
-        }).catch(e => {
-            $log.debug('TRANSITION BLOCKED! Error was',e);
-            def.resolve($state.target('appSimp.login', undefined, { location: true }));
-        });
-        return def.promise;
-    });
-    $transitions.onFinish({ to: 'app.**' }, function () {
-        document.body.scrollTop = document.documentElement.scrollTop = 0;
-    });
-}]);
-app.factory('userFact', function($http,$log) {
-    return {
-        getUser: function() {
-            return $http.get('/user/usrData').then(function(s) {
-                $log.debug('getUser in fac says:', s);
-                return s;
-            });
-        },
-        newUser:function(o){
-            return $http.post('/user/new',o).then(function(r){
-                return r;
-            })
-        },
-        login:function(o){
-            return $http.put('/user/login',o).then(function(r){
-                return r;
-            })
-        },
-        logout:function(){
-            return $http.get('/user/logout').then(function(r){
-                return r;
-            })
-        },
-        sendMsg:function(o){
-            return $http.put('/user/sendMsg',o).then(function(r){
-                return r;
-            })
-        },
-        forgot:function(o){
-            return $http.put('/user/forgot',o).then(function(r){
-                return r;
-            })
-        },
-        resetKey:function(k){
-            return $http.get('/user/resetUsr?key='+o).then(function(r){
-                return r;
-            })
-        },
-        resetPwd:function(k){
-            return $http.put('/user/resetPwd',o).then(function(r){
-                return r;
-            })
-        },
-        nameCheck:function(n){
-            return $http.get('/user/nameOkay?name='+n).then(function(r){
-                return r;
-            })
-        }
-    };
 });
 }());
