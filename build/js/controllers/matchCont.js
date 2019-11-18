@@ -27,6 +27,7 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
                 return { value: q.title.toLowerCase(), display: q.title, desc: q.desc };
             });
             $scope.topicObjs = angular.copy($scope.topicObjsAll);
+            $scope.topicObjs.push({ value: 'addSkill', display: '---- + Add a skill ----', desc: 'Add a new skill!' });
         });
     };
     socket.on('topicRef', function (o) {
@@ -37,15 +38,92 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
         });
     });
     $scope.regetTopics();
-    $scope.filterMe = (query) => {
-        const lowercaseQuery = query.toLowerCase();
-        // $log.debug('picked topics map', $scope.pickedTopics.map(q => q.value))
-        let tops = $scope.topicObjs.filter(topic => {
-            return (topic.value.indexOf(lowercaseQuery) > -1);
-        });
-        // $log.debug('tops', tops)
-        return tops;
-    };
+    // $scope.filterMe = (query) => {
+    //     const lowercaseQuery = query.toLowerCase();
+    //     // $log.debug('picked topics map', $scope.pickedTopics.map(q => q.value))
+    //     let tops = $scope.topicObjs.filter(topic => {
+    //         return (topic.value.indexOf(lowercaseQuery) > -1);
+    //     });
+    //     // $log.debug('tops', tops)
+    //     return tops;
+    // };
+    // $scope.SASFilter =  (a, f, s) => {
+    //     if (!f) {
+    //         return (a && a.length && a) || [];
+    //     }
+    //     console.log('filtering items',a,'with',f)
+    //     return a.filter(q => {
+    //         // console.log('FILTER ITEM',q)
+    //         const searchableItem = s?q[s]:q;
+    //         return searchableItem.toLowerCase().includes(f.toLowerCase())
+    //     });
+    // }
+    $scope.clearSearch = ()=>{
+        $scope.skillSearch='';
+        $scope.showNSR = false;
+        $scope.$digest();
+    }
+    $scope.showNSR = false;
+    // $scope.nsr = document.querySelector('#no_result')
+    new autoComplete({
+        data: {                              // Data src [Array, Function, Async] | (REQUIRED)
+            src: async () => {
+                const query = $scope.skillSearch;
+                const freshData = await fetch('/topic/topic'),
+                data = await freshData.json();
+                // const data = await $http.get('/topic/topic');
+                // Return Fetched data
+                console.log('data',data);
+                return data;
+            },
+            key: ["title"],
+            cache: false
+        },
+        sort: (a, b) => {                    // Sort rendered results ascendingly | (Optional)
+            return a.match-b.match
+        },
+        placeHolder: "Pick a skill",     // Place Holder text                 | (Optional)
+        selector: "#autoComplete",           // Input field selector              | (Optional)
+        threshold: 0,                        // Min. Chars length to start Engine | (Optional)
+        debounce: 0,                       // Post duration for engine to start | (Optional)
+        searchEngine: "strict",              // Search Engine type/mode           | (Optional)
+        highlight: true,                       // Highlight matching results      | (Optional)
+        // maxResults: 5,                         // Max. number of rendered results | (Optional)
+        resultsList: {                       // Rendered results list object      | (Optional)
+            render: true,
+            container: source => {
+                source.setAttribute("id", "skill-list");
+            },
+            destination: document.querySelector("#autoComplete"),
+            position: "afterend",
+            element: "ul"
+        },
+        resultItem: {                          // Rendered result item            | (Optional)
+            content: (data, source) => {
+                console.log('in resultItem',data,source)
+                source.innerHTML = data.match;
+            },
+            element: "li"
+        },
+        noResults: () => {                     // Action script on noResults      | (Optional)
+            // const result = $scope.nsr;
+            // result.style.display = 'block';
+            // result.setAttribute("tabindex", "1");
+            // result.innerHTML = "No Results";
+            // document.querySelector("#skill-list").appendChild(result);
+            console.log('TRIGGERED NSR CALLBACK',$scope.skillSearch,$scope.showNSR)
+            $scope.showNSR = true;
+            console.log('SHOWNSR NOW',$scope.showNSR)
+            $scope.$apply();
+        },
+        onSelection: feedback => {             // Action script onSelection event | (Optional)
+            //actual item is: feedback.selection.value;
+            $scope.selectedTopic = feedback.selection.value;
+            $scope.$digest();
+            document.querySelector("#autoComplete").value='';
+        }
+    });
+    $scope.pickedItem = null;
     $scope.newTopic = {
         title: null,
         desc: null,
@@ -57,7 +135,7 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
         const nfCtrl = document.querySelector('.md-standard-list-container.md-autocomplete-suggestions-container');
         if (!$scope.newTopic.show) {
             nfCtrl.className += ' ng-hide';
-        }else{
+        } else {
             // nfCtrl.className = nfCtrl.className.replace(' ng-hide','')
         }
         $scope.newTopic.show = !$scope.newTopic.show;
@@ -75,6 +153,11 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
             $scope.regetTopics();
         }
     });
+    $scope.AddNewSkill = (e)=>{
+        e.preventDefault();
+        console.log('user wants to add skill called ',$scope.skillSearch)
+        $scope.clearSearch();
+    }
     $scope.addNewTopic = () => {
         $http.post('/topic/topic', $scope.newTopic)
             .then(r => {
@@ -89,17 +172,18 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
     };
     $scope.pickedTopics = [];
     $scope.addTopicBtn = () => {
-        // $log.debug( $scope.pickedTopics.length,$scope.topicObjs.length)
-        const simpPT = $scope.pickedTopics.map(a => a.value).sort().join(''),
-            simpTO = $scope.topicObjs ? $scope.topicObjs.map(b => b.value).sort().join('') : '';
-        // $log.debug("simple data",simpPT,simpTO)
-        if ($scope.topicToAdd && simpPT != simpTO) {
-            return 'Click to add your selected skill!';
-        } else if (simpPT != simpTO) {
-            return `You need to select a skill before you can add it!`;
-        } else {
-            return `You've added all possible skills. Create a new one if you want!`;
-        }
+        // // $log.debug( $scope.pickedTopics.length,$scope.topicObjs.length)
+        // const simpPT = $scope.pickedTopics.map(a => a.value).sort().join(''),
+        //     simpTO = $scope.topicObjs ? $scope.topicObjs.filter(q => q.value !== 'addSkill').map(b => b.value).sort().join('') : '';
+        // $log.debug("simple data", simpPT, simpTO)
+        // if (!simpTO || !simpTO.length) {
+        //     return `You've added all possible skills! Create a new one if you want`;
+        // } else if ($scope.selectedTopic && !simpPT.includes($scope.selectedTopic.value)) {
+        //     return 'Click to add your selected skill!';
+        // } else {
+        //     return `You need to select a skill before you can add it!`;
+        // }
+        return 'Nothing to see here!'
     };
     $scope.changeTopList = () => {
         // $log.debug('simpTops', tl, 'all', $scope.topicObjsAll)

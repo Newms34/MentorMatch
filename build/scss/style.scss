@@ -1,6 +1,7 @@
 @import "./components/bulma";
 // @import "./components/chat";
 @import "./components/fonts.scss";
+@import "./components/autocomplete.scss";
 html,
 body {
   width: 100%;
@@ -175,4 +176,9 @@ $tenNames: two, three, four, five, six, seven, eight, nine;
 }
 input[type=email]:invalid{
   background-color:#fcc;
+}
+select{
+  option:last-child{
+   color:#555;
+  }
 }

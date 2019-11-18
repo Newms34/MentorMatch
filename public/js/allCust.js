@@ -259,6 +259,168 @@ app
             }
         };
     }]);
+    // .directive("simpleAutoSuggest", function ($sce) {
+    //     return {
+    //         restrict: "E",
+    //         transclude: true,
+    //         replace:true,
+    //         scope: {
+    //             items: '=simpleAutoItems',
+    //             filterFn: '=simpleAutoFilter',
+    //             output: '=simpleAutoOutput',
+    //             adtnlClasses: '@simpleAutoClasses',
+    //             adtnlStyles: '@simpleAutoStyles',
+    //             nfText: '@simpleAutoNotFoundText',
+    //             subItem: '@simpleAutoSubItem',
+    //             verbose: '@simpleAutoVerbose'
+    //         },
+    //         template: `<div class='sas-cont {{adtnlClasses}}' style='{{adtnlStyles}}'>
+    //         <input class='input sas-inp' type='text' ng-model='filterSearch' ng-keyup='doFilter()' />
+    //         <div style='width:{{inpBoxDims.width}}px; min-height:100px;' ng-show='hasFocus && ((filteredItems && filteredItems.length)||showNFBox)' id='sas-suggestion-container'>
+    //             <div ng-repeat='si in filteredItems' class='simple-auto-suggest-suggestion' ng-click='pickItem(si,$event);$event.stopPropagation();' ng-bind-html='hilite(si,subItem)'></div>
+    //             <div ng-show='showNFBox'>
+    //                 <ng-transclude>
+    //                 </ng-transclude>
+    //             </div>
+    //         </div>
+    //     </div>`,
+    //         link: function (scope, element, attributes) {
+    //             const vc = function () {
+    //                 if (!scope.verbose) {
+    //                     return false;
+    //                 }
+    //                 return console.log(...arguments);
+    //             };
+    //             vc("ATTRIBUTES", attributes, "ELEMENT", element, 'SCOPE', scope, 'ELEMENT HTML', element.html());
+    //             scope.hasFocus = true;
+    //             const inpBox = element[0].querySelector(".sas-inp");
+    //             setTimeout(function () {
+    //                 scope.inpBoxDims = element[0]
+    //                     .querySelector(".sas-inp")
+    //                     .getBoundingClientRect();
+    //             }, 1);
+    //             scope.notFoundEvald = () => {
+    //                 return $sce.trustAsHtml(scope.nfText)
+    //             }
+    //             scope.showNFBox = false;
+    //             scope.doFilter = () => {
+    //                 console.log('SEARCHING FOR',scope.filterSearch, scope.filterFn,scope.filterOkay,scope.items)
+    //                 const filterOkay =
+    //                     scope.filterFn &&
+    //                     typeof scope.filterFn === "function" &&
+    //                     scope.items &&
+    //                     (scope.items instanceof Array);
+    //                 scope.filteredItems =
+    //                     (scope.filterSearch &&
+    //                         scope.filterSearch.length &&
+    //                         filterOkay &&
+    //                         scope.filterFn(scope.items, scope.filterSearch,scope.subItem||null)) ||
+    //                     null;
+    //                 vc(
+    //                     "FILTERED STOOF", scope.filteredItems,
+    //                     "SEARCH TERM",
+    //                     scope.filterSearch,
+    //                     'ALL ITEMS',
+    //                     scope.items,
+    //                     'Filter okay?', filterOkay
+    //                 );
+    //                 scope.showNFBox =
+    //                     !!scope.filterSearch &&
+    //                     (!scope.filteredItems || !scope.filteredItems.length);
+    //                 // scope.$digest();
+    //             }
+    //             scope.pickItem = (it, me) => {
+    //                 if (scope.output && scope.output !== 'null') {
+    //                     //three different possibilities. First, if we're given a function, run dat function. Second, if it's an array, push into array. Thirdly, if neither, just replace
+    //                     if (typeof scope.output === 'function') {
+    //                         vc('output is fn!')
+    //                         scope.output(it);
+    //                     } else if (scope.output instanceof Array) {
+    //                         vc('output is array')
+    //                         scope.output.push(it);
+    //                     } else {
+    //                         scope.output = it;
+    //                     }
+    //                     vc('ITEM', it, me)
+    //                     scope.filterSearch = it && me && me.srcElement && me.srcElement.innerText;
+    //                 } else {
+    //                     scope.filterSearch = it;
+    //                 }
+    //                 if(scope.subItem && scope.filterSearch[scope.subItem]){
+    //                     scope.filterSearch = it[scope.subItem]
+    //                 }
+    //                 scope.filteredItems = [];
+    //                 vc('PARENT NOW', scope.$parent, scope.output)
+    //             };
+    //             const climbAndSearchTree = (el, sel) => {
+    //                 currEl = el,
+    //                     elPath = [el],
+    //                     selectorType = sel && sel[0] == '.' ? 'className' : sel && sel[0] == '#' ? 'id' : null;
+    //                 let foundItem = false,
+    //                     atTop = false;
+    //                 if (sel && !selectorType) {
+    //                     throw new Error('climbAndSearchTree only accepts simple className or id selectors for now!');
+    //                 }
+    //                 while (currEl && !foundItem && !atTop) {
+    //                     currEl = currEl.parentNode;
+    //                     console.log(currEl.tagName)
+    //                     atTop = currEl && currEl.tagName && currEl.tagName.toLowerCase() === 'html';
+    //                     elPath.push(currEl);
+    //                     if ((selectorType == 'className' && currEl.className && currEl.className.toLowerCase().includes(sel.toLowerCase().slice(1)))
+    //                         ||
+    //                         (selectorType == 'id' && currEl.id && currEl.id.toLowerCase() == sel.toLowerCase().slice(1))) {
+    //                         console.log('FOUND IT!')
+    //                         //found the item;
+    //                         foundItem = true;
+    //                         break;
+    //                     }
+    //                 }
+    //                 return foundItem || (!sel && elPath) || false;
+    //             }
+    //             vc('THIS SAS IS', element[0].querySelector('.sas-cont'))
+    //             scope.hilite = t => {
+    //                 const termString = scope.subItem && t[scope.subItem] ? t[scope.subItem] : typeof t !== 'string' ? JSON.stringify(t) : t,
+    //                     pos = termString.indexOf(scope.filterSearch);
+    //                 return $sce.trustAsHtml(
+    //                     `${termString.slice(0, pos)}<strong>${scope.filterSearch}</strong>${termString.slice(
+    //                         scope.filterSearch.length + pos
+    //                     )}`
+    //                 );
+    //             };
+    //             element[0].querySelector('.sas-inp').addEventListener(
+    //                 "focus",
+    //                 function (e) {
+    //                     // vc('focus event', e,this)
+    //                     scope.filterSearch = null;
+    //                     scope.hasFocus = true;
+    //                     scope.$digest();
+    //                 },
+    //                 false
+    //             );
+    //             element[0].querySelector('.sas-inp').addEventListener(
+    //                 "blur",
+    //                 function (e) {
+    //                     setTimeout(function () {
+    //                         vc('event', e, 'new Focus', document.elementFromPoint(scope.x, scope.y), climbAndSearchTree(document.elementFromPoint(scope.x, scope.y), '#sas-suggestion-container'))
+    //                         if (!climbAndSearchTree(document.elementFromPoint(scope.x, scope.y), '#sas-suggestion-container')) {
+    //                             // scope.hasFocus = false;
+    //                             scope.hasFocus = false;
+    //                             scope.$digest();
+    //                         } else {
+    //                             console.log('Clicked autosuggest item!')
+    //                         }
+    //                     }, 5);
+    //                 },
+    //                 false
+    //             );
+    //             element[0].addEventListener('mousemove', function simpMouse(e) {
+    //                 // vc('MOUSE POS (client)',e.clientX,e.clientY)
+    //                 scope.x = e.clientX;
+    //                 scope.y = e.clientY;
+    //             })
+    //         }
+    //     };
+    // });
 
 String.prototype.titleCase = function () {
     return this.split(/\s/).map(t => t.slice(0, 1).toUpperCase() + t.slice(1).toLowerCase()).join(' ');
@@ -318,102 +480,6 @@ function postrenderAction($timeout) {
         }, 0);
     }
 }
-app.factory('socketFac', function ($rootScope) {
-  var socket = io.connect();
-  return {
-    on: function (eventName, callback) {
-      socket.on(eventName, function () { 
-        var args = arguments;
-        $rootScope.$apply(function () {
-          callback.apply(socket, args);
-        });
-      });
-    },
-    emit: function (eventName, data, callback) {
-      socket.emit(eventName, data, function () {
-        var args = arguments;
-        $rootScope.$apply(function () {
-          if (callback) {
-            callback.apply(socket, args);
-          }
-        });
-      });
-    }
-  };
-});
-app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q', 'userFact', '$log', function ($rootScope, $state, $stateParams, $transitions, $q, userFact, $log) {
-    $transitions.onBefore({ to: 'app.**' }, function (trans) {
-        let def = $q.defer();
-        $log.debug('TRANS', trans);
-        const usrCheck = trans.injector().get('userFact');
-        usrCheck.getUser().then(function (r) {
-            $log.debug('response from login chck', r);
-            if (r.data) {
-                def.resolve(true);
-            } else {
-                // User isn't authenticated. Redirect to a new Target State
-                def.resolve($state.target('appSimp.login', undefined, { location: true }));
-            }
-        }).catch(e => {
-            $log.debug('TRANSITION BLOCKED! Error was',e);
-            def.resolve($state.target('appSimp.login', undefined, { location: true }));
-        });
-        return def.promise;
-    });
-    $transitions.onFinish({ to: 'app.**' }, function () {
-        document.body.scrollTop = document.documentElement.scrollTop = 0;
-    });
-}]);
-app.factory('userFact', function($http,$log) {
-    return {
-        getUser: function() {
-            return $http.get('/user/usrData').then(function(s) {
-                $log.debug('getUser in fac says:', s);
-                return s;
-            });
-        },
-        newUser:function(o){
-            return $http.post('/user/new',o).then(function(r){
-                return r;
-            })
-        },
-        login:function(o){
-            return $http.put('/user/login',o).then(function(r){
-                return r;
-            })
-        },
-        logout:function(){
-            return $http.get('/user/logout').then(function(r){
-                return r;
-            })
-        },
-        sendMsg:function(o){
-            return $http.put('/user/sendMsg',o).then(function(r){
-                return r;
-            })
-        },
-        forgot:function(o){
-            return $http.put('/user/forgot',o).then(function(r){
-                return r;
-            })
-        },
-        resetKey:function(k){
-            return $http.get('/user/resetUsr?key='+o).then(function(r){
-                return r;
-            })
-        },
-        resetPwd:function(k){
-            return $http.put('/user/resetPwd',o).then(function(r){
-                return r;
-            })
-        },
-        nameCheck:function(n){
-            return $http.get('/user/nameOkay?name='+n).then(function(r){
-                return r;
-            })
-        }
-    };
-});
 app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
     // $log.debug("Dashboard ctrl registered")
     $scope.refUsr = $scope.$parent.refUsr;
@@ -1368,6 +1434,7 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
                 return { value: q.title.toLowerCase(), display: q.title, desc: q.desc };
             });
             $scope.topicObjs = angular.copy($scope.topicObjsAll);
+            $scope.topicObjs.push({ value: 'addSkill', display: '---- + Add a skill ----', desc: 'Add a new skill!' });
         });
     };
     socket.on('topicRef', function (o) {
@@ -1378,15 +1445,92 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
         });
     });
     $scope.regetTopics();
-    $scope.filterMe = (query) => {
-        const lowercaseQuery = query.toLowerCase();
-        // $log.debug('picked topics map', $scope.pickedTopics.map(q => q.value))
-        let tops = $scope.topicObjs.filter(topic => {
-            return (topic.value.indexOf(lowercaseQuery) > -1);
-        });
-        // $log.debug('tops', tops)
-        return tops;
-    };
+    // $scope.filterMe = (query) => {
+    //     const lowercaseQuery = query.toLowerCase();
+    //     // $log.debug('picked topics map', $scope.pickedTopics.map(q => q.value))
+    //     let tops = $scope.topicObjs.filter(topic => {
+    //         return (topic.value.indexOf(lowercaseQuery) > -1);
+    //     });
+    //     // $log.debug('tops', tops)
+    //     return tops;
+    // };
+    // $scope.SASFilter =  (a, f, s) => {
+    //     if (!f) {
+    //         return (a && a.length && a) || [];
+    //     }
+    //     console.log('filtering items',a,'with',f)
+    //     return a.filter(q => {
+    //         // console.log('FILTER ITEM',q)
+    //         const searchableItem = s?q[s]:q;
+    //         return searchableItem.toLowerCase().includes(f.toLowerCase())
+    //     });
+    // }
+    $scope.clearSearch = ()=>{
+        $scope.skillSearch='';
+        $scope.showNSR = false;
+        $scope.$digest();
+    }
+    $scope.showNSR = false;
+    // $scope.nsr = document.querySelector('#no_result')
+    new autoComplete({
+        data: {                              // Data src [Array, Function, Async] | (REQUIRED)
+            src: async () => {
+                const query = $scope.skillSearch;
+                const freshData = await fetch('/topic/topic'),
+                data = await freshData.json();
+                // const data = await $http.get('/topic/topic');
+                // Return Fetched data
+                console.log('data',data);
+                return data;
+            },
+            key: ["title"],
+            cache: false
+        },
+        sort: (a, b) => {                    // Sort rendered results ascendingly | (Optional)
+            return a.match-b.match
+        },
+        placeHolder: "Pick a skill",     // Place Holder text                 | (Optional)
+        selector: "#autoComplete",           // Input field selector              | (Optional)
+        threshold: 0,                        // Min. Chars length to start Engine | (Optional)
+        debounce: 0,                       // Post duration for engine to start | (Optional)
+        searchEngine: "strict",              // Search Engine type/mode           | (Optional)
+        highlight: true,                       // Highlight matching results      | (Optional)
+        // maxResults: 5,                         // Max. number of rendered results | (Optional)
+        resultsList: {                       // Rendered results list object      | (Optional)
+            render: true,
+            container: source => {
+                source.setAttribute("id", "skill-list");
+            },
+            destination: document.querySelector("#autoComplete"),
+            position: "afterend",
+            element: "ul"
+        },
+        resultItem: {                          // Rendered result item            | (Optional)
+            content: (data, source) => {
+                console.log('in resultItem',data,source)
+                source.innerHTML = data.match;
+            },
+            element: "li"
+        },
+        noResults: () => {                     // Action script on noResults      | (Optional)
+            // const result = $scope.nsr;
+            // result.style.display = 'block';
+            // result.setAttribute("tabindex", "1");
+            // result.innerHTML = "No Results";
+            // document.querySelector("#skill-list").appendChild(result);
+            console.log('TRIGGERED NSR CALLBACK',$scope.skillSearch,$scope.showNSR)
+            $scope.showNSR = true;
+            console.log('SHOWNSR NOW',$scope.showNSR)
+            $scope.$apply();
+        },
+        onSelection: feedback => {             // Action script onSelection event | (Optional)
+            //actual item is: feedback.selection.value;
+            $scope.selectedTopic = feedback.selection.value;
+            $scope.$digest();
+            document.querySelector("#autoComplete").value='';
+        }
+    });
+    $scope.pickedItem = null;
     $scope.newTopic = {
         title: null,
         desc: null,
@@ -1398,7 +1542,7 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
         const nfCtrl = document.querySelector('.md-standard-list-container.md-autocomplete-suggestions-container');
         if (!$scope.newTopic.show) {
             nfCtrl.className += ' ng-hide';
-        }else{
+        } else {
             // nfCtrl.className = nfCtrl.className.replace(' ng-hide','')
         }
         $scope.newTopic.show = !$scope.newTopic.show;
@@ -1416,6 +1560,11 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
             $scope.regetTopics();
         }
     });
+    $scope.AddNewSkill = (e)=>{
+        e.preventDefault();
+        console.log('user wants to add skill called ',$scope.skillSearch)
+        $scope.clearSearch();
+    }
     $scope.addNewTopic = () => {
         $http.post('/topic/topic', $scope.newTopic)
             .then(r => {
@@ -1430,17 +1579,18 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
     };
     $scope.pickedTopics = [];
     $scope.addTopicBtn = () => {
-        // $log.debug( $scope.pickedTopics.length,$scope.topicObjs.length)
-        const simpPT = $scope.pickedTopics.map(a => a.value).sort().join(''),
-            simpTO = $scope.topicObjs ? $scope.topicObjs.map(b => b.value).sort().join('') : '';
-        // $log.debug("simple data",simpPT,simpTO)
-        if ($scope.topicToAdd && simpPT != simpTO) {
-            return 'Click to add your selected skill!';
-        } else if (simpPT != simpTO) {
-            return `You need to select a skill before you can add it!`;
-        } else {
-            return `You've added all possible skills. Create a new one if you want!`;
-        }
+        // // $log.debug( $scope.pickedTopics.length,$scope.topicObjs.length)
+        // const simpPT = $scope.pickedTopics.map(a => a.value).sort().join(''),
+        //     simpTO = $scope.topicObjs ? $scope.topicObjs.filter(q => q.value !== 'addSkill').map(b => b.value).sort().join('') : '';
+        // $log.debug("simple data", simpPT, simpTO)
+        // if (!simpTO || !simpTO.length) {
+        //     return `You've added all possible skills! Create a new one if you want`;
+        // } else if ($scope.selectedTopic && !simpPT.includes($scope.selectedTopic.value)) {
+        //     return 'Click to add your selected skill!';
+        // } else {
+        //     return `You need to select a skill before you can add it!`;
+        // }
+        return 'Nothing to see here!'
     };
     $scope.changeTopList = () => {
         // $log.debug('simpTops', tl, 'all', $scope.topicObjsAll)
@@ -1956,5 +2106,101 @@ app.controller('vote-cont',function($scope,$http,$state, $log){
     socket.on('voteRef',function(o){
         $scope.regetVotes();
     });
+});
+app.factory('socketFac', function ($rootScope) {
+  var socket = io.connect();
+  return {
+    on: function (eventName, callback) {
+      socket.on(eventName, function () { 
+        var args = arguments;
+        $rootScope.$apply(function () {
+          callback.apply(socket, args);
+        });
+      });
+    },
+    emit: function (eventName, data, callback) {
+      socket.emit(eventName, data, function () {
+        var args = arguments;
+        $rootScope.$apply(function () {
+          if (callback) {
+            callback.apply(socket, args);
+          }
+        });
+      });
+    }
+  };
+});
+app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q', 'userFact', '$log', function ($rootScope, $state, $stateParams, $transitions, $q, userFact, $log) {
+    $transitions.onBefore({ to: 'app.**' }, function (trans) {
+        let def = $q.defer();
+        $log.debug('TRANS', trans);
+        const usrCheck = trans.injector().get('userFact');
+        usrCheck.getUser().then(function (r) {
+            $log.debug('response from login chck', r);
+            if (r.data) {
+                def.resolve(true);
+            } else {
+                // User isn't authenticated. Redirect to a new Target State
+                def.resolve($state.target('appSimp.login', undefined, { location: true }));
+            }
+        }).catch(e => {
+            $log.debug('TRANSITION BLOCKED! Error was',e);
+            def.resolve($state.target('appSimp.login', undefined, { location: true }));
+        });
+        return def.promise;
+    });
+    $transitions.onFinish({ to: 'app.**' }, function () {
+        document.body.scrollTop = document.documentElement.scrollTop = 0;
+    });
+}]);
+app.factory('userFact', function($http,$log) {
+    return {
+        getUser: function() {
+            return $http.get('/user/usrData').then(function(s) {
+                $log.debug('getUser in fac says:', s);
+                return s;
+            });
+        },
+        newUser:function(o){
+            return $http.post('/user/new',o).then(function(r){
+                return r;
+            })
+        },
+        login:function(o){
+            return $http.put('/user/login',o).then(function(r){
+                return r;
+            })
+        },
+        logout:function(){
+            return $http.get('/user/logout').then(function(r){
+                return r;
+            })
+        },
+        sendMsg:function(o){
+            return $http.put('/user/sendMsg',o).then(function(r){
+                return r;
+            })
+        },
+        forgot:function(o){
+            return $http.put('/user/forgot',o).then(function(r){
+                return r;
+            })
+        },
+        resetKey:function(k){
+            return $http.get('/user/resetUsr?key='+o).then(function(r){
+                return r;
+            })
+        },
+        resetPwd:function(k){
+            return $http.put('/user/resetPwd',o).then(function(r){
+                return r;
+            })
+        },
+        nameCheck:function(n){
+            return $http.get('/user/nameOkay?name='+n).then(function(r){
+                return r;
+            })
+        }
+    };
 });
 }());
