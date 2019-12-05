@@ -1,7 +1,7 @@
 @import "./components/bulma";
 // @import "./components/chat";
 @import "./components/fonts.scss";
-@import "./components/autocomplete.scss";
+// @import "./components/autocomplete.scss";
 html,
 body {
   width: 100%;
@@ -16,9 +16,9 @@ body {
   height: 140vh;
   // color: #fff;
   // background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('https://cdn.pixabay.com/photo/2017/07/03/11/02/timetable-2467247_960_720.jpg');
-  background-attachment:fixed;
-  background-size:cover;
-  background-repeat:no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 .is-fullwidth {
   width: 100% !important;
@@ -59,8 +59,8 @@ $tenNames: two, three, four, five, six, seven, eight, nine;
 }
 .check-list {
   list-style-type: none !important;
-  & li::before{
-    content:'✓ '
+  & li::before {
+    content: "✓ ";
   }
 }
 .prof-pic {
@@ -68,8 +68,8 @@ $tenNames: two, three, four, five, six, seven, eight, nine;
 }
 .notif-spaced {
   margin-top: 0.75rem;
-  background:#333;
-  color:#fff;
+  background: #333;
+  color: #fff;
 }
 .dave-tabs {
   border-bottom: none !important;
@@ -128,57 +128,75 @@ $tenNames: two, three, four, five, six, seven, eight, nine;
   color: #fff;
   text-align: center;
   top: 0;
-  left:0;
+  left: 0;
   line-height: 12;
-  z-index:99;
+  z-index: 99;
 }
-.loady-spin{
-  display:inline-block;
-  height:40px;
-  width:40px;
+.loady-spin {
+  display: inline-block;
+  height: 40px;
+  width: 40px;
   border-radius: 50%;
-  border-top:2px solid #ddd;
-  border-left:2px solid #ddd;
+  border-top: 2px solid #ddd;
+  border-left: 2px solid #ddd;
   animation: spin 1s linear infinite;
-  transform-origin:50% 50%;
+  transform-origin: 50% 50%;
 }
-@keyframes spin{
-  from{
-    transform:rotateZ(0deg);
+@keyframes spin {
+  from {
+    transform: rotateZ(0deg);
   }
-  to{
-    transform:rotateZ(360deg)
+  to {
+    transform: rotateZ(360deg);
   }
 }
-.no-poke{
-  cursor:default!important;
+.no-poke {
+  cursor: default !important;
 }
 @media screen and (max-width: 768px) {
-  .is-fullwidth-btn-mobile{
-    width:100%!important;
-    margin-bottom:2px;
+  .is-fullwidth-btn-mobile {
+    width: 100% !important;
+    margin-bottom: 2px;
   }
-  .is-half-btn-mobile{
-    width:48%!important;
-    margin-bottom:2px;
+  .is-half-btn-mobile {
+    width: 48% !important;
+    margin-bottom: 2px;
   }
 }
-.is-somewhat-dangerous{
-  background:#942138;
+.is-somewhat-dangerous {
+  background: #942138;
   border-color: transparent;
-  color:#fff;
-  &:hover{
-    color:#fff;
+  color: #fff;
+  &:hover {
+    color: #fff;
   }
 }
-.md-scroll-mask{
-  display:none;
+.md-scroll-mask {
+  display: none;
 }
-input[type=email]:invalid{
-  background-color:#fcc;
+input[type="email"]:invalid {
+  background-color: #fcc;
 }
-select{
-  option:last-child{
-   color:#555;
+select {
+  option:last-child {
+    color: #555;
+  }
+}
+.auto-list {
+  & div {
+    padding: 3px;
+    padding-left:7px;
+    cursor: pointer;
+    background: #fff;
+    border-left: 1px solid #333;
+    border-right: 1px solid #333;
+    border-bottom: 1px solid #333;
+    &:last-child {
+      border-bottom-left-radius: 5px;
+      border-bottom-right-radius: 5px;
+    }
+    &:hover{
+      background: #eee;
+    }
   }
 }

@@ -1,4 +1,4 @@
-app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
+app.controller('dash-cont', ($scope, $http, $q, userFact, $log,$sce) => {
     // $log.debug("Dashboard ctrl registered")
     $scope.refUsr = $scope.$parent.refUsr;
 
@@ -6,9 +6,9 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
     $scope.updateTopics = () => {
         // $log.debug('Would updoot topics here! Val we passed was',e)
         $http.put('/user/interests', $scope.$parent.user.interests)
-        .then(r=>{
-            // $scope.$parent.$refUsr();
-        });
+            .then(r => {
+                // $scope.$parent.$refUsr();
+            });
     };
     $scope.removeSkill = skt => {
         // $log.debug('USER WISHES TO REMOVE',skt)
@@ -74,7 +74,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
         show: false
     };
     $scope.refTopObjs = (cb) => {
-        $http.get('/topic/topic',{headers:{'Cache-Control': 'no-cache'}}).then(r => {
+        $http.get('/topic/topic', { headers: { 'Cache-Control': 'no-cache' } }).then(r => {
             $scope.topicObjsAll = r.data.map(q => {
                 return { value: q.title.toLowerCase(), display: q.title, desc: q.desc };
             });
@@ -123,17 +123,62 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
         canTeach: false,
     };
     $scope.addIntDial = (t) => {
-        $scope.addInt = {
-            title: t || null,
-            show: true,
-            lvl: 0,
-            newDesc: null,
-            canTeach: false,
-        };
+        $scope.refTopObjs(function () {
+            $scope.addInt = {
+                title: t || null,
+                show: true,
+                lvl: 0,
+                newDesc: null,
+                canTeach: false,
+            };
+            
+        })
     };
-    socket.on('topicRef',function(o){
-        bulmabox.confirm('Topic Refresh',`One or more topics have been update. Would you like to refresh the page to make these new topics available?`,r=>{
-            if(!!r){
+    $scope.deFocusSkillSearch = ()=>{
+        setTimeout(function(){
+            const el= document.getElementFromPoint($scope.mouse.x,$scope.mouse.y);
+            console.log('new focus',el)
+        },1)
+    }
+    $scope.mouse ={x:0,y:0}
+    document.querySelector('#skill-search').addEventListener('mousemove',(e)=>{
+        $scope.mouse.x = e.clientX;
+        $scope.mouse.y = e.clientY;
+    })
+    document.querySelector('#skill-search input').addEventListener('keyup',(e)=>{
+        // console.log(e)
+        if(e.key=='Escape'){
+            // console.log('ESCAPE PRESSED')
+            $scope.clearSkillSearchBox();
+            $scope.$apply();
+        }
+    })
+    $scope.skillSearchFilter = ()=>{
+        if(!$scope.skillSearch){
+            return [];
+        }
+        return $scope.topicObjs.filter(q=>q.value.includes($scope.skillSearch.toLowerCase())).map(q=>{
+            q.displayHL = $sce.trustAsHtml(q.display.replace(new RegExp($scope.skillSearch,'gi'),function(a,b,c){
+                // console.log('a',a,'b',b,'c',c)
+                return '<strong>'+a+'</strong>';
+            }));
+            return q;
+        })
+    }
+    $scope.clearSkillSearchBox = ()=>{
+        console.log('clearing Skillbox')
+        $scope.skillSearch = null;
+    }
+    $scope.pickSkill = (s,e)=>{
+        e.stopPropagation();
+        console.log("user wants to pick skill",s)
+        $scope.skillSearch = null;
+        $scope.selectedTopic = s;
+        $scope.$digest();
+    }
+    socket.on('topicRef', function (o) {
+        bulmabox.confirm('Topic Refresh', `One or more topics have been update. Would you like to refresh the page to make these new topics available?`, r => {
+            if (!!r) {
                 return $scope.refTopObjs();
             }
         });
@@ -173,7 +218,8 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
                 });
         }
     };
-    //add/edit proj
+
+    //project stuff
     $scope.modProj = {
         show: false,
         proj: null,
@@ -211,23 +257,24 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             });
     };
     $scope.projView = {
-        proj:null,
-        show:false
+        proj: null,
+        show: false
     };
-    $scope.viewEditProj = p =>{
-        $scope.projView.proj=p;
-        $scope.show=true;
+    $scope.viewEditProj = p => {
+        $scope.projView.proj = p;
+        $scope.show = true;
     };
     $scope.deleteProj = t => {
         bulmabox.confirm('Remove Project', `Are you sure you wish to remove the project ${t}?`, r => {
             if (!!r) {
-                $http.delete('/user/projs', {data:{ name: t },headers:{'Content-Type': 'application/json;charset=utf-8'}})
+                $http.delete('/user/projs', { data: { name: t }, headers: { 'Content-Type': 'application/json;charset=utf-8' } })
                     .then(r => {
                         // $scope.$parent.$refUsr();
                     });
             }
         });
     };
+
     //curr lesson stuffs
     $scope.countDups = countDups;
     $scope.messageTeacher = l => {
@@ -265,8 +312,6 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             });
         });
     };
-
-
     $scope.getLessons = () => {
         $http.get('/user/activeLessons')
             .then(r => {

@@ -22,60 +22,56 @@
   transition: all 0.4s ease;
   -webkit-transition: all -webkit-transform 0.4s ease;
   text-overflow: ellipsis;
-}
+  &::placeholder {
+    color: rgba(255, 122, 122, 0);
+    transition: all 0.3s ease;
+  }
 
-#autoComplete::placeholder {
-  color: rgba(255, 122, 122, 0);
-  transition: all 0.3s ease;
-}
+  &::selection {
+    color: transparent;
+  }
 
-#autoComplete:hover::placeholder {
-  color: rgba(255, 122, 122, 0.3);
-  transition: all 0.3s ease;
-  -webkit-transition: all -webkit-transform 0.3s ease;
-}
+  &:hover {
+    padding: 0 2rem 0 3.5rem;
+    color: rgba(255, 122, 122, 1);
+    height: 3rem;
+    width: 16.5rem;
+    background-image: url(./images/magnifier.svg);
+    background-size: 1.7rem;
+    background-position: left 1.05rem top 0.7rem;
+    transition: all 0.3s ease;
+    -webkit-transition: all -webkit-transform 0.3s ease;
+    &::placeholder {
+      color: rgba(255, 122, 122, 0.3);
+      transition: all 0.3s ease;
+      -webkit-transition: all -webkit-transform 0.3s ease;
+    }
+  }
 
-#autoComplete:focus::placeholder {
-  padding: 0.1rem 0.6rem;
-  font-size: 1rem;
-  color: rgba(255, 122, 122, 0.3);
-  transition: all 0.3s ease;
-  -webkit-transition: all -webkit-transform 0.3s ease;
-}
+  &:focus {
+    padding: 0 2rem 0 3.5rem;
+    color: rgba(255, 122, 122, 1);
+    height: 3rem;
+    width: 16.5rem;
+    border: 0.05rem solid rgb(255, 122, 122);
+    background-image: url(./images/magnifier.svg);
+    background-size: 1.5rem;
+    background-position: left 1.05rem top 0.8rem;
+    box-shadow: rgba(255, 122, 122, 0.1) 0px 0px 20px 5px;
 
-#autoComplete::selection {
-  color: transparent;
+    &::placeholder {
+      padding: 0.1rem 0.6rem;
+      font-size: 1rem;
+      color: rgba(255, 122, 122, 0.3);
+      transition: all 0.3s ease;
+      -webkit-transition: all -webkit-transform 0.3s ease;
+    }
+    &::selection {
+      color: #fff;
+      background-color: rgba(255, 122, 122, 1);
+    }
+  }
 }
-
-#autoComplete:focus::selection {
-  color: #fff;
-  background-color: rgba(255, 122, 122, 1);
-}
-
-#autoComplete:hover {
-  padding: 0 2rem 0 3.5rem;
-  color: rgba(255, 122, 122, 1);
-  height: 3rem;
-  width: 16.5rem;
-  background-image: url(./images/magnifier.svg);
-  background-size: 1.7rem;
-  background-position: left 1.05rem top 0.7rem;
-  transition: all 0.3s ease;
-  -webkit-transition: all -webkit-transform 0.3s ease;
-}
-
-#autoComplete:focus {
-  padding: 0 2rem 0 3.5rem;
-  color: rgba(255, 122, 122, 1);
-  height: 3rem;
-  width: 16.5rem;
-  border: 0.05rem solid rgb(255, 122, 122);
-  background-image: url(./images/magnifier.svg);
-  background-size: 1.5rem;
-  background-position: left 1.05rem top 0.8rem;
-  box-shadow: rgba(255, 122, 122, 0.1) 0px 0px 20px 5px;
-}
-
 #no_result {
   // margin: 0.15rem auto;
   // display:none;
@@ -104,7 +100,6 @@
   border: 0.05rem solid #e3e3e3;
 }
 
-
 #autoComplete_list {
   position: fixed;
   z-index: 1000;
@@ -130,46 +125,46 @@
   color: rgb(123, 123, 123);
   transition: all 0.1s ease-in-out;
   background-color: #fff;
-}
 
-.autoComplete_result::selection {
-  color: rgba(#ffffff, 0);
-  background-color: rgba(#ffffff, 0);
-}
+  &::selection {
+    color: rgba(#ffffff, 0);
+    background-color: rgba(#ffffff, 0);
+  }
 
-.autoComplete_result:last-child {
-  border-radius: 0 0 1rem 1rem;
-}
+  &:last-child {
+    border-radius: 0 0 1rem 1rem;
+  }
 
-.autoComplete_result:hover {
-  cursor: pointer;
-  background-color: rgba(255, 248, 248, 0.9);
-  border-left: 2px solid rgba(255, 122, 122, 1);
-  border-right: 2px solid rgba(255, 122, 122, 1);
-  border-top: 2px solid transparent;
-  border-bottom: 2px solid transparent;
-}
+  &:hover {
+    cursor: pointer;
+    background-color: rgba(255, 248, 248, 0.9);
+    border-left: 2px solid rgba(255, 122, 122, 1);
+    border-right: 2px solid rgba(255, 122, 122, 1);
+    border-top: 2px solid transparent;
+    border-bottom: 2px solid transparent;
+  }
 
-.autoComplete_result:focus {
-  outline: none;
-  background-color: rgba(255, 248, 248, 0.9);
-  border-left: 2px solid rgba(255, 122, 122, 1);
-  border-right: 2px solid rgba(255, 122, 122, 1);
-  border-top: 2px solid transparent;
-  border-bottom: 2px solid transparent;
+  &:focus {
+    outline: none;
+    background-color: rgba(255, 248, 248, 0.9);
+    border-left: 2px solid rgba(255, 122, 122, 1);
+    border-right: 2px solid rgba(255, 122, 122, 1);
+    border-top: 2px solid transparent;
+    border-bottom: 2px solid transparent;
+  }
 }
 
 .autoComplete_highlighted {
   opacity: 1;
   color: rgba(255, 122, 122, 1);
   font-weight: bold;
+  
+  &::selection {
+    color: rgba(#ffffff, 0);
+    background-color: rgba(#ffffff, 0);
+  }
 }
-
-.autoComplete_highlighted::selection {
-  color: rgba(#ffffff, 0);
-  background-color: rgba(#ffffff, 0);
-}
-
+  
 .autoComplete_selected {
   cursor: pointer;
   background-color: rgba(255, 248, 248, 0.9);
@@ -206,14 +201,13 @@
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
   #autoComplete {
     border-width: 1px;
-  }
-
-  #autoComplete:hover {
-    border-width: 1px;
-  }
-
-  #autoComplete:focus {
-    border-width: 1px;
+    &:hover {
+      border-width: 1px;
+    }
+    
+    &:focus {
+      border-width: 1px;
+    }
   }
 }
 
@@ -223,14 +217,14 @@
     background-size: 1.2rem;
     background-origin: border-box;
     background-position: center;
-  }
-
-  #autoComplete:hover {
-    border-width: 1px;
-  }
-
-  #autoComplete:focus {
-    border-width: 1px;
-    background-position: left 1.1rem top 0.8rem;
+    
+    &:hover {
+      border-width: 1px;
+    }
+    
+    &:focus {
+      border-width: 1px;
+      background-position: left 1.1rem top 0.8rem;
+    }
   }
 }

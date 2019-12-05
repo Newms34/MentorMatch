@@ -259,168 +259,7 @@ app
             }
         };
     }]);
-    // .directive("simpleAutoSuggest", function ($sce) {
-    //     return {
-    //         restrict: "E",
-    //         transclude: true,
-    //         replace:true,
-    //         scope: {
-    //             items: '=simpleAutoItems',
-    //             filterFn: '=simpleAutoFilter',
-    //             output: '=simpleAutoOutput',
-    //             adtnlClasses: '@simpleAutoClasses',
-    //             adtnlStyles: '@simpleAutoStyles',
-    //             nfText: '@simpleAutoNotFoundText',
-    //             subItem: '@simpleAutoSubItem',
-    //             verbose: '@simpleAutoVerbose'
-    //         },
-    //         template: `<div class='sas-cont {{adtnlClasses}}' style='{{adtnlStyles}}'>
-    //         <input class='input sas-inp' type='text' ng-model='filterSearch' ng-keyup='doFilter()' />
-    //         <div style='width:{{inpBoxDims.width}}px; min-height:100px;' ng-show='hasFocus && ((filteredItems && filteredItems.length)||showNFBox)' id='sas-suggestion-container'>
-    //             <div ng-repeat='si in filteredItems' class='simple-auto-suggest-suggestion' ng-click='pickItem(si,$event);$event.stopPropagation();' ng-bind-html='hilite(si,subItem)'></div>
-    //             <div ng-show='showNFBox'>
-    //                 <ng-transclude>
-    //                 </ng-transclude>
-    //             </div>
-    //         </div>
-    //     </div>`,
-    //         link: function (scope, element, attributes) {
-    //             const vc = function () {
-    //                 if (!scope.verbose) {
-    //                     return false;
-    //                 }
-    //                 return console.log(...arguments);
-    //             };
-    //             vc("ATTRIBUTES", attributes, "ELEMENT", element, 'SCOPE', scope, 'ELEMENT HTML', element.html());
-    //             scope.hasFocus = true;
-    //             const inpBox = element[0].querySelector(".sas-inp");
-    //             setTimeout(function () {
-    //                 scope.inpBoxDims = element[0]
-    //                     .querySelector(".sas-inp")
-    //                     .getBoundingClientRect();
-    //             }, 1);
-    //             scope.notFoundEvald = () => {
-    //                 return $sce.trustAsHtml(scope.nfText)
-    //             }
-    //             scope.showNFBox = false;
-    //             scope.doFilter = () => {
-    //                 console.log('SEARCHING FOR',scope.filterSearch, scope.filterFn,scope.filterOkay,scope.items)
-    //                 const filterOkay =
-    //                     scope.filterFn &&
-    //                     typeof scope.filterFn === "function" &&
-    //                     scope.items &&
-    //                     (scope.items instanceof Array);
-    //                 scope.filteredItems =
-    //                     (scope.filterSearch &&
-    //                         scope.filterSearch.length &&
-    //                         filterOkay &&
-    //                         scope.filterFn(scope.items, scope.filterSearch,scope.subItem||null)) ||
-    //                     null;
-    //                 vc(
-    //                     "FILTERED STOOF", scope.filteredItems,
-    //                     "SEARCH TERM",
-    //                     scope.filterSearch,
-    //                     'ALL ITEMS',
-    //                     scope.items,
-    //                     'Filter okay?', filterOkay
-    //                 );
-    //                 scope.showNFBox =
-    //                     !!scope.filterSearch &&
-    //                     (!scope.filteredItems || !scope.filteredItems.length);
-    //                 // scope.$digest();
-    //             }
-    //             scope.pickItem = (it, me) => {
-    //                 if (scope.output && scope.output !== 'null') {
-    //                     //three different possibilities. First, if we're given a function, run dat function. Second, if it's an array, push into array. Thirdly, if neither, just replace
-    //                     if (typeof scope.output === 'function') {
-    //                         vc('output is fn!')
-    //                         scope.output(it);
-    //                     } else if (scope.output instanceof Array) {
-    //                         vc('output is array')
-    //                         scope.output.push(it);
-    //                     } else {
-    //                         scope.output = it;
-    //                     }
-    //                     vc('ITEM', it, me)
-    //                     scope.filterSearch = it && me && me.srcElement && me.srcElement.innerText;
-    //                 } else {
-    //                     scope.filterSearch = it;
-    //                 }
-    //                 if(scope.subItem && scope.filterSearch[scope.subItem]){
-    //                     scope.filterSearch = it[scope.subItem]
-    //                 }
-    //                 scope.filteredItems = [];
-    //                 vc('PARENT NOW', scope.$parent, scope.output)
-    //             };
-    //             const climbAndSearchTree = (el, sel) => {
-    //                 currEl = el,
-    //                     elPath = [el],
-    //                     selectorType = sel && sel[0] == '.' ? 'className' : sel && sel[0] == '#' ? 'id' : null;
-    //                 let foundItem = false,
-    //                     atTop = false;
-    //                 if (sel && !selectorType) {
-    //                     throw new Error('climbAndSearchTree only accepts simple className or id selectors for now!');
-    //                 }
-    //                 while (currEl && !foundItem && !atTop) {
-    //                     currEl = currEl.parentNode;
-    //                     console.log(currEl.tagName)
-    //                     atTop = currEl && currEl.tagName && currEl.tagName.toLowerCase() === 'html';
-    //                     elPath.push(currEl);
-    //                     if ((selectorType == 'className' && currEl.className && currEl.className.toLowerCase().includes(sel.toLowerCase().slice(1)))
-    //                         ||
-    //                         (selectorType == 'id' && currEl.id && currEl.id.toLowerCase() == sel.toLowerCase().slice(1))) {
-    //                         console.log('FOUND IT!')
-    //                         //found the item;
-    //                         foundItem = true;
-    //                         break;
-    //                     }
-    //                 }
-    //                 return foundItem || (!sel && elPath) || false;
-    //             }
-    //             vc('THIS SAS IS', element[0].querySelector('.sas-cont'))
-    //             scope.hilite = t => {
-    //                 const termString = scope.subItem && t[scope.subItem] ? t[scope.subItem] : typeof t !== 'string' ? JSON.stringify(t) : t,
-    //                     pos = termString.indexOf(scope.filterSearch);
-    //                 return $sce.trustAsHtml(
-    //                     `${termString.slice(0, pos)}<strong>${scope.filterSearch}</strong>${termString.slice(
-    //                         scope.filterSearch.length + pos
-    //                     )}`
-    //                 );
-    //             };
-    //             element[0].querySelector('.sas-inp').addEventListener(
-    //                 "focus",
-    //                 function (e) {
-    //                     // vc('focus event', e,this)
-    //                     scope.filterSearch = null;
-    //                     scope.hasFocus = true;
-    //                     scope.$digest();
-    //                 },
-    //                 false
-    //             );
-    //             element[0].querySelector('.sas-inp').addEventListener(
-    //                 "blur",
-    //                 function (e) {
-    //                     setTimeout(function () {
-    //                         vc('event', e, 'new Focus', document.elementFromPoint(scope.x, scope.y), climbAndSearchTree(document.elementFromPoint(scope.x, scope.y), '#sas-suggestion-container'))
-    //                         if (!climbAndSearchTree(document.elementFromPoint(scope.x, scope.y), '#sas-suggestion-container')) {
-    //                             // scope.hasFocus = false;
-    //                             scope.hasFocus = false;
-    //                             scope.$digest();
-    //                         } else {
-    //                             console.log('Clicked autosuggest item!')
-    //                         }
-    //                     }, 5);
-    //                 },
-    //                 false
-    //             );
-    //             element[0].addEventListener('mousemove', function simpMouse(e) {
-    //                 // vc('MOUSE POS (client)',e.clientX,e.clientY)
-    //                 scope.x = e.clientX;
-    //                 scope.y = e.clientY;
-    //             })
-    //         }
-    //     };
-    // });
+    
 
 String.prototype.titleCase = function () {
     return this.split(/\s/).map(t => t.slice(0, 1).toUpperCase() + t.slice(1).toLowerCase()).join(' ');
@@ -480,7 +319,7 @@ function postrenderAction($timeout) {
         }, 0);
     }
 }
-app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
+app.controller('dash-cont', ($scope, $http, $q, userFact, $log,$sce) => {
     // $log.debug("Dashboard ctrl registered")
     $scope.refUsr = $scope.$parent.refUsr;
 
@@ -488,9 +327,9 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
     $scope.updateTopics = () => {
         // $log.debug('Would updoot topics here! Val we passed was',e)
         $http.put('/user/interests', $scope.$parent.user.interests)
-        .then(r=>{
-            // $scope.$parent.$refUsr();
-        });
+            .then(r => {
+                // $scope.$parent.$refUsr();
+            });
     };
     $scope.removeSkill = skt => {
         // $log.debug('USER WISHES TO REMOVE',skt)
@@ -556,7 +395,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
         show: false
     };
     $scope.refTopObjs = (cb) => {
-        $http.get('/topic/topic',{headers:{'Cache-Control': 'no-cache'}}).then(r => {
+        $http.get('/topic/topic', { headers: { 'Cache-Control': 'no-cache' } }).then(r => {
             $scope.topicObjsAll = r.data.map(q => {
                 return { value: q.title.toLowerCase(), display: q.title, desc: q.desc };
             });
@@ -605,17 +444,62 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
         canTeach: false,
     };
     $scope.addIntDial = (t) => {
-        $scope.addInt = {
-            title: t || null,
-            show: true,
-            lvl: 0,
-            newDesc: null,
-            canTeach: false,
-        };
+        $scope.refTopObjs(function () {
+            $scope.addInt = {
+                title: t || null,
+                show: true,
+                lvl: 0,
+                newDesc: null,
+                canTeach: false,
+            };
+            
+        })
     };
-    socket.on('topicRef',function(o){
-        bulmabox.confirm('Topic Refresh',`One or more topics have been update. Would you like to refresh the page to make these new topics available?`,r=>{
-            if(!!r){
+    $scope.deFocusSkillSearch = ()=>{
+        setTimeout(function(){
+            const el= document.getElementFromPoint($scope.mouse.x,$scope.mouse.y);
+            console.log('new focus',el)
+        },1)
+    }
+    $scope.mouse ={x:0,y:0}
+    document.querySelector('#skill-search').addEventListener('mousemove',(e)=>{
+        $scope.mouse.x = e.clientX;
+        $scope.mouse.y = e.clientY;
+    })
+    document.querySelector('#skill-search input').addEventListener('keyup',(e)=>{
+        // console.log(e)
+        if(e.key=='Escape'){
+            // console.log('ESCAPE PRESSED')
+            $scope.clearSkillSearchBox();
+            $scope.$apply();
+        }
+    })
+    $scope.skillSearchFilter = ()=>{
+        if(!$scope.skillSearch){
+            return [];
+        }
+        return $scope.topicObjs.filter(q=>q.value.includes($scope.skillSearch.toLowerCase())).map(q=>{
+            q.displayHL = $sce.trustAsHtml(q.display.replace(new RegExp($scope.skillSearch,'gi'),function(a,b,c){
+                // console.log('a',a,'b',b,'c',c)
+                return '<strong>'+a+'</strong>';
+            }));
+            return q;
+        })
+    }
+    $scope.clearSkillSearchBox = ()=>{
+        console.log('clearing Skillbox')
+        $scope.skillSearch = null;
+    }
+    $scope.pickSkill = (s,e)=>{
+        e.stopPropagation();
+        console.log("user wants to pick skill",s)
+        $scope.skillSearch = null;
+        $scope.selectedTopic = s;
+        $scope.$digest();
+    }
+    socket.on('topicRef', function (o) {
+        bulmabox.confirm('Topic Refresh', `One or more topics have been update. Would you like to refresh the page to make these new topics available?`, r => {
+            if (!!r) {
                 return $scope.refTopObjs();
             }
         });
@@ -655,7 +539,8 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
                 });
         }
     };
-    //add/edit proj
+
+    //project stuff
     $scope.modProj = {
         show: false,
         proj: null,
@@ -693,23 +578,24 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             });
     };
     $scope.projView = {
-        proj:null,
-        show:false
+        proj: null,
+        show: false
     };
-    $scope.viewEditProj = p =>{
-        $scope.projView.proj=p;
-        $scope.show=true;
+    $scope.viewEditProj = p => {
+        $scope.projView.proj = p;
+        $scope.show = true;
     };
     $scope.deleteProj = t => {
         bulmabox.confirm('Remove Project', `Are you sure you wish to remove the project ${t}?`, r => {
             if (!!r) {
-                $http.delete('/user/projs', {data:{ name: t },headers:{'Content-Type': 'application/json;charset=utf-8'}})
+                $http.delete('/user/projs', { data: { name: t }, headers: { 'Content-Type': 'application/json;charset=utf-8' } })
                     .then(r => {
                         // $scope.$parent.$refUsr();
                     });
             }
         });
     };
+
     //curr lesson stuffs
     $scope.countDups = countDups;
     $scope.messageTeacher = l => {
@@ -747,8 +633,6 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log) => {
             });
         });
     };
-
-
     $scope.getLessons = () => {
         $http.get('/user/activeLessons')
             .then(r => {

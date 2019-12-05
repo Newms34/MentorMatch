@@ -179,29 +179,29 @@
                 <div class="panel-heading is-link"> Add Skill <button class="button is-danger is-small is-pulled-right" ng-click='addInt.show=false'>x</button> </div>
                 <div class="panel-block has-background-white blocky content">
                     <div class="columns is-fullwidth is-multiline">
-                        <div class="column is-one-fifth notification notif-spaced"> Skill Name: </div>
-                        <div class="column is-four-fifths">
-                            <md-content class='md-padding'>
-                                <form>
-                                    <div id="addTopicLabel" class='is-fullwidth has-text-left'>Add a skill</div>
-                                    <md-autocomplete md-selected-item="selectedTopic" md-search-text="topicToAdd" md-items="topic in filterMe(topicToAdd)" md-no-cache='true' md-item-text="topic.display" md-min-length="0" placeholder="Ex. JavaScript" input-aria-labelledby="addTopicLabel" md-mode='standard'>
-                                        <md-item-template> <span md-highlight-text="topicToAdd" md-highlight-flags="^i">{{topic.display}}</span> </md-item-template>
-                                    </md-autocomplete>
-                                </form>
-                            </md-content>
+                        <div class="column is-one-fifth notification notif-spaced"> Pick/Create Skill: </div>
+                        <div class="column is-four-fifths" id='skill-search' ng-click='clearSkillSearchBox()'>
+                            <input type="text" class="input" ng-model='skillSearch'> 
+                            <div class="auto-list" ng-blur='deFocusSkillSearch()'>
+                                <div ng-repeat='sk in skillSearchFilter()' ng-click='pickSkill(sk,$event);' ng-bind-html='sk.displayHL'></div>
+                                <div ng-if='skillSearch.length && skillSearchFilter().length===0' ng-click='$event.stopPropagation()'>
+                                    No matching skills found. Create your own?
+                                </div>
+                            </div>
                         </div>
                         <div class="column is-full">
                             <hr>
                         </div>
-                        <div class="column is-one-fifth notification notif-spaced"> Skill Description: </div>
-                        <div class="column is-four-fifths" ng-show='hazTopic(topicToAdd)'>
+                        <div class="column is-one-fifth notification notif-spaced"> Skill Information: </div>
+                        <div class="column is-four-fifths" ng-show='hazTopic(topicToAdd)||selectedTopic'>
+                            <div class="is-full"> Title: {{selectedTopic.display}} </div><br>
                             <div class="is-full"> Description: {{selectedTopic.desc}} </div>
                         </div>
                         <div class="column is-four-fifths" ng-show='!!topicToAdd && !hazTopic(topicToAdd)'>
                             <div class="is-full notification is-warning is-italic"><i class="fa fa-exclamation-triangle is-size-4"></i>&nbsp;You're adding a skill we don't have in our system.<br> Please help us out and give it a cool (useful!) description!</div> <textarea ng-model='addInt.newDesc' class='textarea'></textarea>
                         </div>
                         <div class="column is-four-fifths" ng-show='!topicToAdd && !hazTopic(topicToAdd)'>
-                            <div class="is-full is-italic"> (Please enter a skill title first!) </div>
+                            <div class="is-full is-italic"> (Please pick a skill title first!) </div>
                         </div>
                         <div class="column is-full">
                             <hr>
