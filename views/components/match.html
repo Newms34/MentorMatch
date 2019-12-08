@@ -24,13 +24,9 @@
                     <div class="column is-full">
                         <div class="message">
                             <div class="message-header" id='at-head'>Available Skills</div>
-                            <div class="message-body " id='avail-skills'>
-                                <!-- <p class="select is-half">
-                                    <select placeholder='potato' ng-options='sk as sk.display for sk in topicObjs' ng-model='selectedTopic'>
-                                        <option value="" disabled selected>(pick a topic)</option>
-                                    </select>
-                                </p> -->
-                                <input type="text" placeholder='Please wait (skills loading!)' class="input" id="autoComplete" ng-model='skillSearch' ng-blur='showNSR=false;'></input>
+                            <div class="message-body is-fullwidth columns" id='avail-skills'>
+                               
+                                <!-- <input type="text" placeholder='Please wait (skills loading!)' class="input" id="autoComplete" ng-model='skillSearch' ng-blur='showNSR=false;'></input>
 
                                 <div class="is-fullwidth has-text-left" ng-if='selectedTopic'>
                                     <strong>Skill:</strong>{{selectedTopic.title||''}} <br>
@@ -40,10 +36,24 @@
                             <div id="no_result" ng-click='clearSearch()' ng-show='showNSR'> No results!
                                 <button class="button is-small is-info is-pulled-right" ng-click='AddNewSkill($event)'>
                                     <i class="fa fa-plus"></i> &nbsp;Create New Skill</button>
+                            </div> -->
+                            <!-- INTEREST LIST: {{$parent.user.interests}} -->
+                            <div class="column is-one-fifth notification notif-spaced">
+                                Add Skills
                             </div>
-                            <hr>
-                            <button ng-show='selectedTopic.value!="addSkill"' class="button is-wide-btn is-link" ng-disabled='addTopicBtn()!="Click to add your selected skill!"' title='{{addTopicBtn()}}' ng-click='addSearchTopic(selectedTopic)'><i class="fa fa-pencil"></i>&nbsp; Add Skill</button>
-                            <!-- <button ng-show='selectedTopic.value=="addSkill"' class="button is-wide-btn is-info" title='Create a new skill'><i class="fa fa-plus"></i>&nbsp; Create New Skill</button> -->
+                            <div class="column is-four-fifths">
+                                <div class="is-fullwidth is-italic">
+                                    Pick some skills from your profile to search for mentors that can teach those skills. <br>Wanna add more skills? Head on over to the <a href="./">Profile</a> page to add more skills!
+                                </div>
+                                <hr>
+                                <strong>Desired Topic:</strong> 
+                                 <p class="select is-full">
+                                   <select placeholder='...loading' id='skill-box' ng-options='sk as sk.title for sk in $parent.user.interests' ng-model='selectedTopic'>
+                                        <option value="" selected disabled>(Pick a topic)</option>
+                                    </select>
+                                </p><br><br>
+                                <button ng-disabled='!selectedTopic' class="button is-wide-btn is-link" ng-click='addSearchTopic(selectedTopic)'><i class="fa fa-pencil"></i>&nbsp; Add Skill</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -53,12 +63,12 @@
                         <div class="message-body">
                             <div class="is-fullwidth is-italic" ng-show='!pickedTopics.length'>No skills selected!
                                 Pick
-                                some skills above or create your own!</div>
+                                some skills above!</div>
                             <div class="is-fullwidth columns is-multiline" ng-show='pickedTopics.length'>
 
                                 <div class="column is-one-fifth-desktop is-full-mobile notification is-dark btn-pad-right" ng-repeat='t in pickedTopics' title='{{t.desc}}'>
                                     <div class="is-fullwidth">
-                                        <strong>Skill</strong>:&nbsp;{{t.display}}
+                                        <strong>Skill</strong>:&nbsp;{{t.title}}
                                     </div>
                                     <div class="is-fullwidth">&nbsp;</div>
                                     <div class="is-fullwidth">

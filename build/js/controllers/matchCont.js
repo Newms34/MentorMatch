@@ -61,8 +61,9 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
     // };
     $scope.changeTopList = () => {
         // $log.debug('simpTops', tl, 'all', $scope.topicObjsAll)
-        const tl = $scope.pickedTopics.map(s => s.value.toLowerCase());
+        const tl = $scope.pickedTopics.map(s => s.title.toLowerCase());
         //remove this from our list of available topics to add
+        $log.debug('TOPICS',$scope.pickedTopics,tl)
         $scope.topicObjs = $scope.topicObjsAll.filter(tf => !tl.includes(tf.value));
         $http.post('/user/topicSearch', $scope.pickedTopics).then(r => {
             $scope.availTeachs = r.data;
@@ -72,7 +73,7 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
     $scope.addSearchTopic = (q) => {
         //add a topic to search by!
         $log.debug('topic', q);
-        if ($scope.pickedTopics.map(a => a.value.toLowerCase()).includes(q.value)) {
+        if ($scope.pickedTopics.map(a => a.title.toLowerCase()).includes(q.title)) {
             // $log.debug('Duplicate!',q)
             $scope.topicToAdd = '';
             return bulmabox.alert(`Already Added`, `You've already added this topic!`);
@@ -83,10 +84,13 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
         $scope.changeTopList();
         // $scope.filterMe('')
         // $scope.topicObjs = $scope.topicObjsAll.filter(q => !.includes(q));
-        $scope.topicToAdd = '';
-    };
+        console.log('OPTS NOW',document.querySelector('#skill-box').options)
+        Array.from(document.querySelector('#skill-box').options).forEach((q,i)=>{q.selected==!i})
+        // $scope.selectedTopic ='';
+        document.querySelector('#skill-box').selectedIndex=0;
+    };  
     $scope.removeTopic = t => {
-        $scope.pickedTopics = $scope.pickedTopics.filter(q => q.value != t.value);
+        $scope.pickedTopics = $scope.pickedTopics.filter(q => q.title != t.title);
         $scope.changeTopList();
     };
     $scope.mentCon = {

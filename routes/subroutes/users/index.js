@@ -861,7 +861,7 @@ const routeExp = function (io, pp) {
                 return req.user.user != u.user && (!req.body.filter(srchTop => {
                     return !usrCanTeach.find(ut => {
                         // console.log('USER', u.user, 'TITLE', srchTop.value, 'TITLE MATCH', ut.title == srchTop.value, 'LVL MATCH', ut.lvl >= srchTop.min);
-                        return ut.title.toLowerCase() == srchTop.value.toLowerCase() && ut.lvl >= srchTop.min;
+                        return ut.title.toLowerCase() == srchTop.title.toLowerCase() && ut.lvl >= srchTop.min;
                     });
                     // return !simpUsrInts.includes(a);
                 }).length);
