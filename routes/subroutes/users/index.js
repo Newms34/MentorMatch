@@ -277,6 +277,7 @@ const routeExp = function (io, pp) {
                     canTeach: !!intr.canTeach
                 };
                 req.user.interests.push(alreadyHaz);
+                //NOTE: creation of completely new topics is done on FRONT end.
             } else {
                 //does already exists. update 
                 alreadyHaz.lvl = intr.lvl || alreadyHaz.lvl;

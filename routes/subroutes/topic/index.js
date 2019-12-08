@@ -38,12 +38,18 @@ const routeExp = function (io) {
     };
     router.get('/topic', this.authbit, (req, res, next) => {
         // console.log(req.user);
-        mongoose.model('topic').find({ $or: [{ 'votes.status': 1 }, { user: req.user.user }] }, (err, tps) => {
-            // send all topics that are either in voting 
+        mongoose.model('topic').find({ $or: [{ 'votes.status': 1 }, { user: req.user.user ,'votes.status':0}] }, (err, tps) => {
+            // send all topics that are either in voting and by this user, OR voted in.
             res.send(tps);
         });
         // res.send('not implemented! searched for '+req.query.q);
     });
+    router.get('/all',this.authbit,(req,res,next)=>{
+        //ALL topics, regardless of status.
+        mongoose.model('topic').find({},(err,tps)=>{
+            res.send(tps);
+        })
+    })
     router.post('/topic', this.authbit, (req, res, next) => {
         // console.log('triggered topic add route', req.body);
         if (!req.body || !req.body.title) {

@@ -155,7 +155,7 @@ app
             },
             link: function (scope, element, attributes) {
                 // const theFn = scope.changeFn();
-                // $log.debug('THE FUNCTION IS',scope.changeFn())
+                console.log('THE FUNCTION IS',scope.changeFn.toString())
                 element.bind("change", function (changeEvent) {
                     // $log.debug('SCOPE',scope,'ELEMENT',element,'ATTRIBS',attributes,scope.changeFn)
                     scope.changeFn().then(r => {

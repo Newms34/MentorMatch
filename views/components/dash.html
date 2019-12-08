@@ -14,18 +14,18 @@
                             <div class="column is-four-fifths">
                                 <div class="is-fullwidth is-italic">How about a nice, clear picture of you?</div> <img src="{{$parent.user.avatar}}" alt="" class="prof-pic">
                                 <label for="mob-file" class="button has-background-info has-text-white is-fullwidth is-hidden-desktop">
-                                        <i class="fa fa-upload"></i> Change Profile Pic
+                                    <i class="fa fa-upload"></i> Change Profile Pic
                                     <input type="file" id='mob-file' class='is-hidden' fileread="user.avatar" onchange="angular.element(this).scope().loadFile(this)">
                                 </label>
                                 <div class="field is-hidden-touch">
-                                    <div class="file"> 
+                                    <div class="file">
                                         <label class="file-label">
-                                             <input class='file-input' type="file" fileread="user.avatar" onchange="angular.element(this).scope().loadFile(this)" /> 
-                                             <span class="file-cta button is-info"> 
-                                                 <span class="file-icon"> <i class="fa fa-upload"></i> </span> 
-                                                 <span class="file-label"> Change Profile Pic</span> 
-                                            </span> 
-                                        </label> 
+                                            <input class='file-input' type="file" fileread="user.avatar" onchange="angular.element(this).scope().loadFile(this)" />
+                                            <span class="file-cta button is-info">
+                                                <span class="file-icon"> <i class="fa fa-upload"></i> </span>
+                                                <span class="file-label"> Change Profile Pic</span>
+                                            </span>
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -107,6 +107,7 @@
                     <div class="message">
                         <div class="message-header"> Skills </div>
                         <div class="message-body has-background-grey-lighter">
+                            <div class="is-fullwidth is-italic notification">Skills you either know or want to know!</div>
                             <table class="table is-fullwidth">
                                 <thead>
                                     <tr>
@@ -120,7 +121,8 @@
                                     <tr ng-repeat='sk in $parent.user.interests'>
                                         <td>{{sk.title}} <div class="is-hidden-desktop">
                                                 <input type="number" ng-model='sk.lvl' class="number" change-re-focus change-fn='updateTopics()' min='0' max='10'>
-                                        </div></td>
+                                            </div>
+                                        </td>
                                         <td class='is-hidden-mobile'><input type="number" ng-model='sk.lvl' class="number" change-re-focus change-fn='updateTopics()' min='0' max='10'></td>
                                         <td>
                                             <!-- ng-click='sk.canTeach=!sk.cantTeach;' --> <input type='checkbox' ng-model='sk.canTeach' change-re-focus change-fn='updateTopics()' id='skCanTeach-{{$index}}'> <label for="skCanTeach-{{$index}}">{{sk.canTeach?'Yes':'No'}}</label> </td>
@@ -164,7 +166,7 @@
                                         <div class="eraser is-pulled-right"></div>
                                     </div>
                                 </div>
-          
+
                             </div>
                         </div>
                     </div>
@@ -181,11 +183,11 @@
                     <div class="columns is-fullwidth is-multiline">
                         <div class="column is-one-fifth notification notif-spaced"> Pick/Create Skill: </div>
                         <div class="column is-four-fifths" id='skill-search' ng-click='clearSkillSearchBox()'>
-                            <input type="text" class="input" ng-model='skillSearch'> 
+                            <input type="text" class="input" ng-model='skillSearch' ng-keyup='selectedTopic=null;topicWasClicked=false' ng-focus='selectedTopic=null;topicWasClicked=false'>
                             <div class="auto-list" ng-blur='deFocusSkillSearch()'>
-                                <div ng-repeat='sk in skillSearchFilter()' ng-click='pickSkill(sk,$event);' ng-bind-html='sk.displayHL'></div>
-                                <div ng-if='skillSearch.length && skillSearchFilter().length===0' ng-click='$event.stopPropagation()'>
-                                    No matching skills found. Create your own?
+                                <div ng-repeat='sk in skillSearchFilter()' ng-click='pickSkill(sk,$event);' ng-bind-html='sk.displayHL' ng-show='!topicWasClicked'></div>
+                                <div ng-if='skillSearch.length && skillSearchFilter().length===0 && !topicWasClicked' ng-click='$event.stopPropagation()'>
+                                    No matching skills found. Topic was clicked?{{topicWasClicked}}. <button class="button is-info" ng-click='doNewTopic(skillSearch)'>Create Skill</button>
                                 </div>
                             </div>
                         </div>
@@ -193,14 +195,18 @@
                             <hr>
                         </div>
                         <div class="column is-one-fifth notification notif-spaced"> Skill Information: </div>
-                        <div class="column is-four-fifths" ng-show='hazTopic(topicToAdd)||selectedTopic'>
-                            <div class="is-full"> Title: {{selectedTopic.display}} </div><br>
-                            <div class="is-full"> Description: {{selectedTopic.desc}} </div>
+                        <div class="column is-four-fifths" ng-show='selectedTopic'>
+                            <div class="is-full"> <strong>Title:</strong> {{selectedTopic.display}} </div><br>
+                            <div class="is-full"> <strong>Description: </strong> {{selectedTopic.desc}}</div>
                         </div>
-                        <div class="column is-four-fifths" ng-show='!!topicToAdd && !hazTopic(topicToAdd)'>
-                            <div class="is-full notification is-warning is-italic"><i class="fa fa-exclamation-triangle is-size-4"></i>&nbsp;You're adding a skill we don't have in our system.<br> Please help us out and give it a cool (useful!) description!</div> <textarea ng-model='addInt.newDesc' class='textarea'></textarea>
+                        <div class="column is-four-fifths" ng-show='!hazTopic(topicToAdd) && addInt.isNew'>
+                            <div class="is-full notification is-warning is-italic"><i class="fa fa-exclamation-triangle is-size-4"></i>&nbsp;You're adding a skill we don't have in our system.<br> Please help us out and give it a cool (useful!) description!</div>
+
+                            <strong>Name:</strong>{{addInt.isNew}} <br>
+                            <strong>Description:</strong>
+                            <textarea ng-model='addInt.newDesc' class='textarea'></textarea>
                         </div>
-                        <div class="column is-four-fifths" ng-show='!topicToAdd && !hazTopic(topicToAdd)'>
+                        <div class="column is-four-fifths" ng-show='!selectedTopic'>
                             <div class="is-full is-italic"> (Please pick a skill title first!) </div>
                         </div>
                         <div class="column is-full">
@@ -220,7 +226,10 @@
                         <div class="column is-full">
                             <hr>
                         </div>
-                        <div class="column is-full has-text-centered"> <button class="button is-info is-large" ng-click='saveSkills()'><i class="fa fa-plus"></i>&nbsp; Add Skill</button> </div>
+                        <div class="column is-full has-text-centered"> 
+                            <button ng-show='!addInt.isNew' class="button is-info is-large" ng-click='addSkill()'><i class="fa fa-plus"></i>&nbsp; Add Skill</button> 
+                            <button ng-show='addInt.isNew' class="button is-info is-large" ng-click='createSkill()'><i class="fa fa-plus"></i>&nbsp; Create Skill</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -263,40 +272,40 @@
     </div>
 
     <div class="modal" ng-class='{"is-active":reviewPage.show==true}'>
-            <div class="modal-background" ng-click='reviewPage.show=false'></div>
-            <div class="modal-content modal-wide">
-                <div class="panel">
-                    <div class="panel-heading is-link"> Write review for: {{reviewPage.teacher.displayName||reviewPage.teacher.user}} <button class="button is-danger is-small is-pulled-right" ng-click='reviewPage.show=false'>x</button> </div>
-                    <div class="panel-block has-background-white blocky content">
-                        <div class="columns is-fullwidth is-multiline">
-                            <div class="column is-one-fifth notification notif-spaced"> Comment: </div>
-                            <div class="column is-four-fifths">
-                                <div class="is-fullwidth is-italic">Tell us what you think about this mentor. Be nice!</div> 
-                                <textarea class="textarea" ng-model='reviewPage.msg' placeholder='e.g., I learned so much!'></textarea>
-                            </div>
-                            <div class="column is-full">
-                                <hr>
-                            </div>
-                            <div class="column is-one-fifth notification notif-spaced"> Stars: </div>
-                            <div class="column is-four-fifths">
-                                <div class="is-fullwidth is-italic">How many stars (out of 5) do you think this mentor earned?</div>
-                                <i class="fa fa-star{{isActiveStar($index,str)?'':'-o'}} is-size-3 pokey star-fade" ng-mouseover='toggleOverStars(true,str);' ng-mouseout='toggleOverStars(false,str);' ng-repeat ='str in reviewPage.starsArr track by $index' ng-click='reviewPage.stars =$index+1;'></i>
-                            </div>
-                            <div class="column is-full">
-                                <hr>
-                            </div>
-                            <div class="column is-one-fifth notification notif-spaced"> Hide Name: </div>
-                            <div class="column is-four-fifths">
-                                <div class="is-fullwidth is-italic">Would you like to make this review anonymous?</div>
-                                <input type="checkbox" ng-model='reviewPage.hideName' id='hide-name-box'> <label for="hide-name-box">Hide Name (make anonymous)</label>
-                            </div>
-                            <div class="column is-full">
-                                <hr>
-                            </div>
-                            <div class="column is-full has-text-centered"> <button class="button is-info is-large" ng-click='submitReview()'><i class="fa fa-pencil"></i>&nbsp;add/edit review</button> </div>
+        <div class="modal-background" ng-click='reviewPage.show=false'></div>
+        <div class="modal-content modal-wide">
+            <div class="panel">
+                <div class="panel-heading is-link"> Write review for: {{reviewPage.teacher.displayName||reviewPage.teacher.user}} <button class="button is-danger is-small is-pulled-right" ng-click='reviewPage.show=false'>x</button> </div>
+                <div class="panel-block has-background-white blocky content">
+                    <div class="columns is-fullwidth is-multiline">
+                        <div class="column is-one-fifth notification notif-spaced"> Comment: </div>
+                        <div class="column is-four-fifths">
+                            <div class="is-fullwidth is-italic">Tell us what you think about this mentor. Be nice!</div>
+                            <textarea class="textarea" ng-model='reviewPage.msg' placeholder='e.g., I learned so much!'></textarea>
                         </div>
+                        <div class="column is-full">
+                            <hr>
+                        </div>
+                        <div class="column is-one-fifth notification notif-spaced"> Stars: </div>
+                        <div class="column is-four-fifths">
+                            <div class="is-fullwidth is-italic">How many stars (out of 5) do you think this mentor earned?</div>
+                            <i class="fa fa-star{{isActiveStar($index,str)?'':'-o'}} is-size-3 pokey star-fade" ng-mouseover='toggleOverStars(true,str);' ng-mouseout='toggleOverStars(false,str);' ng-repeat='str in reviewPage.starsArr track by $index' ng-click='reviewPage.stars =$index+1;'></i>
+                        </div>
+                        <div class="column is-full">
+                            <hr>
+                        </div>
+                        <div class="column is-one-fifth notification notif-spaced"> Hide Name: </div>
+                        <div class="column is-four-fifths">
+                            <div class="is-fullwidth is-italic">Would you like to make this review anonymous?</div>
+                            <input type="checkbox" ng-model='reviewPage.hideName' id='hide-name-box'> <label for="hide-name-box">Hide Name (make anonymous)</label>
+                        </div>
+                        <div class="column is-full">
+                            <hr>
+                        </div>
+                        <div class="column is-full has-text-centered"> <button class="button is-info is-large" ng-click='submitReview()'><i class="fa fa-pencil"></i>&nbsp;add/edit review</button> </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 </div>
