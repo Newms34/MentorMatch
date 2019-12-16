@@ -40,6 +40,7 @@ const routeExp = function (io) {
         mongoose.model('topic').find({},(err,tps)=>{
             tps.forEach(t=>{
                 t.votes.status=1;
+                t.save();
             })
             res.send('done');
         })
