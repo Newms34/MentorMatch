@@ -1,6 +1,6 @@
 {
   "name": "codementormatch",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "description": "CodeMentorMatch: Matching Mentors and Teachers for coding",
   "main": "app.js",
   "dependencies": {
@@ -16,7 +16,7 @@
     "crypto": "^1.0.1",
     "express": "^4.17.1",
     "express-session": "^1.16.2",
-    "helmet": "^3.21.1",
+    "helmet": "^3.21.2",
     "lodash": "^4.17.15",
     "lodash.template": "^4.5.0",
     "mongoose": "^5.7.7",
@@ -33,7 +33,7 @@
     "remark": "^11.0.1",
     "sendgrid": "^5.2.3",
     "sendmail": "^1.4.1",
-    "socket.io": "^2.2.0",
+    "socket.io": "^2.3.0",
     "strip-markdown": "^3.1.1",
     "through2": "^3.0.1",
     "uuid": "^3.3.3"

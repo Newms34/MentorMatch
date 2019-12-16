@@ -36,6 +36,14 @@ const routeExp = function (io) {
             });
         }
     };
+    router.get('/setAllVoted',this.authbit,isMod,(req,res,next)=>{
+        mongoose.model('topic').find({},(err,tps)=>{
+            tps.forEach(t=>{
+                t.votes.status=1;
+            })
+            res.send('done');
+        })
+    })
     router.get('/topic', this.authbit, (req, res, next) => {
         // console.log(req.user);
         mongoose.model('topic').find({ $or: [{ 'votes.status': 1 }, { user: req.user.user ,'votes.status':0}] }, (err, tps) => {
