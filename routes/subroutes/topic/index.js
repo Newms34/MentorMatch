@@ -41,6 +41,7 @@ const routeExp = function (io) {
             console.log('TOPICS',tps,'END OF TPS')
             tps.forEach(t=>{
                 t.votes.status=1;
+                t.creator=req.user.user;
                 t.save();
             })
             res.send('done');
