@@ -38,6 +38,7 @@ const routeExp = function (io) {
     };
     router.get('/setAllVoted',this.authbit,isMod,(req,res,next)=>{
         mongoose.model('topic').find({},(err,tps)=>{
+            console.log('TOPICS',tps,'END OF TPS')
             tps.forEach(t=>{
                 t.votes.status=1;
                 t.save();
