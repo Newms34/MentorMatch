@@ -180,15 +180,15 @@ const routeExp = function (io,mongoose) {
             }
         })(req, res, next);
     });
-    router.get('/unban',(req,res,next)=>{
-        mongoose.model('User').find({},(err,usrs)=>{
-            usrs.forEach(u=>{
-                u.isBanned=null;
-                u.save();
-            });
-            res.send('probly done');
-        });
-    });
+    // router.get('/unban',(req,res,next)=>{
+    //     mongoose.model('User').find({},(err,usrs)=>{
+    //         usrs.forEach(u=>{
+    //             u.isBanned=null;
+    //             u.save();
+    //         });
+    //         res.send('probly done');
+    //     });
+    // });
     router.get('/logout', function (req, res, next) {
         /*this function logs out the user. It has no confirmation stuff because
         1) this is on the backend

@@ -16,8 +16,7 @@ const jshint = require('gulp-jshint'),
     addSrc = require('gulp-add-src'),
     iife = require('gulp-iife'),
     th2 = require('through2'),
-    chalk = require('chalk'),
-    ngAnnotate = require('gulp-ng-annotate');
+    chalk = require('chalk');
 let sassStart = 0,
     jsStart = 0;
 const reporterFn = function (results, data, opts = {}) {
