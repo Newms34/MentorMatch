@@ -1,11 +1,14 @@
 const express = require('express');
 const router = express.Router(),
-    mongoose = require('mongoose');
+    mongoose = require('mongoose'),
+    models = require('../models');
+    
+mongoose.Promise = Promise;
 
-module.exports = function(io, pp) {
-    router.use('/user', require('./subroutes/users')(io, pp));
-    router.use('/topic', require('./subroutes/topic')(io, pp));
-    router.use('/lesson', require('./subroutes/lessons')(io, pp));
+module.exports = function(io) {
+    router.use('/user', require('./subroutes/users')(io,mongoose));
+    router.use('/topic', require('./subroutes/topic')(io,mongoose));
+    router.use('/lesson', require('./subroutes/lessons')(io,mongoose));
     router.get('/reset', function(req, res, next) {
         // console.log('trying to get main page!')
         res.sendFile('reset.html', { root: './views' });

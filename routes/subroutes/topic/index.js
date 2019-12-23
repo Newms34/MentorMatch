@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router(),
     _ = require('lodash'),
-    mongoose = require('mongoose'),
+    // mongoose = require('mongoose'),
     isMod = (req, res, next) => {
         // console.log('passport', req.session.passport);
         mongoose.model('User').findOne({
@@ -15,7 +15,7 @@ const router = express.Router(),
         });
     };
 
-const routeExp = function (io) {
+const routeExp = function (io, mongoose) {
     this.authbit = (req, res, next) => {
         if (!req.session || !req.session.passport || !req.session.passport.user) {
             //no passport userid
@@ -38,15 +38,15 @@ const routeExp = function (io) {
     };
     router.get('/topic', this.authbit, (req, res, next) => {
         // console.log(req.user);
-        mongoose.model('topic').find({ $or: [{ 'votes.status': 1 }, { user: req.user.user ,'votes.status':0}] }, (err, tps) => {
+        mongoose.model('topic').find({ $or: [{ 'votes.status': 1 }, { user: req.user.user, 'votes.status': 0 }] }, (err, tps) => {
             // send all topics that are either in voting and by this user, OR voted in.
             res.send(tps);
         });
         // res.send('not implemented! searched for '+req.query.q);
     });
-    router.get('/all',this.authbit,(req,res,next)=>{
+    router.get('/all', this.authbit, (req, res, next) => {
         //ALL topics, regardless of status.
-        mongoose.model('topic').find({},(err,tps)=>{
+        mongoose.model('topic').find({}, (err, tps) => {
             res.send(tps);
         });
     });
@@ -133,12 +133,12 @@ const halfDay = 1000 * 3600 * 12,
                 // console.log('VOTE RESULT: \nTopic',v.title,(voteUpTotal>2 && vPerc>0.6?'would':'would not'),'be voted in')
                 if (voteUpTotal > 2 && vPerc > 0.6) {
                     //if we've got more than two votes (so one user cannot just simply vote their own topic up and get it to pass) and the vote percent than a little less than 2/3, set vote status to 1 (included). Otherwise set to 2 (not included)
-                    v.votes.status=1;
-                }else{
-                    v.votes.status=2;
+                    v.votes.status = 1;
+                } else {
+                    v.votes.status = 2;
                 }
-                v.save((errvr,svvr)=>{
-                    io.emit('voteRef',{});
+                v.save((errvr, svvr) => {
+                    io.emit('voteRef', {});
                 });
             });
         });

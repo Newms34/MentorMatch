@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router(),
-    path = require('path'),
-    models = require('../../../models/'),
     _ = require('lodash'),
+    path = require('path'),
     maxAttempts = 10,
     mongoose = require('mongoose'),
     uuid = require('uuid'),
     passport = require('passport'),
-    axios = require('axios'),
     remark = require('remark'),
     strip = require('strip-markdown'),
     fs = require('fs'),
@@ -40,7 +38,7 @@ const router = express.Router(),
 
 // const oldUsers = JSON.parse(fs.readFileSync('oldUsers.json', 'utf-8'))
 let sgApi;
-mongoose.Promise = Promise;
+// mongoose.Promise = Promise;
 if (fs.existsSync('./config/keys.json')) {
     sparkyConf = JSON.parse(fs.readFileSync('./config/keys.json', 'utf-8')).keys;
 } else {
@@ -58,8 +56,7 @@ if (fs.existsSync('./config/keys.json')) {
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(sparkyConf.SENDGRID_API);
 
-
-const routeExp = function (io, pp) {
+const routeExp = function (io,mongoose) {
     this.authbit = (req, res, next) => {
         if (!req.session || !req.session.passport || !req.session.passport.user) {
             //no passport userid
@@ -120,7 +117,7 @@ const routeExp = function (io, pp) {
         })(req, res, next);
     });
     router.put('/login', function (req, res, next) {
-        // console.log('body', req.body);
+        console.log('body', req.body);
         const logStart = Date.now();
         if (!req.body || !req.body.pass || !req.body.user) {
             // console.log('Missing info!');
@@ -131,7 +128,7 @@ const routeExp = function (io, pp) {
         // }
         passport.authenticate('local-login', function (err, uObj, info) {
             let usr = uObj.u;
-            // console.log('USER',usr,'ERR',err,'INFO',info)
+            // console.log('USER',usr,'ERR',err,'INFO',info);
             if (!info) {
                 //wrong un/pwd combo
                 mongoose.model('User').findOne({
@@ -211,10 +208,6 @@ const routeExp = function (io, pp) {
         mongoose.model('User').findOne({
             _id: req.session.passport.user
         }, function (_err, usr) {
-            //make sure we're in the right school
-            // truncus('USER FOUND VIA REDIRECT:', usr, 'SCHOOL', config.MATHAPP_SCHOOL)
-            // truncus('REQ IS',req,'GET REQT')
-            // res.send('SEE CONSOLE!')
             res.redirect('../');
         });
     });
@@ -1384,9 +1377,6 @@ const routeExp = function (io, pp) {
             });
             res.send('DONE');
         });
-    });
-    router.post('/jestTest', (req, res, next) => {
-        res.send(req.body.name.toUpperCase());
     });
     return router;
 };

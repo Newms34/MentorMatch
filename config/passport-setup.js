@@ -104,11 +104,12 @@ passport.use('local-login', new LocalStrategy({
         passReqToCallback: true // allows us to pass back the entire request to the callback
     },
     function (req, user, pass, done) { // callback with email and password from our form
-        // console.log('DATA:', user, pass,'\nUSER MODEL',User.findOne)
+        // console.log('DATA :', user, pass)
         User.findOne({
             'user': user
         }, function (err, usrFnd) {
-            // console.log('Result of findone',err,usrFnd)
+            console.log('err from findone?',err||'none!')
+            console.log('Result of findone',err,usrFnd)
             // if there are any errors, return the error before anything else
             if (err) {
                 return done(err, false, false);

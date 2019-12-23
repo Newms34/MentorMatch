@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router(),
     _ = require('lodash'),
-    mongoose = require('mongoose'),
-    axios = require('axios'),
+    // mongoose = require('mongoose'),
     isMod = (req, res, next) => {
         mongoose.model('User').findOne({
             _id: req.session.passport.user
@@ -16,7 +15,7 @@ const router = express.Router(),
     };
 // NOTE: for the purposes of this app, a lesson is tying two users together, with one as teacher and one as student. These are stored in the TEACHER USER model. 
 
-const routeExp = function (io) {
+const routeExp = function (io,mongoose) {
     this.authbit = (req, res, next) => {
         if (!req.session || !req.session.passport || !req.session.passport.user) {
             //no passport userid
