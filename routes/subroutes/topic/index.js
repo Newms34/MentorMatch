@@ -1,8 +1,24 @@
 const express = require('express');
 const router = express.Router(),
     _ = require('lodash'),
+    halfDay = 1000 * 3600 * 12,
+    voteExpire = 1000 * 3600 * 24 * 7;
     // mongoose = require('mongoose'),
-    isMod = (req, res, next) => {
+    // isMod = (req, res, next) => {
+    //     // console.log('passport', req.session.passport);
+    //     mongoose.model('User').findOne({
+    //         _id: req.session.passport.user
+    //     }, function (err, usr) {
+    //         if (!err && usr.mod) {
+    //             next();
+    //         } else {
+    //             res.status(403).send('err');
+    //         }
+    //     });
+    // };
+
+const routeExp = function (io, mongoose) {
+    this.isMod = (req, res, next) => {
         // console.log('passport', req.session.passport);
         mongoose.model('User').findOne({
             _id: req.session.passport.user
@@ -14,8 +30,29 @@ const router = express.Router(),
             }
         });
     };
-
-const routeExp = function (io, mongoose) {
+    this.voteTimer = setInterval(function () {
+        //check every half day to "expire" old votes;
+        const nunc = Date.now();
+        mongoose.model('topic').find({ 'votes.status': 0 }, (errv, resv) => {
+            // console.log('VOTES UP',resv);
+            const votesToCheck = resv.filter(q => nunc - q.votes.date > voteExpire);
+            // console.log('VOTES TO CHECK', (votesToCheck.length && votesToCheck) ||'None!');
+            votesToCheck.forEach(v => {
+                const voteUpTotal = v.votes.votesUp.length,
+                    vPerc = v.votes.votesUp.length / (v.votes.votesUp.length + v.votes.votesDown.length);
+                // console.log('VOTE RESULT: \nTopic',v.title,(voteUpTotal>2 && vPerc>0.6?'would':'would not'),'be voted in')
+                if (voteUpTotal > 2 && vPerc > 0.6) {
+                    //if we've got more than two votes (so one user cannot just simply vote their own topic up and get it to pass) and the vote percent than a little less than 2/3, set vote status to 1 (included). Otherwise set to 2 (not included)
+                    v.votes.status = 1;
+                } else {
+                    v.votes.status = 2;
+                }
+                v.save((errvr, svvr) => {
+                    io.emit('voteRef', {});
+                });
+            });
+        });
+    }, halfDay);
     this.authbit = (req, res, next) => {
         if (!req.session || !req.session.passport || !req.session.passport.user) {
             //no passport userid
@@ -116,31 +153,4 @@ const routeExp = function (io, mongoose) {
     });
     return router;
 };
-const halfDay = 1000 * 3600 * 12,
-    voteExpire = 1000 * 3600 * 24 * 7,// 1 week
-    halfDayFake = 1000 * 10,//for testing!
-    voteExpireFake = 1000 * 30,
-    voteTimer = setInterval(function () {
-        //check every half day to "expire" old votes;
-        const nunc = Date.now();
-        mongoose.model('topic').find({ 'votes.status': 0 }, (errv, resv) => {
-            // console.log('VOTES UP',resv);
-            const votesToCheck = resv.filter(q => nunc - q.votes.date > voteExpire);
-            // console.log('VOTES TO CHECK', (votesToCheck.length && votesToCheck) ||'None!');
-            votesToCheck.forEach(v => {
-                const voteUpTotal = v.votes.votesUp.length,
-                    vPerc = v.votes.votesUp.length / (v.votes.votesUp.length + v.votes.votesDown.length);
-                // console.log('VOTE RESULT: \nTopic',v.title,(voteUpTotal>2 && vPerc>0.6?'would':'would not'),'be voted in')
-                if (voteUpTotal > 2 && vPerc > 0.6) {
-                    //if we've got more than two votes (so one user cannot just simply vote their own topic up and get it to pass) and the vote percent than a little less than 2/3, set vote status to 1 (included). Otherwise set to 2 (not included)
-                    v.votes.status = 1;
-                } else {
-                    v.votes.status = 2;
-                }
-                v.save((errvr, svvr) => {
-                    io.emit('voteRef', {});
-                });
-            });
-        });
-    }, halfDay);
 module.exports = routeExp;

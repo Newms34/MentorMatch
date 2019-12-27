@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router(),
-    _ = require('lodash'),
+    _ = require('lodash');
     // mongoose = require('mongoose'),
-    isMod = (req, res, next) => {
-        mongoose.model('User').findOne({
-            _id: req.session.passport.user
-        }, function (err, usr) {
-            if (!err && usr.mod) {
-                next();
-            } else {
-                res.status(403).send('err');
-            }
-        });
-    };
+    // isMod = (req, res, next) => {
+    //     mongoose.model('User').findOne({
+    //         _id: req.session.passport.user
+    //     }, function (err, usr) {
+    //         if (!err && usr.mod) {
+    //             next();
+    //         } else {
+    //             res.status(403).send('err');
+    //         }
+    //     });
+    // };
 // NOTE: for the purposes of this app, a lesson is tying two users together, with one as teacher and one as student. These are stored in the TEACHER USER model. 
 
 const routeExp = function (io,mongoose) {

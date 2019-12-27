@@ -15,9 +15,37 @@
                 <tbody>
                     <tr ng-repeat='u in allUsrs'>
                         <td><i class="fa fa-lock" ng-if='u.mod' title='This user is a moderator'>&nbsp;</i>{{u.displayName||u.user}}</td>
-                        <td>{{u.displayName && u.user!=u.displayName?u.user:'(same)'}}</td>
+                        <td>
+                            <div class="has-text-grey" ng-show='!u.displayName || u.user==u.displayName'>
+                                (same)
+                            </div>
+                            <div class="" ng-show='u.displayName && u.user!=u.displayName'>
+                                {{u.user}}
+                            </div>
+                            <!-- {{u.displayName && u.user!=u.displayName?u.user:'(same)'}} -->
+                        </td>
                         <td>{{u.isBanned?'Banned':'Not banned'}}</td>
-                        <td>SKILLS (interests) STUFF</td>
+                        <td>
+                            <div ng-if='!u.interests || !u.interests.length' class='has-text-grey'>
+                                (none)
+                            </div>
+                            <table class="table" ng-show='u.interests && u.interests.length'>
+                                <thead>
+                                    <tr>
+                                        <th>Topic</th>
+                                        <th>Lvl</th>
+                                        <th><i class="fa fa-graduation-cap" title='Can this user teach this skill?'></i></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat='tp in u.interests'>
+                                        <td>{{tp.title}}</td>
+                                        <td>{{tp.lvl}}</td>
+                                        <td><i class="fa fa-{{tp.canTeach?'check':'times'}}"></i></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
                         <td>
                             <div class="is-fullwidth has-text-grey" ng-if='!u.teaching.length'>
                                 (This user is not currently mentoring anyone)

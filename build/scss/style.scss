@@ -200,3 +200,14 @@ select {
     }
   }
 }
+
+.modal.is-active{
+  // position:sticky;
+  // top:-70px;
+  & .modal-background{
+    background:none;
+  }
+  & .modal-content{
+    box-shadow: 0 0 15px #000;
+  }
+}

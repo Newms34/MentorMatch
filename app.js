@@ -59,6 +59,7 @@ io.on('connection', function (socket) {
         io.to(o.id).emit('refreshById')
     })
 });
+console.log('Server restarting at',new Date().toLocaleString())
 server.listen(process.env.PORT || 8080,function(){
     console.log('Server is listening!')
     app.emit('app_running')

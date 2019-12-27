@@ -3,34 +3,12 @@ const router = express.Router(),
     _ = require('lodash'),
     path = require('path'),
     maxAttempts = 10,
-    mongoose = require('mongoose'),
+    // mongoose = require('mongoose'),
     uuid = require('uuid'),
     passport = require('passport'),
     remark = require('remark'),
     strip = require('strip-markdown'),
     fs = require('fs'),
-    isMod = (req, res, next) => {
-        mongoose.model('User').findOne({
-            _id: req.session.passport.user
-        }, function (err, usr) {
-            if (!err && usr.mod) {
-                next();
-            } else {
-                res.status(403).send('err');
-            }
-        });
-    },
-    isSuperMod = (req, res, next) => {
-        mongoose.model('User').findOne({
-            _id: req.session.passport.user
-        }, function (err, usr) {
-            if (!err && usr.superMod) {
-                next();
-            } else {
-                res.status(403).send('err');
-            }
-        });
-    },
     demoNames = {
         animals: ['dog', 'fish', 'cat', 'horse', 'bird', 'lizard', 'turtle', 'spider', 'mouse', 'hamster', 'frog'],
         adjectives: ['lumpy', 'large', 'small', 'ferocious', 'tiny', 'friendly', 'dignified', 'superior', 'humble']
@@ -57,6 +35,28 @@ const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(sparkyConf.SENDGRID_API);
 
 const routeExp = function (io,mongoose) {
+    this.isMod = (req, res, next) => {
+        mongoose.model('User').findOne({
+            _id: req.session.passport.user
+        }, function (err, usr) {
+            if (!err && usr.mod) {
+                next();
+            } else {
+                res.status(403).send('err');
+            }
+        });
+    };
+    this.isSuperMod = (req, res, next) => {
+        mongoose.model('User').findOne({
+            _id: req.session.passport.user
+        }, function (err, usr) {
+            if (!err && usr.superMod) {
+                next();
+            } else {
+                res.status(403).send('err');
+            }
+        });
+    };
     this.authbit = (req, res, next) => {
         if (!req.session || !req.session.passport || !req.session.passport.user) {
             //no passport userid
@@ -397,7 +397,7 @@ const routeExp = function (io,mongoose) {
         });
     });
     //mod stuff
-    router.put('/makeMod', this.authbit, isMod, (req, res, next) => {
+    router.put('/makeMod', this.authbit, this.isMod, (req, res, next) => {
         mongoose.model('User').findOneAndUpdate({
             user: req.query.user
         }, {
@@ -419,7 +419,7 @@ const routeExp = function (io,mongoose) {
             });
         });
     });
-    router.get('/users', this.authbit, isMod, (req, res, next) => {
+    router.get('/users', this.authbit, this.isMod, (req, res, next) => {
         mongoose.model('User').find({}).lean().exec(function (err, usrs) {
             if (err || !usrs || !usrs.length) {
                 return res.status(400).send('noUsrs');
@@ -442,7 +442,7 @@ const routeExp = function (io,mongoose) {
             res.send(safeUsrs);
         });
     });
-    router.put('/toggleBan', this.authbit, isMod, (req, res, next) => {
+    router.put('/toggleBan', this.authbit, this.isMod, (req, res, next) => {
         mongoose.model('User').findOne({
             user: req.body.user
         }, function (err, usr) {
@@ -1325,7 +1325,7 @@ const routeExp = function (io,mongoose) {
 
     //Supermod routes
 
-    router.get('/genDemoUser', this.authbit, isSuperMod, (req, res, next) => {
+    router.get('/genDemoUser', this.authbit, this.isSuperMod, (req, res, next) => {
         const user = `${demoNames.adjectives[Math.floor(Math.random() * demoNames.adjectives.length)]}-${demoNames.animals[Math.floor(Math.random() * demoNames.animals.length)]}-${Math.ceil(Math.random() * 99)}`;
         req.body = {
             user: user,
@@ -1354,7 +1354,7 @@ const routeExp = function (io,mongoose) {
             });
         })(req, res, next);
     });
-    router.get('/wipeMail', this.authbit, isSuperMod, (req, res, next) => {
+    router.get('/wipeMail', this.authbit, this.isSuperMod, (req, res, next) => {
         mongoose.model('User').find({}, (err, usrs) => {
             usrs.forEach(u => {
                 u.inMsgs = [];
@@ -1364,7 +1364,7 @@ const routeExp = function (io,mongoose) {
             res.send('DONE');
         });
     });
-    router.get('/acceptAllTopics', this.authbit, isSuperMod, (req, res, next) => {
+    router.get('/acceptAllTopics', this.authbit, this.isSuperMod, (req, res, next) => {
         mongoose.model('topic').find({}, (err, tps) => {
             tps.forEach(t => {
                 t.votes.status = 1;
