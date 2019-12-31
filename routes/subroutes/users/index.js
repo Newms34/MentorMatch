@@ -13,8 +13,6 @@ const router = express.Router(),
         animals: ['dog', 'fish', 'cat', 'horse', 'bird', 'lizard', 'turtle', 'spider', 'mouse', 'hamster', 'frog'],
         adjectives: ['lumpy', 'large', 'small', 'ferocious', 'tiny', 'friendly', 'dignified', 'superior', 'humble']
     };
-
-// const oldUsers = JSON.parse(fs.readFileSync('oldUsers.json', 'utf-8'))
 let sgApi;
 // mongoose.Promise = Promise;
 if (fs.existsSync('./config/keys.json')) {

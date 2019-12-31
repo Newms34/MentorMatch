@@ -1,5 +1,6 @@
 const express = require('express'),
     app = express(),
+    // fs = require('fs'),
     http = require('http'),
     server = http.Server(app),
     io = require('socket.io')(server),
@@ -21,8 +22,6 @@ store.on('error', function (error) {
     console.log(error);
 });
 app.use(compression());
-
-
 const sesh = session({
     secret: 'ea augusta est et carissima',
     cookie: {
@@ -32,6 +31,7 @@ const sesh = session({
     resave: false,
     saveUninitialized: false
 });
+console.log('Server restarting at',new Date().toLocaleString())
 const usrModel = require('./models/users')
 app.use(sesh);
 app.use(passport.initialize());
@@ -49,6 +49,8 @@ app.set('io', io)
 const routes = require('./routes')(io);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'views')));
+// console.log(path.join(__dirname,'../','mazegame'))
+// console.log(`${ __dirname }../`)
 app.use('/', routes);
 io.on('connection', function (socket) {
     socket.on('testFn', function (d) {
@@ -59,7 +61,6 @@ io.on('connection', function (socket) {
         io.to(o.id).emit('refreshById')
     })
 });
-console.log('Server restarting at',new Date().toLocaleString())
 server.listen(process.env.PORT || 8080,function(){
     console.log('Server is listening!')
     app.emit('app_running')
