@@ -9,15 +9,16 @@ const router = express.Router(),
     remark = require('remark'),
     strip = require('strip-markdown'),
     fs = require('fs'),
+    sgMail = require('@sendgrid/mail'),
     demoNames = {
         animals: ['dog', 'fish', 'cat', 'horse', 'bird', 'lizard', 'turtle', 'spider', 'mouse', 'hamster', 'frog'],
         adjectives: ['lumpy', 'large', 'small', 'ferocious', 'tiny', 'friendly', 'dignified', 'superior', 'humble']
     };
-let sgApi;
-// mongoose.Promise = Promise;
-if (fs.existsSync('./config/keys.json')) {
+let sparkyConf;
+//load config info either from local file OR from environment vars
+try {
     sparkyConf = JSON.parse(fs.readFileSync('./config/keys.json', 'utf-8')).keys;
-} else {
+} catch (error) {
     sparkyConf = {
         SPARKPOST_API_KEY: process.env.SPARKPOST_API_KEY,
         SPARKPOST_API_URL: process.env.SPARKPOST_API_URL,
@@ -29,10 +30,9 @@ if (fs.existsSync('./config/keys.json')) {
         SENDGRID_API: process.env.SENDGRID_API
     };
 }
-const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(sparkyConf.SENDGRID_API);
 
-const routeExp = function (io,mongoose) {
+const routeExp = function (io, mongoose) {
     this.isMod = (req, res, next) => {
         mongoose.model('User').findOne({
             _id: req.session.passport.user
@@ -115,7 +115,7 @@ const routeExp = function (io,mongoose) {
         })(req, res, next);
     });
     router.put('/login', function (req, res, next) {
-        console.log('body', req.body);
+        // console.log('body', req.body);
         const logStart = Date.now();
         if (!req.body || !req.body.pass || !req.body.user) {
             // console.log('Missing info!');
@@ -139,7 +139,7 @@ const routeExp = function (io,mongoose) {
                     usrwc.locked = true; //too many incorrect attempts; lock account & wait for teacher;
                     refStu();
                     usrwc.save((_erru, _svu) => {
-                        return res.status(403).send({status:'locked'});
+                        return res.status(403).send({ status: 'locked' });
                     });
                 });
             } else {
@@ -169,11 +169,11 @@ const routeExp = function (io,mongoose) {
                     });
                 }
                 if (!!usr.isBanned) {
-                    mongoose.model('User').findOne({user:usr.isBanned},(errm,md)=>{
-                        return res.status(403).send({status:'banned',usr:md.displayName||md.user});
+                    mongoose.model('User').findOne({ user: usr.isBanned }, (errm, md) => {
+                        return res.status(403).send({ status: 'banned', usr: md.displayName || md.user });
                     });
                 } else if (usr.locked) {
-                    return res.status(403).send({status:'locked'});
+                    return res.status(403).send({ status: 'locked' });
                 }
             }
         })(req, res, next);
@@ -244,7 +244,7 @@ const routeExp = function (io,mongoose) {
         });
     });
     //user profile stuff, like interests, etc.    
-    //inchrests
+    //inchrests (also known as TOPICS)
     router.put('/interests', this.authbit, (req, res, next) => {
         //upsert one or more interests
         //incoming format: array of interests like [{title:'JS',lvl:6,canTeach:bool}]
@@ -434,7 +434,7 @@ const routeExp = function (io,mongoose) {
                     interests: q.interests,
                     teaching: q.teaching,
                     mod: q.mod,
-                    isBanned:q.isBanned
+                    isBanned: q.isBanned
                 };
             });
             res.send(safeUsrs);
@@ -445,9 +445,9 @@ const routeExp = function (io,mongoose) {
             user: req.body.user
         }, function (err, usr) {
             // console.log('CHANGING BAN STATUS OF', req.body.user, 'WHO IS', usr.user);
-            if(!!usr.isBanned){
-                usr.isBanned=null;
-            }else{
+            if (!!usr.isBanned) {
+                usr.isBanned = null;
+            } else {
                 usr.isBanned = req.user.user;
             }
             usr.save(function (err, resp) {
