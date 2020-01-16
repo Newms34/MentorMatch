@@ -121,9 +121,6 @@ const routeExp = function (io, mongoose) {
             // console.log('Missing info!');
             return res.status(400).send(false);
         }
-        // else{
-        //     return res.send(`user tried to login with ${req.body.user} and ${req.body.pass}`)
-        // }
         passport.authenticate('local-login', function (err, uObj, info) {
             let usr = uObj.u;
             // console.log('USER',usr,'ERR',err,'INFO',info);
@@ -178,15 +175,6 @@ const routeExp = function (io, mongoose) {
             }
         })(req, res, next);
     });
-    // router.get('/unban',(req,res,next)=>{
-    //     mongoose.model('User').find({},(err,usrs)=>{
-    //         usrs.forEach(u=>{
-    //             u.isBanned=null;
-    //             u.save();
-    //         });
-    //         res.send('probly done');
-    //     });
-    // });
     router.get('/logout', function (req, res, next) {
         /*this function logs out the user. It has no confirmation stuff because
         1) this is on the backend
@@ -1366,7 +1354,8 @@ const routeExp = function (io, mongoose) {
         mongoose.model('topic').find({}, (err, tps) => {
             tps.forEach(t => {
                 t.votes.status = 1;
-                t.creator = t.creator || req.user.user;//just in case we somehow do not have a yoozr
+                //just in case we somehow do not have a yoozr
+                t.creator = t.creator || req.user.user;
                 t.save((terr, tsv) => {
                     if (terr) {
                         // console.log('ERR for', t, 'IS', terr);

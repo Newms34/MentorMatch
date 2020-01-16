@@ -24,5 +24,6 @@ module.exports = function(io) {
     router.use(function(req, res) {
         res.status(404).end();
     });
+    // console.log(router.stack.filter(r => r.route).map(r => r.route.path))
     return router;
 };
