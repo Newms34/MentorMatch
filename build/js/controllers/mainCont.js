@@ -140,16 +140,16 @@ app.controller('main-cont', function ($scope, $http, $state, userFact, $log) {
         whichFont: 0
     };
     $scope.fontOpts = ['aurebesh', 'tengwar quenya-1', 'klingon font', 'hieroglyphic', 'dovahkiin', 'Skyrim_Daedra'];
-    const bgImg = `./img/bgs/bg${Math.ceil(Math.random()*3)}.jpg`
-    $scope.bgFull = `background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('${bgImg}'); background-size:cover; background-attachment:fixed; will-change:transform; background-repeat:no-repeat`
+    const bgImg = `./img/bgs/bg${Math.ceil(Math.random()*3)}.jpg`;
+    $scope.bgFull = `background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('${bgImg}'); background-size:cover; background-attachment:fixed; will-change:transform; background-repeat:no-repeat`;
     document.addEventListener('scroll',function(q){
         // console.log('The User Scrolls V: border-color:skyblue;',q,window.scrollY)
         setTimeout(function(){
             const sFd = 0.5 + (0.45*window.scrollY/window.outerHeight);
-            $scope.bgFull = `background:linear-gradient(rgba(0,0,0,${sFd}),rgba(0,0,0,${sFd})),url('${bgImg}'); background-size:cover; background-attachment:fixed;will-change:transform; background-repeat:no-repeat`
+            $scope.bgFull = `background:linear-gradient(rgba(0,0,0,${sFd}),rgba(0,0,0,${sFd})),url('${bgImg}'); background-size:cover; background-attachment:fixed;will-change:transform; background-repeat:no-repeat`;
             $scope.$apply();
-        },100)
-    })
+        },100);
+    });
     document.querySelector('body').addEventListener('keyup', function (e) {
         e.preventDefault();
         // $log.debug('KEY PRESSED WAS', e)

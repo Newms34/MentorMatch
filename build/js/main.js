@@ -134,7 +134,7 @@ app
                     // $log.debug('RESPONSE INTERCEPTOR', response && response.data)
                     if (response && response.data && response.data == 'refresh') {
                         // console.log('need to refresh',socket,socket.to)
-                        socket.emit('requestRefresh',{id:socket.id})
+                        socket.emit('requestRefresh',{id:socket.id});
                     }
                     return response;
                 },
@@ -155,7 +155,7 @@ app
             },
             link: function (scope, element, attributes) {
                 // const theFn = scope.changeFn();
-                console.log('THE FUNCTION IS',scope.changeFn.toString())
+                console.log('THE FUNCTION IS',scope.changeFn.toString());
                 element.bind("change", function (changeEvent) {
                     // $log.debug('SCOPE',scope,'ELEMENT',element,'ATTRIBS',attributes,scope.changeFn)
                     scope.changeFn().then(r => {

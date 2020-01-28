@@ -72,9 +72,6 @@ const routeExp = function (io, mongoose) {
                         const cleanUsr = JSON.parse(JSON.stringify(usv));
                         delete cleanUsr.salt;
                         delete cleanUsr.pass;
-                        // cleanUsr.inMsgs = [];
-                        // cleanUsr.outMsgs = [];
-                        // delete cleanUsr.id;
                         req.user = usv;
                         req.cleanUsr = cleanUsr;
                         next();

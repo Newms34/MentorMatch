@@ -22,7 +22,7 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
         $scope.skillSearch='';
         $scope.showNSR = false;
         $scope.$digest();
-    }
+    };
     $scope.showNSR = false;
     // $scope.nsr = document.querySelector('#no_result')
     $scope.pickedItem = null;
@@ -63,7 +63,7 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
         // $log.debug('simpTops', tl, 'all', $scope.topicObjsAll)
         const tl = $scope.pickedTopics.map(s => s.title.toLowerCase());
         //remove this from our list of available topics to add
-        $log.debug('TOPICS',$scope.pickedTopics,tl)
+        $log.debug('TOPICS',$scope.pickedTopics,tl);
         $scope.topicObjs = $scope.topicObjsAll.filter(tf => !tl.includes(tf.value));
         $http.post('/user/topicSearch', $scope.pickedTopics).then(r => {
             $scope.availTeachs = r.data;
@@ -84,8 +84,8 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
         $scope.changeTopList();
         // $scope.filterMe('')
         // $scope.topicObjs = $scope.topicObjsAll.filter(q => !.includes(q));
-        console.log('OPTS NOW',document.querySelector('#skill-box').options)
-        Array.from(document.querySelector('#skill-box').options).forEach((q,i)=>{q.selected==!i})
+        $log.debug('OPTS NOW',document.querySelector('#skill-box').options);
+        Array.from(document.querySelector('#skill-box').options).forEach((q,i)=>{q.selected==!i;});
         // $scope.selectedTopic ='';
         document.querySelector('#skill-box').selectedIndex=0;
     };  

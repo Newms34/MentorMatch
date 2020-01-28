@@ -1,11 +1,10 @@
 app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) {
     $scope.noWarn = false;
     $scope.nameOkay = true;
-    delete localStorage.geoUsr;
     $scope.acceptNoSecure = () => {
         localStorage.CMMNoSecure = true;
         $scope.cmmNoSecure = true;
-    }
+    };
     $scope.cmmNoSecure = !!localStorage.CMMNoSecure;
     $scope.checkTimer = false;
     $scope.goReg = () => {
@@ -86,12 +85,11 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
     $scope.pwdNoDup = false;
     $scope.checkPwdDup = () => {
         $scope.pwdNoDup = !$scope.pwd || !$scope.pwdDup || $scope.pwdDup !== $scope.pwd;
-    }
+    };
     $scope.pwdStrStars = [0,1,2,3,4,];
     $scope.badPwds = ['password','pass','1234','123','admin','abc','abcd','pwd'];
-    $scope.pwdStr = {recs:[],score:0,maxScore:5,show:false}
+    $scope.pwdStr = {recs:[],score:0,maxScore:5,show:false};
     $scope.checkPwdStr = () => {
-        
         if(!$scope.pwd){
             return false;
         }
@@ -122,8 +120,8 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
                 }
                 return !reg.test($scope.pwd);
             });
-        $scope.pwdStr = {recs:badStuff,score:reqs.length-badStuff.length,maxScore:5,show:$scope.pwdStr.show}
-    }
+        $scope.pwdStr = {recs:badStuff,score:reqs.length-badStuff.length,maxScore:5,show:$scope.pwdStr.show};
+    };
     $scope.register = () => {
         if (!$scope.pwd || !$scope.pwdDup || !$scope.user) {
             bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Missing Information', 'Please enter a username, and a password (twice).');

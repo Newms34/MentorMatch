@@ -137,7 +137,7 @@ app
                     // $log.debug('RESPONSE INTERCEPTOR', response && response.data)
                     if (response && response.data && response.data == 'refresh') {
                         // console.log('need to refresh',socket,socket.to)
-                        socket.emit('requestRefresh',{id:socket.id})
+                        socket.emit('requestRefresh',{id:socket.id});
                     }
                     return response;
                 },
@@ -158,7 +158,7 @@ app
             },
             link: function (scope, element, attributes) {
                 // const theFn = scope.changeFn();
-                console.log('THE FUNCTION IS',scope.changeFn.toString())
+                console.log('THE FUNCTION IS',scope.changeFn.toString());
                 element.bind("change", function (changeEvent) {
                     // $log.debug('SCOPE',scope,'ELEMENT',element,'ATTRIBS',attributes,scope.changeFn)
                     scope.changeFn().then(r => {
@@ -379,7 +379,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
     //     if (!$scope.topicObjs) {
     //         return [];
     //     }
-    //     console.log($scope.$parent.user.interests)
+    //     $log.debug($scope.$parent.user.interests)
     //     let tops = $scope.topicObjs.filter(topic => {
     //         // $scope.$parent
     //         return (topic.value.indexOf(lowercaseQuery) > -1);
@@ -392,10 +392,10 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
         return $scope.topicObjsAll && $scope.topicObjsAll.length && t && $scope.topicObjsAll.find(q => q.display == t);
     };
     $scope.doNewTopic = t => {
-        // console.log('t',t)
+        // $log.debug('t',t)
         $scope.addInt.isNew = t;
         $scope.topicWasClicked = true;
-    }
+    };
     $scope.refTopObjs = (cb) => {
         $http.get('/topic/topic', { headers: { 'Cache-Control': 'no-cache' } }).then(r => {
             $scope.topicObjsAll = r.data.map(q => {
@@ -426,11 +426,11 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
     $scope.createSkill = () => {
         //add a COMPLETELY NEW topic
         const nt = { title: $scope.addInt.isNew, desc: $scope.addInt.newDesc };
-        console.log(nt);
+        $log.debug(nt);
         //first, we reget ALL topics
         $http.get('/topic/all').then(r => {
             const hazTopicAlready = r.data.find(q => q.title.toLowerCase() == nt.title.toLowerCase());
-            console.log('hazTopicAlready', hazTopicAlready)
+            $log.debug('hazTopicAlready', hazTopicAlready);
             let removeNewSkill = false;
             if (!!hazTopicAlready && hazTopicAlready.votes.status == 2) {
                 bulmabox.alert('Skill Unacceptable', `That skill has been voted to not be acceptable by the community. Please choose another skill name`);
@@ -462,7 +462,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
                     });
 
             }
-        })
+        });
         return false;
     };
     let alreadyAdded = false;
@@ -470,7 +470,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
         //NOTE: this should ONLY be run if we're adding a new skill from already-existing 'library', NOT if we're creating a completely new skill
 
         const skList = $scope.$parent.user.interests;
-        console.log('MAYBE adding', $scope.addInt, 'selectedTopic', $scope.selectedTopic, 'TO', skList, 'ALL TOPIC OBJS', $scope.topicObjsAll)
+        $log.debug('MAYBE adding', $scope.addInt, 'selectedTopic', $scope.selectedTopic, 'TO', skList, 'ALL TOPIC OBJS', $scope.topicObjsAll);
 
         if (!!$scope.addInt.isNew) {
             //COMPLETELY new topic.
@@ -481,7 +481,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
             canTeach: $scope.addInt.canTeach,
             title: $scope.selectedTopic.display
         });
-        console.log('pushed in existing topic, sklist now', skList)
+        $log.debug('pushed in existing topic, sklist now', skList);
         $scope.updateTopics().then(r => {
             $scope.refUsr();
         });
@@ -506,60 +506,57 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
                 isNew: false
             };
 
-        })
+        });
     };
     $scope.deFocusSkillSearch = () => {
         setTimeout(function () {
             const el = document.getElementFromPoint($scope.mouse.x, $scope.mouse.y);
-            console.log('new focus', el)
-        }, 1)
-    }
-    $scope.mouse = { x: 0, y: 0 }
+            $log.debug('new focus', el);
+        }, 1);
+    };
+    $scope.mouse = { x: 0, y: 0 };
     document.querySelector('#skill-search').addEventListener('mousemove', (e) => {
         $scope.mouse.x = e.clientX;
         $scope.mouse.y = e.clientY;
-    })
+    });
     document.querySelector('#skill-search input').addEventListener('keyup', (e) => {
-        // console.log(e)
+        // $log.debug(e)
         if (e.key == 'Escape') {
-            // console.log('ESCAPE PRESSED')
+            // $log.debug('ESCAPE PRESSED')
             $scope.clearSkillSearchBox();
             $scope.$apply();
         }
-    })
+    });
     $scope.skillSearchFilter = () => {
         if (!$scope.skillSearch) {
             return [];
         }
-        // console.log('INCHRESTING INCHRESTS',$scope.$parent.user.interests)
+        // $log.debug('INCHRESTING INCHRESTS',$scope.$parent.user.interests)
         return $scope.topicObjs.filter(q => {
-            // console.log($scope.$parent.user.interests.map(q=>q),$scope.topicObjs.map(s=>s.value.toLowerCase()))
-            return q.value.includes($scope.skillSearch.toLowerCase()) && (!$scope.$parent.user
-                || !$scope.$parent.user.interests
-                || !$scope.$parent.user.interests.length
-                || !$scope.$parent.user.interests.find(a => a.title.toLowerCase() == q.value.toLowerCase()));
+            // $log.debug($scope.$parent.user.interests.map(q=>q),$scope.topicObjs.map(s=>s.value.toLowerCase()))
+            return q.value.includes($scope.skillSearch.toLowerCase()) && (!$scope.$parent.user || !$scope.$parent.user.interests || !$scope.$parent.user.interests.length || !$scope.$parent.user.interests.find(a => a.title.toLowerCase() == q.value.toLowerCase()));
         }).map(q => {
             q.displayHL = $sce.trustAsHtml(q.display.replace(new RegExp($scope.skillSearch, 'gi'), function (a, b, c) {
-                // console.log('a',a,'b',b,'c',c)
+                // $log.debug('a',a,'b',b,'c',c)
                 return '<strong>' + a + '</strong>';
             }));
             return q;
-        })
-    }
+        });
+    }; 
     $scope.topicWasClicked = false;
     $scope.clearSkillSearchBox = () => {
-        console.log('clearing Skillbox')
+        $log.debug('clearing Skillbox');
         $scope.skillSearch = null;
-    }
+    };
     $scope.pickSkill = (s, e) => {
         e.stopPropagation();
         $scope.topicWasClicked = true;
-        // console.log("user wants to pick skill", s)
+        // $log.debug("user wants to pick skill", s)
         $scope.addInt.isNew = false;
         $scope.skillSearch = s.display;
         $scope.selectedTopic = s;
         // $scope.$digest();
-    }
+    };
     socket.on('topicRef', function (o) {
         bulmabox.confirm('Topic Refresh', `One or more topics have been update. Would you like to refresh the page to make these new topics available?`, r => {
             if (!!r) {
@@ -769,11 +766,10 @@ const countDups = (arr, p) => {
 app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) {
     $scope.noWarn = false;
     $scope.nameOkay = true;
-    delete localStorage.geoUsr;
     $scope.acceptNoSecure = () => {
         localStorage.CMMNoSecure = true;
         $scope.cmmNoSecure = true;
-    }
+    };
     $scope.cmmNoSecure = !!localStorage.CMMNoSecure;
     $scope.checkTimer = false;
     $scope.goReg = () => {
@@ -854,12 +850,11 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
     $scope.pwdNoDup = false;
     $scope.checkPwdDup = () => {
         $scope.pwdNoDup = !$scope.pwd || !$scope.pwdDup || $scope.pwdDup !== $scope.pwd;
-    }
+    };
     $scope.pwdStrStars = [0,1,2,3,4,];
     $scope.badPwds = ['password','pass','1234','123','admin','abc','abcd','pwd'];
-    $scope.pwdStr = {recs:[],score:0,maxScore:5,show:false}
+    $scope.pwdStr = {recs:[],score:0,maxScore:5,show:false};
     $scope.checkPwdStr = () => {
-        
         if(!$scope.pwd){
             return false;
         }
@@ -890,8 +885,8 @@ app.controller('log-cont', function ($scope, $http, $state, $q, userFact, $log) 
                 }
                 return !reg.test($scope.pwd);
             });
-        $scope.pwdStr = {recs:badStuff,score:reqs.length-badStuff.length,maxScore:5,show:$scope.pwdStr.show}
-    }
+        $scope.pwdStr = {recs:badStuff,score:reqs.length-badStuff.length,maxScore:5,show:$scope.pwdStr.show};
+    };
     $scope.register = () => {
         if (!$scope.pwd || !$scope.pwdDup || !$scope.user) {
             bulmabox.alert('<i class="fa fa-exclamation-triangle is-size-3"></i>&nbsp;Missing Information', 'Please enter a username, and a password (twice).');
@@ -1256,16 +1251,16 @@ app.controller('main-cont', function ($scope, $http, $state, userFact, $log) {
         whichFont: 0
     };
     $scope.fontOpts = ['aurebesh', 'tengwar quenya-1', 'klingon font', 'hieroglyphic', 'dovahkiin', 'Skyrim_Daedra'];
-    const bgImg = `./img/bgs/bg${Math.ceil(Math.random()*3)}.jpg`
-    $scope.bgFull = `background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('${bgImg}'); background-size:cover; background-attachment:fixed; will-change:transform; background-repeat:no-repeat`
+    const bgImg = `./img/bgs/bg${Math.ceil(Math.random()*3)}.jpg`;
+    $scope.bgFull = `background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url('${bgImg}'); background-size:cover; background-attachment:fixed; will-change:transform; background-repeat:no-repeat`;
     document.addEventListener('scroll',function(q){
         // console.log('The User Scrolls V: border-color:skyblue;',q,window.scrollY)
         setTimeout(function(){
             const sFd = 0.5 + (0.45*window.scrollY/window.outerHeight);
-            $scope.bgFull = `background:linear-gradient(rgba(0,0,0,${sFd}),rgba(0,0,0,${sFd})),url('${bgImg}'); background-size:cover; background-attachment:fixed;will-change:transform; background-repeat:no-repeat`
+            $scope.bgFull = `background:linear-gradient(rgba(0,0,0,${sFd}),rgba(0,0,0,${sFd})),url('${bgImg}'); background-size:cover; background-attachment:fixed;will-change:transform; background-repeat:no-repeat`;
             $scope.$apply();
-        },100)
-    })
+        },100);
+    });
     document.querySelector('body').addEventListener('keyup', function (e) {
         e.preventDefault();
         // $log.debug('KEY PRESSED WAS', e)
@@ -1342,7 +1337,7 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
         $scope.skillSearch='';
         $scope.showNSR = false;
         $scope.$digest();
-    }
+    };
     $scope.showNSR = false;
     // $scope.nsr = document.querySelector('#no_result')
     $scope.pickedItem = null;
@@ -1383,7 +1378,7 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
         // $log.debug('simpTops', tl, 'all', $scope.topicObjsAll)
         const tl = $scope.pickedTopics.map(s => s.title.toLowerCase());
         //remove this from our list of available topics to add
-        $log.debug('TOPICS',$scope.pickedTopics,tl)
+        $log.debug('TOPICS',$scope.pickedTopics,tl);
         $scope.topicObjs = $scope.topicObjsAll.filter(tf => !tl.includes(tf.value));
         $http.post('/user/topicSearch', $scope.pickedTopics).then(r => {
             $scope.availTeachs = r.data;
@@ -1404,8 +1399,8 @@ app.controller('match-cont', function ($scope, $http, $q, $log) {
         $scope.changeTopList();
         // $scope.filterMe('')
         // $scope.topicObjs = $scope.topicObjsAll.filter(q => !.includes(q));
-        console.log('OPTS NOW',document.querySelector('#skill-box').options)
-        Array.from(document.querySelector('#skill-box').options).forEach((q,i)=>{q.selected==!i})
+        $log.debug('OPTS NOW',document.querySelector('#skill-box').options);
+        Array.from(document.querySelector('#skill-box').options).forEach((q,i)=>{q.selected==!i;});
         // $scope.selectedTopic ='';
         document.querySelector('#skill-box').selectedIndex=0;
     };  
@@ -1956,42 +1951,42 @@ app.factory('userFact', function($http,$log) {
         newUser:function(o){
             return $http.post('/user/new',o).then(function(r){
                 return r;
-            })
+            });
         },
         login:function(o){
             return $http.put('/user/login',o).then(function(r){
                 return r;
-            })
+            });
         },
         logout:function(){
             return $http.get('/user/logout').then(function(r){
                 return r;
-            })
+            });
         },
         sendMsg:function(o){
             return $http.put('/user/sendMsg',o).then(function(r){
                 return r;
-            })
+            });
         },
         forgot:function(o){
             return $http.put('/user/forgot',o).then(function(r){
                 return r;
-            })
+            });
         },
         resetKey:function(k){
             return $http.get('/user/resetUsr?key='+o).then(function(r){
                 return r;
-            })
+            });
         },
         resetPwd:function(k){
             return $http.put('/user/resetPwd',o).then(function(r){
                 return r;
-            })
+            });
         },
         nameCheck:function(n){
             return $http.get('/user/nameOkay?name='+n).then(function(r){
                 return r;
-            })
+            });
         }
     };
 });

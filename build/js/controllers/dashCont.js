@@ -58,7 +58,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
     //     if (!$scope.topicObjs) {
     //         return [];
     //     }
-    //     console.log($scope.$parent.user.interests)
+    //     $log.debug($scope.$parent.user.interests)
     //     let tops = $scope.topicObjs.filter(topic => {
     //         // $scope.$parent
     //         return (topic.value.indexOf(lowercaseQuery) > -1);
@@ -71,10 +71,10 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
         return $scope.topicObjsAll && $scope.topicObjsAll.length && t && $scope.topicObjsAll.find(q => q.display == t);
     };
     $scope.doNewTopic = t => {
-        // console.log('t',t)
+        // $log.debug('t',t)
         $scope.addInt.isNew = t;
         $scope.topicWasClicked = true;
-    }
+    };
     $scope.refTopObjs = (cb) => {
         $http.get('/topic/topic', { headers: { 'Cache-Control': 'no-cache' } }).then(r => {
             $scope.topicObjsAll = r.data.map(q => {
@@ -105,11 +105,11 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
     $scope.createSkill = () => {
         //add a COMPLETELY NEW topic
         const nt = { title: $scope.addInt.isNew, desc: $scope.addInt.newDesc };
-        console.log(nt);
+        $log.debug(nt);
         //first, we reget ALL topics
         $http.get('/topic/all').then(r => {
             const hazTopicAlready = r.data.find(q => q.title.toLowerCase() == nt.title.toLowerCase());
-            console.log('hazTopicAlready', hazTopicAlready)
+            $log.debug('hazTopicAlready', hazTopicAlready);
             let removeNewSkill = false;
             if (!!hazTopicAlready && hazTopicAlready.votes.status == 2) {
                 bulmabox.alert('Skill Unacceptable', `That skill has been voted to not be acceptable by the community. Please choose another skill name`);
@@ -141,7 +141,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
                     });
 
             }
-        })
+        });
         return false;
     };
     let alreadyAdded = false;
@@ -149,7 +149,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
         //NOTE: this should ONLY be run if we're adding a new skill from already-existing 'library', NOT if we're creating a completely new skill
 
         const skList = $scope.$parent.user.interests;
-        console.log('MAYBE adding', $scope.addInt, 'selectedTopic', $scope.selectedTopic, 'TO', skList, 'ALL TOPIC OBJS', $scope.topicObjsAll)
+        $log.debug('MAYBE adding', $scope.addInt, 'selectedTopic', $scope.selectedTopic, 'TO', skList, 'ALL TOPIC OBJS', $scope.topicObjsAll);
 
         if (!!$scope.addInt.isNew) {
             //COMPLETELY new topic.
@@ -160,7 +160,7 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
             canTeach: $scope.addInt.canTeach,
             title: $scope.selectedTopic.display
         });
-        console.log('pushed in existing topic, sklist now', skList)
+        $log.debug('pushed in existing topic, sklist now', skList);
         $scope.updateTopics().then(r => {
             $scope.refUsr();
         });
@@ -185,60 +185,57 @@ app.controller('dash-cont', ($scope, $http, $q, userFact, $log, $sce) => {
                 isNew: false
             };
 
-        })
+        });
     };
     $scope.deFocusSkillSearch = () => {
         setTimeout(function () {
             const el = document.getElementFromPoint($scope.mouse.x, $scope.mouse.y);
-            console.log('new focus', el)
-        }, 1)
-    }
-    $scope.mouse = { x: 0, y: 0 }
+            $log.debug('new focus', el);
+        }, 1);
+    };
+    $scope.mouse = { x: 0, y: 0 };
     document.querySelector('#skill-search').addEventListener('mousemove', (e) => {
         $scope.mouse.x = e.clientX;
         $scope.mouse.y = e.clientY;
-    })
+    });
     document.querySelector('#skill-search input').addEventListener('keyup', (e) => {
-        // console.log(e)
+        // $log.debug(e)
         if (e.key == 'Escape') {
-            // console.log('ESCAPE PRESSED')
+            // $log.debug('ESCAPE PRESSED')
             $scope.clearSkillSearchBox();
             $scope.$apply();
         }
-    })
+    });
     $scope.skillSearchFilter = () => {
         if (!$scope.skillSearch) {
             return [];
         }
-        // console.log('INCHRESTING INCHRESTS',$scope.$parent.user.interests)
+        // $log.debug('INCHRESTING INCHRESTS',$scope.$parent.user.interests)
         return $scope.topicObjs.filter(q => {
-            // console.log($scope.$parent.user.interests.map(q=>q),$scope.topicObjs.map(s=>s.value.toLowerCase()))
-            return q.value.includes($scope.skillSearch.toLowerCase()) && (!$scope.$parent.user
-                || !$scope.$parent.user.interests
-                || !$scope.$parent.user.interests.length
-                || !$scope.$parent.user.interests.find(a => a.title.toLowerCase() == q.value.toLowerCase()));
+            // $log.debug($scope.$parent.user.interests.map(q=>q),$scope.topicObjs.map(s=>s.value.toLowerCase()))
+            return q.value.includes($scope.skillSearch.toLowerCase()) && (!$scope.$parent.user || !$scope.$parent.user.interests || !$scope.$parent.user.interests.length || !$scope.$parent.user.interests.find(a => a.title.toLowerCase() == q.value.toLowerCase()));
         }).map(q => {
             q.displayHL = $sce.trustAsHtml(q.display.replace(new RegExp($scope.skillSearch, 'gi'), function (a, b, c) {
-                // console.log('a',a,'b',b,'c',c)
+                // $log.debug('a',a,'b',b,'c',c)
                 return '<strong>' + a + '</strong>';
             }));
             return q;
-        })
-    }
+        });
+    }; 
     $scope.topicWasClicked = false;
     $scope.clearSkillSearchBox = () => {
-        console.log('clearing Skillbox')
+        $log.debug('clearing Skillbox');
         $scope.skillSearch = null;
-    }
+    };
     $scope.pickSkill = (s, e) => {
         e.stopPropagation();
         $scope.topicWasClicked = true;
-        // console.log("user wants to pick skill", s)
+        // $log.debug("user wants to pick skill", s)
         $scope.addInt.isNew = false;
         $scope.skillSearch = s.display;
         $scope.selectedTopic = s;
         // $scope.$digest();
-    }
+    };
     socket.on('topicRef', function (o) {
         bulmabox.confirm('Topic Refresh', `One or more topics have been update. Would you like to refresh the page to make these new topics available?`, r => {
             if (!!r) {
