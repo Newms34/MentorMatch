@@ -36,7 +36,8 @@
     "socket.io": "^2.3.0",
     "strip-markdown": "^3.1.1",
     "through2": "^3.0.1",
-    "uuid": "^3.3.3"
+    "uuid": "^3.3.3",
+    "snyk": "^1.316.1"
   },
   "devDependencies": {
     "@babel/core": "^7.7.7",
@@ -69,12 +70,15 @@
   "scripts": {
     "start": "nodemon app.js",
     "test": "jest --testTimeout=20000",
-    "build": "npm install"
+    "build": "npm install",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "author": "David Newman",
   "license": "ISC",
   "repository": {
     "type": "git",
     "url": "https://github.com/Newms34/MentorMatch.git"
-  }
+  },
+  "snyk": true
 }
