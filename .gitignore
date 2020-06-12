@@ -10,6 +10,6 @@ config/sparky.json
 app.yaml
 jest.config.js
 tests
-views
+# views
 public/css
 public/js

@@ -69,6 +69,7 @@ gulp.task('clean', function () {
 });
 
 gulp.task('html', function () {
+    drawTitle('Copying HTML dirs')
     return gulp
         .src(['build/views/*.html', 'build/views/**/*.html', 'build/views/**/**/*.html'])
         .pipe(cabu.references())
