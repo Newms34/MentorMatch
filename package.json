@@ -71,7 +71,7 @@
   "scripts": {
     "start": "nodemon app.js",
     "test": "jest --testTimeout=20000",
-    "build": "npm install"
+    "build": "gulp render"
   },
   "author": "David Newman",
   "license": "ISC",
