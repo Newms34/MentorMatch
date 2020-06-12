@@ -16,6 +16,9 @@ const jshint = require('gulp-jshint'),
     addSrc = require('gulp-add-src'),
     iife = require('gulp-iife'),
     th2 = require('through2'),
+    cleanF = require('gulp-clean'),
+    cachebust = require('gulp-cachebust'),
+    cabu = new cachebust(),
     chalk = require('chalk');
 let sassStart = 0,
     jsStart = 0;
@@ -59,7 +62,19 @@ const reporterFn = function (results, data, opts = {}) {
     }
     // console.log('NOT SURE WHERE THIS GOES!')
 }
-// Lint Task
+
+gulp.task('clean', function () {
+    return gulp.src(['public/js', 'public/css', 'views'], { read: false, allowEmpty:true })
+        .pipe(cleanF());
+});
+
+gulp.task('html', function () {
+    return gulp
+        .src(['build/views/*.html', 'build/views/**/*.html', 'build/views/**/**/*.html'])
+        .pipe(cabu.references())
+        .pipe(gulp.dest('./views'))
+})
+
 gulp.task('lint', function () {
     let alreadyRan = false,
         semisDone = false;
@@ -125,6 +140,7 @@ gulp.task('sass', function () {
             console.log('CSS reduced from', sassStart, 'to', sassEnd + '. Reduction of', sassRedPerc + '%.')
             return cb(null, file);
         }))
+        .pipe(cabu.resources())
         .pipe(gulp.dest('public/css'));
 });
 
@@ -150,28 +166,16 @@ gulp.task('scripts', function () {
         .pipe(gulp.dest('public/js'))
         .pipe(babel({
             presets: [
-                [
-                    "@babel/preset-env",
-                    {
-                        useBuiltIns: "usage",
-                        corejs: 2,
-                        targets: {
-                            firefox: "64", // or whatever target to choose .    
-                        },
-                      }
-                ]
+                ["@babel/preset-env", {
+                    "targets": {
+                        "browsers": ["last 2 Chrome versions"]
+                    }
+                }]
             ],
-
             plugins: ['angularjs-annotate']
         }))
-        /* ,["transform-runtime", {
-                "regenerator": true
-              }] */
-        // .pipe(ngAnnotate())
         .pipe(terser())
-        // .pipe(uglify({warnings:true}).on('error', gutil.log))
         .pipe(th2.obj((file, enc, cb) => {
-            // console.log('FILE IS',file._contents.toString('utf8'),'ENC',enc,'CB',cb);
             let jsEnd = file._contents.toString('utf8').length,
                 jsRedPerc = Math.floor(10000 * (jsStart - jsEnd) / jsStart) / 100;
             console.log('JS reduced from', jsStart, 'to', jsEnd + '. Reduction of', jsRedPerc + '%.')
@@ -180,6 +184,7 @@ gulp.task('scripts', function () {
         .pipe(addSrc.prepend(['build/libs/*.js', 'build/libs/**/*.js']))
         .pipe(concat('all.js'))
         .pipe(rename('all.min.js'))
+        .pipe(cabu.resources())
         .pipe(gulp.dest('public/js'));
 });
 gulp.task('checkDB', function () {
@@ -210,17 +215,18 @@ gulp.task('checkDB', function () {
 // Watch Files For Changes
 gulp.task('watch', function () {
     let alreadyRan = false;
-    drawTitle('Watching Front-End scripts, Back-End Scripts, and CSS', true)
-    gulp.watch(['build/js/**/*.js', 'build/js/*.js'], gulp.series('lint', 'scripts'));
+    drawTitle('Watching Front-End scripts, Back-End Scripts, HTML, and CSS', true)
+    gulp.watch(['build/js/**/*.js', 'build/js/*.js','build/views/*.html', 'build/views/**/*.html', 'build/views/**/**/*.html','build/scss/*.scss', 'build/scss/**/*.scss'], gulp.series('clean', 'lint', 'scripts','sass','html'));
     gulp.watch(['routes/*.js', 'routes/**/*.js', 'models/*.js', 'models/**/*.js'], gulp.series('lintBE'))
-    gulp.watch(['build/scss/*.scss', 'build/scss/**/*.scss'], gulp.series('sass'));
+    // gulp.watch(['build/scss/*.scss', 'build/scss/**/*.scss'], gulp.series('sass'));
+    // gulp.watch(['build/views/*.html', 'build/views/**/*.html', 'build/views/**/**/*.html'], gulp.series('html'))
 });
 
 //task to simply create everything without actually watching or starting the DB
-gulp.task('render', gulp.series('lint', 'lintBE', 'sass', 'scripts'))
+gulp.task('render', gulp.series('clean', 'lint', 'lintBE', 'sass', 'scripts', 'html'))
 
 // Default Task
-gulp.task('default', gulp.series('lint', 'lintBE', 'sass', 'scripts', 'checkDB', 'watch'));
+gulp.task('default', gulp.series('clean', 'lint', 'lintBE', 'sass', 'scripts', 'html', 'checkDB', 'watch'));
 
 let currColInd = 0;
 

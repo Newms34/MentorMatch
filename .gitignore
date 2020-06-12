@@ -9,4 +9,7 @@ config/sparky.json
 .gcloudignore
 app.yaml
 jest.config.js
-tests/
+tests
+views
+public/css
+public/js

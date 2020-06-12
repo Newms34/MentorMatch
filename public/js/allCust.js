@@ -1875,7 +1875,7 @@ app.controller('vote-cont',function($scope,$http,$state, $log){
     $scope.voteItems = [];
     $scope.regetVotes = ()=>{
         $http.get('/topic/vote').then(r=>{
-            console.log('topics for voting are',r);
+            $log.debug('topics for voting are',r);
             $scope.voteItems = (r && r.data)||[];
         });
     };
