@@ -30,7 +30,7 @@
     "password-hash-and-salt": "^0.1.4",
     "password-reset": "^0.1.4",
     "q": "^1.5.1",
-    "remark": "^12.0.0",
+    "remark": "^13.0.0",
     "sendgrid": "^5.2.3",
     "sendmail": "^1.6.1",
     "socket.io": "^2.3.0",
