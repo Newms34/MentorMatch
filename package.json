@@ -14,7 +14,7 @@
     "cookie-parser": "^1.4.5",
     "core-js": "^3.6.5",
     "crypto": "^1.0.1",
-    "express": "^4.17.1",
+    "express": "^4.19.2",
     "express-session": "^1.17.1",
     "helmet": "^3.22.0",
     "lodash": "^4.17.15",
